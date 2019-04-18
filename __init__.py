@@ -1,4 +1,4 @@
-﻿print("______________________________________________________")
+print("______________________________________________________")
 bl_info = {
     "name": "ProcGenMod",
     "author": "Punya Aachman",
@@ -29,6 +29,9 @@ class PcgNode:
     @classmethod
     def poll(cls, ntree):
         return ntree.bl_idname == 'PcgNodeTree'
+    def update_value(self, context):
+        bpy.ops.pcg.refresh_mesh_op()
+        return None
 
 class PcgInputNode(PcgNode):
     def init(self, context):
@@ -86,7 +89,7 @@ class PcgModifierNode(PcgNode):
             print("Debug: " + self.name + ": Error: Modifier failed to execute")
             return ""
         self.name = bpy.data.objects[self.mesh].modifiers[0].name
-        bpy.ops.object.modifier_apply(modifier=bpy.data.objects[self.mesh].modifiers[0].name)
+        bpy.ops.object.modifier_apply(modifier=self.name)
         return self.mesh
     def functionality(self):
         print("Debug: PcgModifierNode: Main functionality of the node")
@@ -400,11 +403,11 @@ class ResizeNode(Node, PcgOperatorNode):
     
     def functionality(self):
         window = bpy.data.window_managers['WinMan'].windows[0]
-        screen = window.screen
-        area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
+        screen=window.screen
+        area=screen.areas[4]
         space=area.spaces[0]
         scene=bpy.data.scenes[0]
-        region = [i for i in area.regions if i.type == 'WINDOW'][0]
+        region=area.regions[4]
         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
         bpy.ops.transform.resize(override, value=self.prop_value, constraint_axis=self.prop_axis, constraint_orientation=self.prop_orientation, mirror=self.prop_mirror, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1.0, snap=False, snap_target='CLOSEST', snap_point=(0.0, 0.0, 0.0), snap_align=False, snap_normal=(0.0, 0.0, 0.0), gpencil_strokes=False, texture_space=False, remove_on_cancel=False, release_confirm=False, use_accurate=False)
 
@@ -495,9 +498,9 @@ class PivotNode(Node, PcgTransformNode):
     def functionality(self):
         bpy.data.screens['Default'].areas[4].spaces[0].pivot_point=self.prop_pivot
 
-class SelectComponentsNode(Node, PcgSelectionNode):
-    bl_idname = "SelectComponentsNode"
-    bl_label = "Select Mesh Components"
+class SelectComponentsManuallyNode(Node, PcgSelectionNode):
+    bl_idname = "SelectComponentsManuallyNode"
+    bl_label = "Select Mesh Manually Components"
     
     selection_face = StringProperty()
     selection_vert = StringProperty()
@@ -525,9 +528,9 @@ class SelectComponentsNode(Node, PcgSelectionNode):
             print("Debug: " + self.name + ": Saved components selection")
 
     def draw_buttons(self, context, layout):
+        if (self == self.id_data.nodes.active):
+            layout.operator("pcg.save_selection_op", "Save Selection")
         if (not self.mesh == ""):
-            if (self == self.id_data.nodes.active):
-                layout.operator("pcg.save_selection_op", "Save Selection")
             layout.label(text="Faces: " + str(len([i for i in bpy.data.objects[self.mesh].data.polygons if i.select == True])) + "/" + str(len(bpy.data.objects[self.mesh].data.polygons)))
             layout.label(text="Vertices: " + str(len([i for i in bpy.data.objects[self.mesh].data.vertices if i.select == True])) + "/" + str(len(bpy.data.objects[self.mesh].data.vertices)))
             layout.label(text="Edges: " + str(len([i for i in bpy.data.objects[self.mesh].data.edges if i.select == True])) + "/" + str(len(bpy.data.objects[self.mesh].data.edges)))
@@ -796,10 +799,10 @@ class BeautifyFillNode(Node, PcgOperatorNode):
     bl_idname = "BeautifyFillNode"
     bl_label = "Beautify Fill"
 
-    prop_angle_limit = FloatProperty(name="Angle Limit", default=3.14159, min=0.0, max=3.14159)
+    prop_angle_limit = FloatProperty(name="Angle Limit", default=3.14159, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION")
 
     def draw_buttons(self, context, layout):
-        layout(self, "prop_angle_limit")
+        layout.prop(self, "prop_angle_limit")
     
     def functionality(self):
         bpy.ops.mesh.beautify_fill(angle_limit=self.prop_angle_limit)
@@ -808,7 +811,7 @@ class BevelNode(Node, PcgOperatorNode):
     bl_label = "Bevel"
 
     prop_offset_type = EnumProperty(name="Offset Type", items=[("OFFSET", "Offset", ""), ("WIDTH", "Width", ""), ("PERCENT", "Percent", ""), ("DEPTH", "Depth", "")], default="OFFSET")
-    prop_offset = FloatProperty(name="Offset", default=0.0, min=0.000001, max=0.000001)
+    prop_offset = FloatProperty(name="Offset", default=0.0, min=-1000000, max=1000000)
     prop_segments = IntProperty(name="Segments", default=1, min=1, max=1000)
     prop_profile = FloatProperty(name="Profile", default=0.5, min=0.15, max=1.0)
     prop_vertex_only = BoolProperty(name="Vertex Only")
@@ -827,7 +830,55 @@ class BevelNode(Node, PcgOperatorNode):
         layout.prop(self, "prop_material")
     
     def functionality(self):
-        bpy.ops.mesh.bevel(offset_type=self.prop_offset_type, offset=self.prop_offset, segments=self.prop_segments, profile=self.prop_segments, vertex_only=self.prop_vertex_only, clamp_overlap=self.clamp_overlap, loop_slide=self.prop_loop_slide, material=self.prop_material)
+        bpy.ops.mesh.bevel(offset_type=self.prop_offset_type, offset=self.prop_offset, segments=self.prop_segments, profile=self.prop_segments, vertex_only=self.prop_vertex_only, clamp_overlap=self.prop_clamp_overlap, loop_slide=self.prop_loop_slide, material=self.prop_material)
+class BridgeEdgeLoopsNode(Node, PcgOperatorNode):
+    bl_idname = "BridgeEdgeLoopsNode"
+    bl_label = "Bridge Edge Loops"
+
+    prop_type = EnumProperty(name="Connect Loops", items=[("SINGLE", "Single", ""), ("CLOSED", "Closed", ""), ("PAIRS", "Pairs", "")], default="SINGLE")
+    prop_use_merge = BoolProperty(name="Merge")
+    prop_merge_factor = FloatProperty(name="Merge Factor", default=0.5, min=0.0, max=0.1)
+    prop_twist_offset = IntProperty(name="Twist", default=0, min=-1000, max=1000)
+    prop_number_cuts = IntProperty(name="Number of Cuts", default=0, min=0, max=1000)
+    prop_interpolation = EnumProperty(name="Interpolation", items=[("LINEAR", "Linear", ""), ("PATH", "Path", ""), ("SURFACE", "Surface", "")], default="PATH")
+    prop_smoothness = FloatProperty(name="Smoothness", default=1.0, min=0.0, max=1000.0)
+    prop_profile_shape_factor = FloatProperty(name="Profile Factor", default=0.0, min=-1000.0, max=1000.0)
+    prop_profile_shape = EnumProperty(name="Profile Shape", items=[("SMOOTH", "Smooth", ""), ("SPHERE", "Sphere", ""), ("ROOT", "Root", ""), ("INVERSE_SQUARE", "Inverse Square", ""), ("SHARP", "Sharp", ""), ("LINEAR", "Linear", "")], default="SMOOTH")
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_type")
+        layout.prop(self, "prop_use_merge")
+        layout.prop(self, "prop_merge_factor")
+        layout.prop(self, "prop_twist_offset")
+        layout.prop(self, "prop_number_cuts")
+        layout.prop(self, "prop_interpolation")
+        layout.prop(self, "prop_smoothness")
+        layout.prop(self, "prop_profile_shape_factor")
+        layout.prop(self, "prop_profile_shape")
+    
+    def functionality(self):
+        bpy.ops.mesh.bridge_edge_loops(type=self.prop_type, use_merge=self.prop_use_merge, merge_factor=self.prop_merge_factor, twist_offset=self.prop_twist_offset, number_cuts=self.prop_number_cuts, interpolation=self.prop_interpolation, smoothness=self.prop_smoothness, profile_shape_factor=self.prop_profile_shape_factor, profile_shape=self.prop_profile_shape)
+class DecimateNode(Node, PcgOperatorNode):
+    bl_idname = "DecimateNode"
+    bl_label = "Decimate"
+
+    prop_ratio = FloatProperty(name="Ratio", default=1.0, min=0.0, max=1.0)
+    prop_use_vertex_group = BoolProperty(name="Vertex Group")
+    prop_vertex_group_factor = FloatProperty(name="Weight", default=1.0, min=0.0, max=1000.0)
+    prop_invert_vertex_group = BoolProperty(name="Invert")
+    prop_use_symmetry = BoolProperty(name="Symmetry")
+    prop_symmetry_axis = EnumProperty(name="Axis", items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="Y")
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_ratio")
+        layout.prop(self, "prop_use_vertex_group")
+        layout.prop(self, "prop_vertex_group_factor")
+        layout.prop(self, "prop_invert_vertex_group")
+        layout.prop(self, "prop_use_symmetry")
+        layout.prop(self, "prop_symmetry_axis")
+    
+    def functionality(self):
+        bpy.ops.mesh.decimate(ratio=self.prop_ratio, use_vertex_group=self.prop_use_vertex_group, vertex_group_factor=self.prop_vertex_group_factor, invert_vertex_group=self.prop_invert_vertex_group, use_symmetry=self.prop_use_symmetry, symmetry_axis=self.prop_symmetry_axis)
 class ExtrudeFacesNode(Node, PcgOperatorNode):
     bl_idname = "ExtrudeFacesNode"
     bl_label = "Extrude Faces"
@@ -841,11 +892,11 @@ class ExtrudeFacesNode(Node, PcgOperatorNode):
     
     def functionality(self):
         window = bpy.data.window_managers['WinMan'].windows[0]
-        screen = window.screen
-        area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
+        screen=window.screen
+        area=screen.areas[4]
         space=area.spaces[0]
         scene=bpy.data.scenes[0]
-        region = [i for i in area.regions if i.type == 'WINDOW'][0]
+        region=area.regions[4]
         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
         bpy.ops.mesh.extrude_faces_move(override ,MESH_OT_extrude_faces_indiv={"mirror":self.prop_mirror}, TRANSFORM_OT_shrink_fatten={"value":self.prop_amount, "use_even_offset":False, "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "release_confirm":True, "use_accurate":False})
 class ExtrudeRegionNode(Node, PcgOperatorNode):
@@ -861,11 +912,11 @@ class ExtrudeRegionNode(Node, PcgOperatorNode):
     
     def functionality(self):
         window = bpy.data.window_managers['WinMan'].windows[0]
-        screen = window.screen
-        area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
+        screen=window.screen
+        area=screen.areas[4]
         space=area.spaces[0]
         scene=bpy.data.scenes[0]
-        region = [i for i in area.regions if i.type == 'WINDOW'][0]
+        region=area.regions[4]
         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
         bpy.ops.mesh.extrude_region_shrink_fatten(override ,MESH_OT_extrude_region={"mirror":self.prop_mirror}, TRANSFORM_OT_shrink_fatten={"value":self.prop_amount, "use_even_offset":False, "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "release_confirm":True, "use_accurate":False})
 class InsetNode(Node, PcgOperatorNode):
@@ -924,6 +975,48 @@ class SolidifyNode(Node, PcgOperatorNode):
 
     def functionality(self):
         bpy.ops.mesh.solidify(thickness=self.prop_thickness)
+class SpinNode(Node, PcgOperatorNode):
+    bl_idname = "SpinNode"
+    bl_label = "Spin"
+    
+    prop_steps = IntProperty(name="Steps", default=9, min=0, max=1000000)
+    prop_dupli = BoolProperty(name="Duplicate")
+    prop_angle = FloatProperty(name="Angle", default=1.5708, subtype="ANGLE", unit="ROTATION")
+    prop_center = FloatVectorProperty(name="Center")
+    prop_axis = FloatVectorProperty(name="Axis", min=-1.0, max=1.0)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_steps")
+        layout.prop(self, "prop_dupli")
+        layout.prop(self, "prop_angle")
+        layout.prop(self, "prop_center")
+        layout.prop(self, "prop_axis")
+
+    def functionality(self):
+        bpy.ops.mesh.spin(steps=self.prop_steps, dupli=self.prop_dupli, angle=self.prop_angle, center=self.prop_center, axis=self.prop_axis)
+class SubdivideNode(Node, PcgOperatorNode):
+    bl_idname = "SubdivideNode"
+    bl_label = "Subdivide"
+
+    prop_number_cuts = IntProperty(name="Number of Cuts", default=1, min=1, max=100)
+    prop_smoothness = FloatProperty(name="Smoothness", default=0.0, min=0.0, max=1000.0)
+    prop_quadtri = BoolProperty(name="Quad/Tri Mode")
+    prop_quadcorner = EnumProperty(name="Quad Corner Type", items=[("INNERVERT", "Inner Vertices", ""), ("PATH", "Path", ""), ("STRAIGHT_CUT", "Straight Cut", ""), ("FAN", "Fan", "")], default="STRAIGHT_CUT")
+    prop_fractal = FloatProperty(name="Fractal", default=0.0, min=0.0, max=1000000)
+    prop_fractal_along_normal = FloatProperty(name="Along Normal", default=0.0, min=0.0, max=1.0)
+    prop_seed = IntProperty(name="Random Seed", default=0, min=0)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_number_cuts")
+        layout.prop(self, "prop_smoothness")
+        layout.prop(self, "prop_quadtri")
+        layout.prop(self, "prop_quadcorner")
+        layout.prop(self, "prop_fractal")
+        layout.prop(self, "prop_fractal_along_normal")
+        layout.prop(self, "prop_seed")
+    
+    def functionality(self):
+        bpy.ops.mesh.subdivide(number_cuts=self.prop_number_cuts, smoothness=self.prop_smoothness, quadtri=self.prop_quadtri, quadcorner=self.prop_quadcorner, fractal=self.prop_fractal, fractal_along_normal=self.prop_fractal_along_normal, seed=self.prop_seed)
 
 class ArrayNode(Node, PcgModifierNode):
     bl_idname = "ArrayNode"
@@ -1010,7 +1103,7 @@ class BevelModNode(Node, PcgModifierNode):
     use_clamp_overlap = BoolProperty(name="Clamp Overlap", default=True)
     loop_slide = BoolProperty(name="Loop Slide", default=True)
     limit_method = EnumProperty(name="Limit Method", items=[("NONE", "None", ""), ("ANGLE", "Angle", ""), ("WEIGHT", "Weight", "")], default="NONE")
-    angle_limit = IntProperty(name="Angle", default=30, min=0, max=180)
+    angle_limit = IntProperty(name="Angle", default=30, min=0, max=180, subtype="ANGLE")
     offset_type = EnumProperty(name="Limit Method", items=[("OFFSET", "Offset", ""), ("WIDTH", "Width", ""), ("DEPTH", "Depth", ""), ("PERCENT", "Percent", "")], default="OFFSET")
     
     def draw_buttons(self, context, layout):
@@ -1198,9 +1291,9 @@ inputs = [PlaneNode, CubeNode, SphereNode, CylinderNode, ConeNode] #TorusNode
 transform = [LocationNode, RotationNode, ScaleNode, ResizeNode] #ComponentTransform
 modifiers = [ArrayNode, BevelModNode, BooleanNode, SolidifyModNode]
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode, PivotNode]
-selection = [SelectComponentsNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectSimilarNode, SelectSimilarRegionNode, SelectUngroupedNode, SelectEdgesSharpNode, SelectFacesLinkedFlatNode]
-deletion = [DeleteNode]
-operators = [BeautifyFillNode, BevelNode, DissolveFacesNode, ExtrudeFacesNode, ExtrudeRegionNode, InsetNode, MergeNode, SolidifyNode] #Overrides
+selection = [SelectComponentsManuallyNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectSimilarNode, SelectSimilarRegionNode, SelectUngroupedNode, SelectEdgesSharpNode, SelectFacesLinkedFlatNode]
+deletion = [DeleteNode, DissolveFacesNode]
+operators = [BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, DecimateNode, ExtrudeFacesNode, ExtrudeRegionNode, InsetNode, MergeNode, SolidifyNode, SpinNode, SubdivideNode] #Overrides
 outputs = [MeshNode, DrawModeNode]
 
 node_categories = [PcgNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
