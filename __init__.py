@@ -160,34 +160,37 @@ class ComponentSocket(NodeSocket):
 
 
 ######################### HELPER OPS #########################
-# class RealtimeMeshOp(Operator):
-#     bl_idname = "pcg.realtime_mesh_op"
-#     bl_label = "Realtime Mesh Update"
-#     bl_options = {"REGISTER", "UNDO"}
+class RealtimeMeshOp(Operator):
+    bl_idname = "pcg.realtime_mesh_op"
+    bl_label = "Realtime Mesh Update"
+    bl_options = {"REGISTER", "UNDO"}
 
-#     @classmethod
-#     def poll(cls, context):
-#         return context.space_data.type == "NODE_EDITOR"
+    node = None
 
-#     def execute(self, context):
-#         node = context.active_node
-#         if (not self.node == None):
-#             node.execute()
-#             return {'FINISHED'}
-#         print("Debug: RealtimeMeshOp: No active node")
-#         return {'CANCELLED'}
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.type == "NODE_EDITOR"
 
-#     def modal(self, context, event):
-#         if (event.type == "ESC"):
-#             print("Debug: RealtimeMeshOp: STOP")
-#             return {'FINISHED'}
-#         self.execute(context)
-#         return {'PASS_THROUGH'}
+    def execute(self, context):
+        bpy.ops.pcg.refresh_mesh_op()
+        return {'FINISHED'}
 
-#     def invoke(self, context, event):
-#         context.window_manager.modal_handler_add(self)
-#         print("Debug: RealtimeMeshOp: START")        
-#         return {'RUNNING_MODAL'}
+    def modal(self, context, event):
+        if (event.type == "ESC"):
+            print("Debug: RealtimeMeshOp: STOP")
+            return {'FINISHED'}
+        elif (event.type == "LEFTMOUSE"):
+            node = context.active_node
+            if (not node == self.node):
+                print("Debug: RealtimeMeshOp: Active node changed")
+                self.node = node
+                self.execute(context)
+        return {'PASS_THROUGH'}
+
+    def invoke(self, context, event):
+        context.window_manager.modal_handler_add(self)
+        print("Debug: RealtimeMeshOp: START")
+        return {'RUNNING_MODAL'}
 class SaveSelectionOp(Operator):
     bl_idname = "pcg.save_selection_op"
     bl_label = "Execute MeshNode"
@@ -496,7 +499,11 @@ class PivotNode(Node, PcgTransformNode):
         layout.column().prop(self, "prop_pivot", expand=True)
     
     def functionality(self):
-        bpy.data.screens['Default'].areas[4].spaces[0].pivot_point=self.prop_pivot
+        window = bpy.data.window_managers['WinMan'].windows[0]
+        screen = window.screen
+        area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
+        space = area.spaces[0]
+        space.pivot_point = self.prop_pivot
 
 class SelectComponentsManuallyNode(Node, PcgSelectionNode):
     bl_idname = "SelectComponentsManuallyNode"
