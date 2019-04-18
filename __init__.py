@@ -34,6 +34,8 @@ class PcgNode:
         return None
 
 class PcgInputNode(PcgNode):
+    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
+    prop_rotation = FloatVectorProperty(name="Rotation", subtype="EULER", unit="ROTATION", update=PcgNode.update_value)
     def init(self, context):
         self.outputs.new("MeshSocket", "Mesh")
         self.hide = True
@@ -232,8 +234,6 @@ class PlaneNode(Node, PcgInputNode):
     bl_label = "Plane"
     
     prop_radius = FloatProperty(name="Radius", default=1.0, min=0, update=PcgNode.update_value)
-    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
-    prop_rotation = FloatVectorProperty(name="Rotation", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_radius")
@@ -248,8 +248,6 @@ class CubeNode(Node, PcgInputNode):
     bl_label = "Cube"
     
     prop_radius = FloatProperty(name="Radius", default=1.0, min=0.0, update=PcgNode.update_value)
-    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
-    prop_rotation = FloatVectorProperty(name="Rotation", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_radius")
@@ -266,8 +264,6 @@ class SphereNode(Node, PcgInputNode):
     prop_segments = IntProperty(name="Segments", default=32, min=3, max=10000, update=PcgNode.update_value)
     prop_rings = IntProperty(name="Ring Count", default=16, min=3, max=10000, update=PcgNode.update_value)
     prop_size = FloatProperty(name="Size", default=1.0, min=0.0, update=PcgNode.update_value)
-    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
-    prop_rotation = FloatVectorProperty(name="Rotation", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_segments")
@@ -287,8 +283,6 @@ class CylinderNode(Node, PcgInputNode):
     prop_radius = FloatProperty(name="Radius", default=1.0, min=0, update=PcgNode.update_value)
     prop_depth = FloatProperty(name="Depth", default=2.0, min=0, update=PcgNode.update_value)
     prop_end = EnumProperty(name="End Fill Type", items=[("NOTHING", "Nothing", "Don’t fill at all."), ("NGON", "Ngon", "Use ngons"), ("TRIFAN", "Triangle Fan", "Use triangle fans.")], default="NGON", update=PcgNode.update_value)
-    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
-    prop_rotation = FloatVectorProperty(name="Rotation", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_vertices")
@@ -310,8 +304,6 @@ class ConeNode(Node, PcgInputNode):
     prop_radius2 = FloatProperty(name="Radius 2", default=0.0, min=0.0, update=PcgNode.update_value)
     prop_depth = FloatProperty(name="Depth", default=2.0, min=0, update=PcgNode.update_value)
     prop_end = EnumProperty(name="End Fill Type", items=[("NOTHING", "Nothing", "Don’t fill at all."), ("NGON", "Ngon", "Use ngons"), ("TRIFAN", "Triangle Fan", "Use triangle fans.")], default="NGON", update=PcgNode.update_value)
-    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
-    prop_rotation = FloatVectorProperty(name="Rotation", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_vertices")
@@ -336,8 +328,6 @@ class TorusNode(Node, PcgInputNode):
     prop_minor_radius = FloatProperty(name="Minor Radius", default=0.25, min=0.01, max=100, update=PcgNode.update_value)
     prop_ext_radius = FloatProperty(name="Exterior Radius", default=1.25, min=0.01, max=100, update=PcgNode.update_value)
     prop_int_radius = FloatProperty(name="Interior Radius", default=0.75, min=0.01, max=100, update=PcgNode.update_value)
-    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
-    prop_rotation = FloatVectorProperty(name="Rotation", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_major_segments")
@@ -371,7 +361,7 @@ class RotationNode(Node, PcgTransformNode):
     bl_idname = "RotationNode"
     bl_label = "Rotation"
     
-    prop_rotation = FloatVectorProperty(name="Rotation", update=PcgNode.update_value)
+    prop_rotation = FloatVectorProperty(name="Rotation", subtype="EULER", unit="ROTATION", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_rotation")
