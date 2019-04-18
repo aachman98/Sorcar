@@ -160,50 +160,34 @@ class ComponentSocket(NodeSocket):
 
 
 ######################### HELPER OPS #########################
-class GenerateMeshOp(Operator):
-    bl_idname = "pcg.generate_mesh_op"
-    bl_label = "Execute MeshNode"
-    bl_options = {"REGISTER", "UNDO"}
+# class RealtimeMeshOp(Operator):
+#     bl_idname = "pcg.realtime_mesh_op"
+#     bl_label = "Realtime Mesh Update"
+#     bl_options = {"REGISTER", "UNDO"}
 
-    @classmethod
-    def poll(cls, context):
-        return context.space_data.type == "NODE_EDITOR"
-    
-    def execute(self, context):
-        node = context.active_node
-        if (node == None):
-            print("Debug: GenerateMeshOp: No Active Node")
-            return {'CANCELLED'}
-        node.execute()
-        return {'FINISHED'}
-class RealtimeMeshOp(Operator):
-    bl_idname = "pcg.realtime_mesh_op"
-    bl_label = "Realtime Mesh Update"
-    bl_options = {"REGISTER", "UNDO"}
+#     @classmethod
+#     def poll(cls, context):
+#         return context.space_data.type == "NODE_EDITOR"
 
-    @classmethod
-    def poll(cls, context):
-        return context.space_data.type == "NODE_EDITOR"
+#     def execute(self, context):
+#         node = context.active_node
+#         if (not self.node == None):
+#             node.execute()
+#             return {'FINISHED'}
+#         print("Debug: RealtimeMeshOp: No active node")
+#         return {'CANCELLED'}
 
-    def execute(self, context):
-        node = context.active_node
-        if (not node == None):
-            node.execute()
-            return {'FINISHED'}
-        print("Debug: RealtimeMeshOp: No active node")
-        return {'CANCELLED'}
+#     def modal(self, context, event):
+#         if (event.type == "ESC"):
+#             print("Debug: RealtimeMeshOp: STOP")
+#             return {'FINISHED'}
+#         self.execute(context)
+#         return {'PASS_THROUGH'}
 
-    def modal(self, context, event):
-        if (event.type == "ESC"):
-            print("Debug: RealtimeMeshOp: STOP")
-            return {'FINISHED'}
-        self.execute(context)
-        return {'PASS_THROUGH'}
-
-    def invoke(self, context, event):
-        context.window_manager.modal_handler_add(self)
-        print("Debug: RealtimeMeshOp: START")        
-        return {'RUNNING_MODAL'}
+#     def invoke(self, context, event):
+#         context.window_manager.modal_handler_add(self)
+#         print("Debug: RealtimeMeshOp: START")        
+#         return {'RUNNING_MODAL'}
 class SaveSelectionOp(Operator):
     bl_idname = "pcg.save_selection_op"
     bl_label = "Execute MeshNode"
@@ -220,6 +204,22 @@ class SaveSelectionOp(Operator):
             return {'CANCELLED'}
         node.save_selection()
         return {'FINISHED'}
+class RefreshMeshOp(Operator):
+    bl_idname = "pcg.refresh_mesh_op"
+    bl_label = "Refresh Mesh Update"
+    bl_options = {"REGISTER", "UNDO"}
+
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.type == "NODE_EDITOR"
+
+    def execute(self, context):
+        node = context.active_node
+        if (not node == None):
+            node.execute()
+            return {'FINISHED'}
+        print("Debug: RefreshMeshOp: No active node")
+        return {'CANCELLED'}
 ##############################################################
 
 
@@ -228,9 +228,9 @@ class PlaneNode(Node, PcgInputNode):
     bl_idname = "PlaneNode"
     bl_label = "Plane"
     
-    prop_radius = FloatProperty(name="Radius", default=1.0, min=0)
-    prop_location = FloatVectorProperty(name="Location")
-    prop_rotation = FloatVectorProperty(name="Rotation")
+    prop_radius = FloatProperty(name="Radius", default=1.0, min=0, update=PcgNode.update_value)
+    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
+    prop_rotation = FloatVectorProperty(name="Rotation", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_radius")
@@ -244,9 +244,9 @@ class CubeNode(Node, PcgInputNode):
     bl_idname = "CubeNode"
     bl_label = "Cube"
     
-    prop_radius = FloatProperty(name="Radius", default=1.0, min=0.0)
-    prop_location = FloatVectorProperty(name="Location")
-    prop_rotation = FloatVectorProperty(name="Rotation")
+    prop_radius = FloatProperty(name="Radius", default=1.0, min=0.0, update=PcgNode.update_value)
+    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
+    prop_rotation = FloatVectorProperty(name="Rotation", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_radius")
@@ -260,11 +260,11 @@ class SphereNode(Node, PcgInputNode):
     bl_idname = "SphereNode"
     bl_label = "Sphere"
     
-    prop_segments = IntProperty(name="Segments", default=32, min=3, max=10000)
-    prop_rings = IntProperty(name="Ring Count", default=16, min=3, max=10000)
-    prop_size = FloatProperty(name="Size", default=1.0, min=0.0)
-    prop_location = FloatVectorProperty(name="Location")
-    prop_rotation = FloatVectorProperty(name="Rotation")
+    prop_segments = IntProperty(name="Segments", default=32, min=3, max=10000, update=PcgNode.update_value)
+    prop_rings = IntProperty(name="Ring Count", default=16, min=3, max=10000, update=PcgNode.update_value)
+    prop_size = FloatProperty(name="Size", default=1.0, min=0.0, update=PcgNode.update_value)
+    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
+    prop_rotation = FloatVectorProperty(name="Rotation", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_segments")
@@ -280,12 +280,12 @@ class CylinderNode(Node, PcgInputNode):
     bl_idname = "CylinderNode"
     bl_label = "Cylinder"
     
-    prop_vertices = IntProperty(name="Vertices", default=32, min=3, max=1000000)
-    prop_radius = FloatProperty(name="Radius", default=1.0, min=0)
-    prop_depth = FloatProperty(name="Depth", default=2.0, min=0)
-    prop_end = EnumProperty(name="End Fill Type", items=[("NOTHING", "Nothing", "Don’t fill at all."), ("NGON", "Ngon", "Use ngons"), ("TRIFAN", "Triangle Fan", "Use triangle fans.")], default="NGON")
-    prop_location = FloatVectorProperty(name="Location")
-    prop_rotation = FloatVectorProperty(name="Rotation")
+    prop_vertices = IntProperty(name="Vertices", default=32, min=3, max=1000000, update=PcgNode.update_value)
+    prop_radius = FloatProperty(name="Radius", default=1.0, min=0, update=PcgNode.update_value)
+    prop_depth = FloatProperty(name="Depth", default=2.0, min=0, update=PcgNode.update_value)
+    prop_end = EnumProperty(name="End Fill Type", items=[("NOTHING", "Nothing", "Don’t fill at all."), ("NGON", "Ngon", "Use ngons"), ("TRIFAN", "Triangle Fan", "Use triangle fans.")], default="NGON", update=PcgNode.update_value)
+    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
+    prop_rotation = FloatVectorProperty(name="Rotation", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_vertices")
@@ -302,13 +302,13 @@ class ConeNode(Node, PcgInputNode):
     bl_idname = "ConeNode"
     bl_label = "Cone"
     
-    prop_vertices = IntProperty(name="Vertices", default=32, min=3, max=1000000)
-    prop_radius1 = FloatProperty(name="Radius 1", default=1.0, min=0.0)
-    prop_radius2 = FloatProperty(name="Radius 2", default=0.0, min=0.0)
-    prop_depth = FloatProperty(name="Depth", default=2.0, min=0)
-    prop_end = EnumProperty(name="End Fill Type", items=[("NOTHING", "Nothing", "Don’t fill at all."), ("NGON", "Ngon", "Use ngons"), ("TRIFAN", "Triangle Fan", "Use triangle fans.")], default="NGON")
-    prop_location = FloatVectorProperty(name="Location")
-    prop_rotation = FloatVectorProperty(name="Rotation")
+    prop_vertices = IntProperty(name="Vertices", default=32, min=3, max=1000000, update=PcgNode.update_value)
+    prop_radius1 = FloatProperty(name="Radius 1", default=1.0, min=0.0, update=PcgNode.update_value)
+    prop_radius2 = FloatProperty(name="Radius 2", default=0.0, min=0.0, update=PcgNode.update_value)
+    prop_depth = FloatProperty(name="Depth", default=2.0, min=0, update=PcgNode.update_value)
+    prop_end = EnumProperty(name="End Fill Type", items=[("NOTHING", "Nothing", "Don’t fill at all."), ("NGON", "Ngon", "Use ngons"), ("TRIFAN", "Triangle Fan", "Use triangle fans.")], default="NGON", update=PcgNode.update_value)
+    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
+    prop_rotation = FloatVectorProperty(name="Rotation", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_vertices")
@@ -326,15 +326,15 @@ class TorusNode(Node, PcgInputNode):
     bl_idname = "TorusNode"
     bl_label = "Torus"
     
-    prop_major_segments = IntProperty(name="Major Segment", default=48, min=3, max=256)
-    prop_minor_segments = IntProperty(name="Minor Segment", default=12, min=3, max=256)
-    prop_mode = EnumProperty(name="Mode", items=[("MAJOR_MINOR", "Major/Minor", "Use the major/minor radii for torus dimensions."), ("EXT_INT", "Exterior/Interior", "Use the exterior/interior radii for torus dimensions.")], default="MAJOR_MINOR")
-    prop_major_radius = FloatProperty(name="Major Radius", default=1.0, min=0.01, max=100)
-    prop_minor_radius = FloatProperty(name="Minor Radius", default=0.25, min=0.01, max=100)
-    prop_ext_radius = FloatProperty(name="Exterior Radius", default=1.25, min=0.01, max=100)
-    prop_int_radius = FloatProperty(name="Interior Radius", default=0.75, min=0.01, max=100)
-    prop_location = FloatVectorProperty(name="Location")
-    prop_rotation = FloatVectorProperty(name="Rotation")
+    prop_major_segments = IntProperty(name="Major Segment", default=48, min=3, max=256, update=PcgNode.update_value)
+    prop_minor_segments = IntProperty(name="Minor Segment", default=12, min=3, max=256, update=PcgNode.update_value)
+    prop_mode = EnumProperty(name="Mode", items=[("MAJOR_MINOR", "Major/Minor", "Use the major/minor radii for torus dimensions."), ("EXT_INT", "Exterior/Interior", "Use the exterior/interior radii for torus dimensions.")], default="MAJOR_MINOR", update=PcgNode.update_value)
+    prop_major_radius = FloatProperty(name="Major Radius", default=1.0, min=0.01, max=100, update=PcgNode.update_value)
+    prop_minor_radius = FloatProperty(name="Minor Radius", default=0.25, min=0.01, max=100, update=PcgNode.update_value)
+    prop_ext_radius = FloatProperty(name="Exterior Radius", default=1.25, min=0.01, max=100, update=PcgNode.update_value)
+    prop_int_radius = FloatProperty(name="Interior Radius", default=0.75, min=0.01, max=100, update=PcgNode.update_value)
+    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
+    prop_rotation = FloatVectorProperty(name="Rotation", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_major_segments")
@@ -357,7 +357,7 @@ class LocationNode(Node, PcgTransformNode):
     bl_idname = "LocationNode"
     bl_label = "Location"
     
-    prop_location = FloatVectorProperty(name="Location")
+    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_location")
@@ -368,7 +368,7 @@ class RotationNode(Node, PcgTransformNode):
     bl_idname = "RotationNode"
     bl_label = "Rotation"
     
-    prop_rotation = FloatVectorProperty(name="Rotation")
+    prop_rotation = FloatVectorProperty(name="Rotation", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_rotation")
@@ -379,7 +379,7 @@ class ScaleNode(Node, PcgTransformNode):
     bl_idname = "ScaleNode"
     bl_label = "Scale"
     
-    prop_scale = FloatVectorProperty(name="Scale", default=(1.0, 1.0, 1.0))
+    prop_scale = FloatVectorProperty(name="Scale", default=(1.0, 1.0, 1.0), update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_scale")
@@ -390,10 +390,10 @@ class ResizeNode(Node, PcgOperatorNode):
     bl_idname = "ResizeNode"
     bl_label = "Component Scale"
 
-    prop_value = FloatVectorProperty(name="Value", default=(1.0, 1.0, 1.0))
-    prop_axis = BoolVectorProperty(name="Constraint Axis")
-    prop_orientation = EnumProperty(name="Constraint Orientation", items=[("GLOBAL", "Global", "")], default="GLOBAL")
-    prop_mirror = BoolProperty(name="Mirror")
+    prop_value = FloatVectorProperty(name="Value", default=(1.0, 1.0, 1.0), update=PcgNode.update_value)
+    prop_axis = BoolVectorProperty(name="Constraint Axis", update=PcgNode.update_value)
+    prop_orientation = EnumProperty(name="Constraint Orientation", items=[("GLOBAL", "Global", "")], default="GLOBAL", update=PcgNode.update_value)
+    prop_mirror = BoolProperty(name="Mirror", update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_value")
@@ -415,8 +415,8 @@ class ToComponentNode(Node, PcgNode):
     bl_idname = "ToComponentNode"
     bl_label = "To Component Mode"
     
-    prop_selection_type = EnumProperty(name="Component", items=[("FACE", "Faces", ""), ("VERT", "Vertices", ""), ("EDGE", "Edges", "")], default="FACE")
-    prop_deselect = BoolProperty(name="Deselect All", default=True)
+    prop_selection_type = EnumProperty(name="Component", items=[("FACE", "Faces", ""), ("VERT", "Vertices", ""), ("EDGE", "Edges", "")], default="FACE", update=PcgNode.update_value)
+    prop_deselect = BoolProperty(name="Deselect All", default=True, update=PcgNode.update_value)
 
     def init(self, context):
         self.inputs.new("MeshSocket", "Mesh")
@@ -463,7 +463,7 @@ class ChangeModeNode(Node, PcgNode):
     bl_idname = "ChangeModeNode"
     bl_label = "Change Mode Mode"
     
-    prop_selection_type = EnumProperty(name="Component", items=[("FACE", "Faces", ""), ("VERT", "Vertices", ""), ("EDGE", "Edges", "")], default="FACE")
+    prop_selection_type = EnumProperty(name="Component", items=[("FACE", "Faces", ""), ("VERT", "Vertices", ""), ("EDGE", "Edges", "")], default="FACE", update=PcgNode.update_value)
 
     def init(self, context):
         self.inputs.new("ComponentSocket", "Component")
@@ -486,7 +486,7 @@ class PivotNode(Node, PcgTransformNode):
     bl_idname = "PivotNode"
     bl_label = "Change Pivot-Point"
 
-    prop_pivot = EnumProperty(name="Pivot Point", items=[("BOUNDING_BOX_CENTER", "Bound Box Center", ""), ("CURSOR", "Cursor", ""), ("INDIVIDUAL_ORIGINS", "Individual Origins", ""), ("MEDIAN_POINT", "Median Point", ""), ("ACTIVE_ELEMENT", "Active Element", "")], default="MEDIAN_POINT")
+    prop_pivot = EnumProperty(name="Pivot Point", items=[("BOUNDING_BOX_CENTER", "Bound Box Center", ""), ("CURSOR", "Cursor", ""), ("INDIVIDUAL_ORIGINS", "Individual Origins", ""), ("MEDIAN_POINT", "Median Point", ""), ("ACTIVE_ELEMENT", "Active Element", "")], default="MEDIAN_POINT", update=PcgNode.update_value)
 
     def init(self, context):
         self.inputs.new("MeshSocket", "")
@@ -554,7 +554,7 @@ class SelectAllNode(Node, PcgSelectionNode):
     bl_idname = "SelectAllNode"
     bl_label = "Select All"
 
-    prop_action = EnumProperty(name="Action", items=[("TOGGLE", "Toggle", ""), ("SELECT", "Select", ""), ("DESELECT", "Deselect", ""), ("INVERT", "Invert", "")], default="TOGGLE")
+    prop_action = EnumProperty(name="Action", items=[("TOGGLE", "Toggle", ""), ("SELECT", "Select", ""), ("DESELECT", "Deselect", ""), ("INVERT", "Invert", "")], default="TOGGLE", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_action")
@@ -565,9 +565,9 @@ class SelectAxisNode(Node, PcgSelectionNode):
     bl_idname = "SelectAxisNode"
     bl_label = "Select Axis"
 
-    prop_mode = EnumProperty(name="Mode", items=[("POSITIVE", "Positive", ""), ("NEGATIVE", "Negative", ""), ("ALIGNED", "Aligned", "")], default="POSITIVE")
-    prop_axis = EnumProperty(name="Axis", items=[("X_AXIS", "X", ""), ("Y_AXIS", "Y", ""), ("Z_AXIS", "Z", "")], default="X_AXIS")
-    prop_threshold = FloatProperty(name="Threshold", default=0.0001, min=0.000001, max=50)
+    prop_mode = EnumProperty(name="Mode", items=[("POSITIVE", "Positive", ""), ("NEGATIVE", "Negative", ""), ("ALIGNED", "Aligned", "")], default="POSITIVE", update=PcgNode.update_value)
+    prop_axis = EnumProperty(name="Axis", items=[("X_AXIS", "X", ""), ("Y_AXIS", "Y", ""), ("Z_AXIS", "Z", "")], default="X_AXIS", update=PcgNode.update_value)
+    prop_threshold = FloatProperty(name="Threshold", default=0.0001, min=0.000001, max=50, update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_mode", expand=True)
@@ -580,9 +580,9 @@ class SelectFaceBySidesNode(Node, PcgSelectionNode):
     bl_idname = "SelectFaceBySidesNode"
     bl_label = "Select Face By Sides"
 
-    prop_number = IntProperty(name="Number", default=3, min=3)
-    prop_type = EnumProperty(name="Type", items=[("LESS", "Less", ""), ("EQUAL", "Equal", ""), ("GREATER", "Greater", ""), ("NOTEQUAL", "Not Equal", "")], default="EQUAL")
-    prop_extend = BoolProperty(name="Extend", default=True)
+    prop_number = IntProperty(name="Number", default=3, min=3, update=PcgNode.update_value)
+    prop_type = EnumProperty(name="Type", items=[("LESS", "Less", ""), ("EQUAL", "Equal", ""), ("GREATER", "Greater", ""), ("NOTEQUAL", "Not Equal", "")], default="EQUAL", update=PcgNode.update_value)
+    prop_extend = BoolProperty(name="Extend", default=True, update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_number")
@@ -601,7 +601,7 @@ class SelectLessNode(Node, PcgSelectionNode):
     bl_idname = "SelectLessNode"
     bl_label = "Select Less"
 
-    prop_face_step = BoolProperty(name="Face Step", default=True)
+    prop_face_step = BoolProperty(name="Face Step", default=True, update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_face_step")
@@ -612,7 +612,7 @@ class SelectMoreNode(Node, PcgSelectionNode):
     bl_idname = "SelectMoreNode"
     bl_label = "Select More"
 
-    prop_face_step = BoolProperty(name="Face Step", default=True)
+    prop_face_step = BoolProperty(name="Face Step", default=True, update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_face_step")
@@ -623,7 +623,7 @@ class SelectLinkedNode(Node, PcgSelectionNode):
     bl_idname = "SelectLinkedNode"
     bl_label = "Select Linked"
 
-    prop_delimit = EnumProperty(name="Delimit", items=[("NORMAL", "Normal", ""), ("MATERIAL", "Material", ""), ("SEAM", "Seam", ""), ("SHARP", "Sharp", ""), ("UV", "UV", "")], default="SEAM")
+    prop_delimit = EnumProperty(name="Delimit", items=[("NORMAL", "Normal", ""), ("MATERIAL", "Material", ""), ("SEAM", "Seam", ""), ("SHARP", "Sharp", ""), ("UV", "UV", "")], default="SEAM", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_delimit")
@@ -634,7 +634,7 @@ class SelectLooseNode(Node, PcgSelectionNode):
     bl_idname = "SelectLooseNode"
     bl_label = "Select Loose"
 
-    prop_extend = BoolProperty(name="Extend")
+    prop_extend = BoolProperty(name="Extend", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_extend")
@@ -645,8 +645,8 @@ class SelectMirrorNode(Node, PcgSelectionNode):
     bl_idname = "SelectMirrorNode"
     bl_label = "Select Mirror"
 
-    prop_axis = EnumProperty(name="Axis", items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="X")
-    prop_extend = BoolProperty(name="Extend")
+    prop_axis = EnumProperty(name="Axis", items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="X", update=PcgNode.update_value)
+    prop_extend = BoolProperty(name="Extend", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_axis", expand=True)
@@ -670,12 +670,12 @@ class SelectNonManifoldNode(Node, PcgSelectionNode):
     bl_idname = "SelectNonManifoldNode"
     bl_label = "Select Non-Manifold"
 
-    prop_extend = BoolProperty(name="Extend", default=True)
-    prop_wire = BoolProperty(name="Wire", default=True)
-    prop_boundary = BoolProperty(name="Boundary", default=True)
-    prop_multi_face = BoolProperty(name="Multiple Faces", default=True)
-    prop_non_contiguous = BoolProperty(name="Non Contiguous", default=True)
-    prop_verts = BoolProperty(name="Vertices", default=True)
+    prop_extend = BoolProperty(name="Extend", default=True, update=PcgNode.update_value)
+    prop_wire = BoolProperty(name="Wire", default=True, update=PcgNode.update_value)
+    prop_boundary = BoolProperty(name="Boundary", default=True, update=PcgNode.update_value)
+    prop_multi_face = BoolProperty(name="Multiple Faces", default=True, update=PcgNode.update_value)
+    prop_non_contiguous = BoolProperty(name="Non Contiguous", default=True, update=PcgNode.update_value)
+    prop_verts = BoolProperty(name="Vertices", default=True, update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_extend")
@@ -691,9 +691,9 @@ class SelectNthNode(Node, PcgSelectionNode):
     bl_idname = "SelectNthNode"
     bl_label = "Select Nth"
 
-    prop_nth = IntProperty(name="Nth", default=2, min=2)
-    prop_skip = IntProperty(name="Skip", default=1, min=1)
-    prop_offset = IntProperty(name="Offset", default=0)
+    prop_nth = IntProperty(name="Nth", default=2, min=2, update=PcgNode.update_value)
+    prop_skip = IntProperty(name="Skip", default=1, min=1, update=PcgNode.update_value)
+    prop_offset = IntProperty(name="Offset", default=0, update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_nth")
@@ -706,9 +706,9 @@ class SelectRandomNode(Node, PcgSelectionNode):
     bl_idname = "SelectRandomNode"
     bl_label = "Select Random"
 
-    prop_percent = FloatProperty(name="Percent", default=50.0, min=0.0, max=100.0)
-    prop_seed = IntProperty(name="Seed", default=0, min=0)
-    prop_action = EnumProperty(name="Action", items=[("SELECT", "Select", ""), ("DESELECT", "Deselect", "")], default="SELECT")
+    prop_percent = FloatProperty(name="Percent", default=50.0, min=0.0, max=100.0, update=PcgNode.update_value)
+    prop_seed = IntProperty(name="Seed", default=0, min=0, update=PcgNode.update_value)
+    prop_action = EnumProperty(name="Action", items=[("SELECT", "Select", ""), ("DESELECT", "Deselect", "")], default="SELECT", update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_percent")
@@ -721,9 +721,9 @@ class SelectSimilarNode(Node, PcgSelectionNode):
     bl_idname = "SelectSimilarNode"
     bl_label = "Select Similar"
 
-    prop_type = EnumProperty(name="Type", items=[("MATERIAL", "Material", ""), ("IMAGE", "Image", ""), ("AREA", "Area", ""), ("SIDES", "Sides", ""), ("PERIMETER", "Perimeter", ""), ("NORMAL", "Normal", ""), ("COPLANAR", "Co-Planar", ""), ("SMOOTH", "Smooth", ""), ("FREESTYLE_FACE", "Freestyle Face", "")], default="NORMAL")
-    prop_compare = EnumProperty(name="Compare", items=[("EQUAL", "Equal", ""), ("GREATER", "Greater", ""), ("LESS", "Less", "")], default="EQUAL")
-    prop_threshold = FloatProperty(name="Threshold", default=0.0, min=0.0, max=1.0)
+    prop_type = EnumProperty(name="Type", items=[("MATERIAL", "Material", ""), ("IMAGE", "Image", ""), ("AREA", "Area", ""), ("SIDES", "Sides", ""), ("PERIMETER", "Perimeter", ""), ("NORMAL", "Normal", ""), ("COPLANAR", "Co-Planar", ""), ("SMOOTH", "Smooth", ""), ("FREESTYLE_FACE", "Freestyle Face", "")], default="NORMAL", update=PcgNode.update_value)
+    prop_compare = EnumProperty(name="Compare", items=[("EQUAL", "Equal", ""), ("GREATER", "Greater", ""), ("LESS", "Less", "")], default="EQUAL", update=PcgNode.update_value)
+    prop_threshold = FloatProperty(name="Threshold", default=0.0, min=0.0, max=1.0, update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_type")
@@ -742,7 +742,7 @@ class SelectUngroupedNode(Node, PcgSelectionNode):
     bl_idname = "SelectUngroupedNode"
     bl_label = "Select Ungrouped"
 
-    prop_extend = BoolProperty(name="Extend")
+    prop_extend = BoolProperty(name="Extend", update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_extend")
@@ -753,7 +753,7 @@ class SelectEdgesSharpNode(Node, PcgSelectionNode):
     bl_idname = "SelectEdgesSharpNode"
     bl_label = "Select Sharp-Enough Edges"
 
-    prop_sharpness = FloatProperty(name="Sharpness", default=0.523599, min=0.000174533, max=3.14159, precision=6)
+    prop_sharpness = FloatProperty(name="Sharpness", default=0.523599, min=0.000174533, max=3.14159, precision=6, update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_sharpness")
@@ -764,7 +764,7 @@ class SelectFacesLinkedFlatNode(Node, PcgSelectionNode):
     bl_idname = "SelectFacesLinkedFlatSharpNode"
     bl_label = "Select Linked Faces By Angle"
 
-    prop_sharpness = FloatProperty(name="Sharpness", default=0.523599, min=0.000174533, max=3.14159, precision=6)
+    prop_sharpness = FloatProperty(name="Sharpness", default=0.523599, min=0.000174533, max=3.14159, precision=6, update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_sharpness")
@@ -776,7 +776,7 @@ class DeleteNode(Node, PcgOperatorNode):
     bl_idname = "DeleteNode"
     bl_label = "Delete"
 
-    prop_type = EnumProperty(name="Type", items=[("VERT", "Vertices", ""), ("EDGE", "Edges", ""), ("FACE", "Faces", ""), ("EDGE_FACE", "Edges And Faces", ""), ("ONLY_FACE", "Only Faces", "")], default="VERT")
+    prop_type = EnumProperty(name="Type", items=[("VERT", "Vertices", ""), ("EDGE", "Edges", ""), ("FACE", "Faces", ""), ("EDGE_FACE", "Edges And Faces", ""), ("ONLY_FACE", "Only Faces", "")], default="VERT", update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_type")
@@ -787,7 +787,7 @@ class DissolveFacesNode(Node, PcgOperatorNode):
     bl_idname = "DissolveFacesNode"
     bl_label = "Dissolve Faces"
 
-    prop_verts = BoolProperty(name="Use Vertices")
+    prop_verts = BoolProperty(name="Use Vertices", update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout(self, "prop_verts")
@@ -799,7 +799,7 @@ class BeautifyFillNode(Node, PcgOperatorNode):
     bl_idname = "BeautifyFillNode"
     bl_label = "Beautify Fill"
 
-    prop_angle_limit = FloatProperty(name="Angle Limit", default=3.14159, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION")
+    prop_angle_limit = FloatProperty(name="Angle Limit", default=3.14159, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION", update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_angle_limit")
@@ -810,14 +810,14 @@ class BevelNode(Node, PcgOperatorNode):
     bl_idname = "BevelNode"
     bl_label = "Bevel"
 
-    prop_offset_type = EnumProperty(name="Offset Type", items=[("OFFSET", "Offset", ""), ("WIDTH", "Width", ""), ("PERCENT", "Percent", ""), ("DEPTH", "Depth", "")], default="OFFSET")
-    prop_offset = FloatProperty(name="Offset", default=0.0, min=-1000000, max=1000000)
-    prop_segments = IntProperty(name="Segments", default=1, min=1, max=1000)
-    prop_profile = FloatProperty(name="Profile", default=0.5, min=0.15, max=1.0)
-    prop_vertex_only = BoolProperty(name="Vertex Only")
-    prop_clamp_overlap = BoolProperty(name="Clamp Overlap")
-    prop_loop_slide = BoolProperty(name="Loop Slide", default=True)
-    prop_material = IntProperty(name="Material", default=-1, min=-1)
+    prop_offset_type = EnumProperty(name="Offset Type", items=[("OFFSET", "Offset", ""), ("WIDTH", "Width", ""), ("PERCENT", "Percent", ""), ("DEPTH", "Depth", "")], default="OFFSET", update=PcgNode.update_value)
+    prop_offset = FloatProperty(name="Offset", default=0.0, min=-1000000, max=1000000, update=PcgNode.update_value)
+    prop_segments = IntProperty(name="Segments", default=1, min=1, max=1000, update=PcgNode.update_value)
+    prop_profile = FloatProperty(name="Profile", default=0.5, min=0.15, max=1.0, update=PcgNode.update_value)
+    prop_vertex_only = BoolProperty(name="Vertex Only", update=PcgNode.update_value)
+    prop_clamp_overlap = BoolProperty(name="Clamp Overlap", update=PcgNode.update_value)
+    prop_loop_slide = BoolProperty(name="Loop Slide", default=True, update=PcgNode.update_value)
+    prop_material = IntProperty(name="Material", default=-1, min=-1, update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_offset_type")
@@ -835,15 +835,15 @@ class BridgeEdgeLoopsNode(Node, PcgOperatorNode):
     bl_idname = "BridgeEdgeLoopsNode"
     bl_label = "Bridge Edge Loops"
 
-    prop_type = EnumProperty(name="Connect Loops", items=[("SINGLE", "Single", ""), ("CLOSED", "Closed", ""), ("PAIRS", "Pairs", "")], default="SINGLE")
-    prop_use_merge = BoolProperty(name="Merge")
-    prop_merge_factor = FloatProperty(name="Merge Factor", default=0.5, min=0.0, max=0.1)
-    prop_twist_offset = IntProperty(name="Twist", default=0, min=-1000, max=1000)
-    prop_number_cuts = IntProperty(name="Number of Cuts", default=0, min=0, max=1000)
-    prop_interpolation = EnumProperty(name="Interpolation", items=[("LINEAR", "Linear", ""), ("PATH", "Path", ""), ("SURFACE", "Surface", "")], default="PATH")
-    prop_smoothness = FloatProperty(name="Smoothness", default=1.0, min=0.0, max=1000.0)
-    prop_profile_shape_factor = FloatProperty(name="Profile Factor", default=0.0, min=-1000.0, max=1000.0)
-    prop_profile_shape = EnumProperty(name="Profile Shape", items=[("SMOOTH", "Smooth", ""), ("SPHERE", "Sphere", ""), ("ROOT", "Root", ""), ("INVERSE_SQUARE", "Inverse Square", ""), ("SHARP", "Sharp", ""), ("LINEAR", "Linear", "")], default="SMOOTH")
+    prop_type = EnumProperty(name="Connect Loops", items=[("SINGLE", "Single", ""), ("CLOSED", "Closed", ""), ("PAIRS", "Pairs", "")], default="SINGLE", update=PcgNode.update_value)
+    prop_use_merge = BoolProperty(name="Merge", update=PcgNode.update_value)
+    prop_merge_factor = FloatProperty(name="Merge Factor", default=0.5, min=0.0, max=0.1, update=PcgNode.update_value)
+    prop_twist_offset = IntProperty(name="Twist", default=0, min=-1000, max=1000, update=PcgNode.update_value)
+    prop_number_cuts = IntProperty(name="Number of Cuts", default=0, min=0, max=1000, update=PcgNode.update_value)
+    prop_interpolation = EnumProperty(name="Interpolation", items=[("LINEAR", "Linear", ""), ("PATH", "Path", ""), ("SURFACE", "Surface", "")], default="PATH", update=PcgNode.update_value)
+    prop_smoothness = FloatProperty(name="Smoothness", default=1.0, min=0.0, max=1000.0, update=PcgNode.update_value)
+    prop_profile_shape_factor = FloatProperty(name="Profile Factor", default=0.0, min=-1000.0, max=1000.0, update=PcgNode.update_value)
+    prop_profile_shape = EnumProperty(name="Profile Shape", items=[("SMOOTH", "Smooth", ""), ("SPHERE", "Sphere", ""), ("ROOT", "Root", ""), ("INVERSE_SQUARE", "Inverse Square", ""), ("SHARP", "Sharp", ""), ("LINEAR", "Linear", "")], default="SMOOTH", update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_type")
@@ -862,12 +862,12 @@ class DecimateNode(Node, PcgOperatorNode):
     bl_idname = "DecimateNode"
     bl_label = "Decimate"
 
-    prop_ratio = FloatProperty(name="Ratio", default=1.0, min=0.0, max=1.0)
-    prop_use_vertex_group = BoolProperty(name="Vertex Group")
-    prop_vertex_group_factor = FloatProperty(name="Weight", default=1.0, min=0.0, max=1000.0)
-    prop_invert_vertex_group = BoolProperty(name="Invert")
-    prop_use_symmetry = BoolProperty(name="Symmetry")
-    prop_symmetry_axis = EnumProperty(name="Axis", items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="Y")
+    prop_ratio = FloatProperty(name="Ratio", default=1.0, min=0.0, max=1.0, update=PcgNode.update_value)
+    prop_use_vertex_group = BoolProperty(name="Vertex Group", update=PcgNode.update_value)
+    prop_vertex_group_factor = FloatProperty(name="Weight", default=1.0, min=0.0, max=1000.0, update=PcgNode.update_value)
+    prop_invert_vertex_group = BoolProperty(name="Invert", update=PcgNode.update_value)
+    prop_use_symmetry = BoolProperty(name="Symmetry", update=PcgNode.update_value)
+    prop_symmetry_axis = EnumProperty(name="Axis", items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="Y", update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_ratio")
@@ -883,8 +883,8 @@ class ExtrudeFacesNode(Node, PcgOperatorNode):
     bl_idname = "ExtrudeFacesNode"
     bl_label = "Extrude Faces"
 
-    prop_amount = FloatProperty(name="Amount")
-    prop_mirror = BoolProperty(name="Mirror")
+    prop_amount = FloatProperty(name="Amount", update=PcgNode.update_value)
+    prop_mirror = BoolProperty(name="Mirror", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_amount")
@@ -903,8 +903,8 @@ class ExtrudeRegionNode(Node, PcgOperatorNode):
     bl_idname = "ExtrudeRegionNode"
     bl_label = "Extrude Region"
 
-    prop_amount = FloatProperty(name="Amount")
-    prop_mirror = BoolProperty(name="Mirror")
+    prop_amount = FloatProperty(name="Amount", update=PcgNode.update_value)
+    prop_mirror = BoolProperty(name="Mirror", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_amount")
@@ -923,16 +923,16 @@ class InsetNode(Node, PcgOperatorNode):
     bl_idname = "InsetNode"
     bl_label = "Inset"
     
-    prop_thickness = FloatProperty(name="Thickness", default=0.01, min=0.0)
-    prop_depth = FloatProperty(name="Depth")
-    prop_boundary = BoolProperty(name="Boundary", default=True)
-    prop_even_offset = BoolProperty(name="Even Offset", default=True)
-    prop_relative_offset = BoolProperty(name="Relative Offset")
-    prop_edge_rail = BoolProperty(name="Edge Rail")
-    prop_outset = BoolProperty(name="Outset")
-    prop_select_inset = BoolProperty(name="Select Inset")
-    prop_individual = BoolProperty(name="Individual")
-    prop_interpolate = BoolProperty(name="Interpolate", default=True)
+    prop_thickness = FloatProperty(name="Thickness", default=0.01, min=0.0, update=PcgNode.update_value)
+    prop_depth = FloatProperty(name="Depth", update=PcgNode.update_value)
+    prop_boundary = BoolProperty(name="Boundary", default=True, update=PcgNode.update_value)
+    prop_even_offset = BoolProperty(name="Even Offset", default=True, update=PcgNode.update_value)
+    prop_relative_offset = BoolProperty(name="Relative Offset", update=PcgNode.update_value)
+    prop_edge_rail = BoolProperty(name="Edge Rail", update=PcgNode.update_value)
+    prop_outset = BoolProperty(name="Outset", update=PcgNode.update_value)
+    prop_select_inset = BoolProperty(name="Select Inset", update=PcgNode.update_value)
+    prop_individual = BoolProperty(name="Individual", update=PcgNode.update_value)
+    prop_interpolate = BoolProperty(name="Interpolate", default=True, update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_thickness")
@@ -955,8 +955,8 @@ class MergeNode(Node, PcgOperatorNode):
     bl_idname = "MergeNode"
     bl_label = "Merge"
     
-    prop_type = EnumProperty(name="Type", items=[("CENTER", "Center", ""), ("CURSOR", "Cursor", ""), ("COLLAPSE", "Collapse", "")], default="CENTER")
-    prop_uv = BoolProperty(name="UVs")
+    prop_type = EnumProperty(name="Type", items=[("CENTER", "Center", ""), ("CURSOR", "Cursor", ""), ("COLLAPSE", "Collapse", "")], default="CENTER", update=PcgNode.update_value)
+    prop_uv = BoolProperty(name="UVs", update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_type")
@@ -968,7 +968,7 @@ class SolidifyNode(Node, PcgOperatorNode):
     bl_idname = "SolidifyNode"
     bl_label = "Solidify"
     
-    prop_thickness = FloatProperty(name="Thickness", default=0.01, min=-10000.0, max=10000.0)
+    prop_thickness = FloatProperty(name="Thickness", default=0.01, min=-10000.0, max=10000.0, update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_thickness")
@@ -979,11 +979,11 @@ class SpinNode(Node, PcgOperatorNode):
     bl_idname = "SpinNode"
     bl_label = "Spin"
     
-    prop_steps = IntProperty(name="Steps", default=9, min=0, max=1000000)
-    prop_dupli = BoolProperty(name="Duplicate")
-    prop_angle = FloatProperty(name="Angle", default=1.5708, subtype="ANGLE", unit="ROTATION")
-    prop_center = FloatVectorProperty(name="Center")
-    prop_axis = FloatVectorProperty(name="Axis", min=-1.0, max=1.0)
+    prop_steps = IntProperty(name="Steps", default=9, min=0, max=1000000, update=PcgNode.update_value)
+    prop_dupli = BoolProperty(name="Duplicate", update=PcgNode.update_value)
+    prop_angle = FloatProperty(name="Angle", default=1.5708, subtype="ANGLE", unit="ROTATION", update=PcgNode.update_value)
+    prop_center = FloatVectorProperty(name="Center", update=PcgNode.update_value)
+    prop_axis = FloatVectorProperty(name="Axis", min=-1.0, max=1.0, update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_steps")
@@ -998,13 +998,13 @@ class SubdivideNode(Node, PcgOperatorNode):
     bl_idname = "SubdivideNode"
     bl_label = "Subdivide"
 
-    prop_number_cuts = IntProperty(name="Number of Cuts", default=1, min=1, max=100)
-    prop_smoothness = FloatProperty(name="Smoothness", default=0.0, min=0.0, max=1000.0)
-    prop_quadtri = BoolProperty(name="Quad/Tri Mode")
-    prop_quadcorner = EnumProperty(name="Quad Corner Type", items=[("INNERVERT", "Inner Vertices", ""), ("PATH", "Path", ""), ("STRAIGHT_CUT", "Straight Cut", ""), ("FAN", "Fan", "")], default="STRAIGHT_CUT")
-    prop_fractal = FloatProperty(name="Fractal", default=0.0, min=0.0, max=1000000)
-    prop_fractal_along_normal = FloatProperty(name="Along Normal", default=0.0, min=0.0, max=1.0)
-    prop_seed = IntProperty(name="Random Seed", default=0, min=0)
+    prop_number_cuts = IntProperty(name="Number of Cuts", default=1, min=1, max=100, update=PcgNode.update_value)
+    prop_smoothness = FloatProperty(name="Smoothness", default=0.0, min=0.0, max=1000.0, update=PcgNode.update_value)
+    prop_quadtri = BoolProperty(name="Quad/Tri Mode", update=PcgNode.update_value)
+    prop_quadcorner = EnumProperty(name="Quad Corner Type", items=[("INNERVERT", "Inner Vertices", ""), ("PATH", "Path", ""), ("STRAIGHT_CUT", "Straight Cut", ""), ("FAN", "Fan", "")], default="STRAIGHT_CUT", update=PcgNode.update_value)
+    prop_fractal = FloatProperty(name="Fractal", default=0.0, min=0.0, max=1000000, update=PcgNode.update_value)
+    prop_fractal_along_normal = FloatProperty(name="Along Normal", default=0.0, min=0.0, max=1.0, update=PcgNode.update_value)
+    prop_seed = IntProperty(name="Random Seed", default=0, min=0, update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_number_cuts")
@@ -1022,21 +1022,21 @@ class ArrayNode(Node, PcgModifierNode):
     bl_idname = "ArrayNode"
     bl_label = "Array"
 
-    fit_type = EnumProperty(name="Fit Type", items=[("FIXED_COUNT", "Fixed Count", ""), ("FIT_LENGTH", "Fit Length", ""), ("FIT_CURVE", "Fit Curve", "")], default="FIXED_COUNT")
-    count = IntProperty(name="Count", default=2, min=1, max=1000)
-    fit_length = FloatProperty(name="Length", default=0.0, min=0.0)
-    curve = PointerProperty(name="Curve", type=bpy.types.Curve)
-    use_constant_offset = BoolProperty(name="Constant Offset")
-    constant_offset_displace = FloatVectorProperty()
-    use_merge_vertices = BoolProperty()
-    use_merge_vertices_cap = BoolProperty()
-    merge_threshold = FloatProperty(default=0.01, min=0.0, max=1.0)
-    use_relative_offset = BoolProperty(name="Use Relative Offset", default=True)
-    relative_offset_displace = FloatVectorProperty(default=(1.0, 0.0, 0.0))
-    use_object_offset = BoolProperty(name="Object Offset")
-    offset_object = PointerProperty(type=bpy.types.Object)
-    start_cap = PointerProperty(name="Start Cap", type=bpy.types.Object)
-    end_cap = PointerProperty(name="End Cap", type=bpy.types.Object)
+    fit_type = EnumProperty(name="Fit Type", items=[("FIXED_COUNT", "Fixed Count", ""), ("FIT_LENGTH", "Fit Length", ""), ("FIT_CURVE", "Fit Curve", "")], default="FIXED_COUNT", update=PcgNode.update_value)
+    count = IntProperty(name="Count", default=2, min=1, max=1000, update=PcgNode.update_value)
+    fit_length = FloatProperty(name="Length", default=0.0, min=0.0, update=PcgNode.update_value)
+    curve = PointerProperty(name="Curve", type=bpy.types.Curve, update=PcgNode.update_value)
+    use_constant_offset = BoolProperty(name="Constant Offset", update=PcgNode.update_value)
+    constant_offset_displace = FloatVectorProperty(name="Offset", update=PcgNode.update_value)
+    use_merge_vertices = BoolProperty(name="Merge Vertices", update=PcgNode.update_value)
+    use_merge_vertices_cap = BoolProperty(name="Cap", update=PcgNode.update_value)
+    merge_threshold = FloatProperty(name="Threshold", default=0.01, min=0.0, max=1.0, update=PcgNode.update_value)
+    use_relative_offset = BoolProperty(name="Use Relative Offset", default=True, update=PcgNode.update_value)
+    relative_offset_displace = FloatVectorProperty(name="Relative Offset", default=(1.0, 0.0, 0.0), update=PcgNode.update_value)
+    use_object_offset = BoolProperty(name="Object Offset", update=PcgNode.update_value)
+    offset_object = PointerProperty(type=bpy.types.Object, update=PcgNode.update_value)
+    start_cap = PointerProperty(name="Start Cap", type=bpy.types.Object, update=PcgNode.update_value)
+    end_cap = PointerProperty(name="End Cap", type=bpy.types.Object, update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.prop(self, "fit_type")
@@ -1095,16 +1095,16 @@ class BevelModNode(Node, PcgModifierNode):
     bl_idname = "BevelModNode"
     bl_label = "Bevel"
     
-    width = FloatProperty(name="Width", default=0.1, min=0.0)
-    segments = IntProperty(name="Segments", default=1, min=0, max=100)
-    profile = FloatProperty(name="Profile", default=0.5, min=0.0, max=1.0)
-    material = IntProperty(name="Material", default=-1, min=0, max=32767)
-    use_only_vertices = BoolProperty(name="Only Vertices")
-    use_clamp_overlap = BoolProperty(name="Clamp Overlap", default=True)
-    loop_slide = BoolProperty(name="Loop Slide", default=True)
-    limit_method = EnumProperty(name="Limit Method", items=[("NONE", "None", ""), ("ANGLE", "Angle", ""), ("WEIGHT", "Weight", "")], default="NONE")
-    angle_limit = IntProperty(name="Angle", default=30, min=0, max=180, subtype="ANGLE")
-    offset_type = EnumProperty(name="Limit Method", items=[("OFFSET", "Offset", ""), ("WIDTH", "Width", ""), ("DEPTH", "Depth", ""), ("PERCENT", "Percent", "")], default="OFFSET")
+    width = FloatProperty(name="Width", default=0.1, min=0.0, update=PcgNode.update_value)
+    segments = IntProperty(name="Segments", default=1, min=0, max=100, update=PcgNode.update_value)
+    profile = FloatProperty(name="Profile", default=0.5, min=0.0, max=1.0, update=PcgNode.update_value)
+    material = IntProperty(name="Material", default=-1, min=0, max=32767, update=PcgNode.update_value)
+    use_only_vertices = BoolProperty(name="Only Vertices", update=PcgNode.update_value)
+    use_clamp_overlap = BoolProperty(name="Clamp Overlap", default=True, update=PcgNode.update_value)
+    loop_slide = BoolProperty(name="Loop Slide", default=True, update=PcgNode.update_value)
+    limit_method = EnumProperty(name="Limit Method", items=[("NONE", "None", ""), ("ANGLE", "Angle", ""), ("WEIGHT", "Weight", "")], default="NONE", update=PcgNode.update_value)
+    angle_limit = IntProperty(name="Angle", default=30, min=0, max=180, subtype="ANGLE", update=PcgNode.update_value)
+    offset_type = EnumProperty(name="Limit Method", items=[("OFFSET", "Offset", ""), ("WIDTH", "Width", ""), ("DEPTH", "Depth", ""), ("PERCENT", "Percent", "")], default="OFFSET", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         split = layout.split()
@@ -1141,10 +1141,10 @@ class BooleanNode(Node, PcgModifierNode):
     bl_idname = "BooleanNode"
     bl_label = "Boolean"
     
-    prop_op = EnumProperty(name="Operation", items=[("DIFFERENCE", "Difference", ""), ("UNION", "Union", ""), ("INTERSECT", "Intersect", "")], default="INTERSECT")
-    prop_obj = PointerProperty(name="Object", type=bpy.types.Object)
-    prop_overlap = FloatProperty(name="Overlap Threshold", default=0.000001, min=0.0, max=1.0, precision=6)
-    prop_draw_mode = EnumProperty(items=[("SOLID", "Solid", ""), ("WIRE", "Wire", ""), ("BOUNDS", "Bounds", "")], default="WIRE")
+    prop_op = EnumProperty(name="Operation", items=[("DIFFERENCE", "Difference", ""), ("UNION", "Union", ""), ("INTERSECT", "Intersect", "")], default="INTERSECT", update=PcgNode.update_value)
+    prop_obj = PointerProperty(name="Object", type=bpy.types.Object, update=PcgNode.update_value)
+    prop_overlap = FloatProperty(name="Overlap Threshold", default=0.000001, min=0.0, max=1.0, precision=6, update=PcgNode.update_value)
+    prop_draw_mode = EnumProperty(items=[("SOLID", "Solid", ""), ("WIRE", "Wire", ""), ("BOUNDS", "Bounds", "")], default="WIRE", update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_op")
@@ -1166,22 +1166,22 @@ class SolidifyModNode(Node, PcgModifierNode):
     bl_idname = "SolidifyModNode"
     bl_label = "Solidify"
     
-    thickness = FloatProperty(name="Thickness", default=0.01)
-    thickness_clamp = FloatProperty(name="Clamp", default=0.0, min=0.0, max=100.0)
-    vertex_group = StringProperty()
-    invert_vertex_group = BoolProperty()
-    thickness_vertex_group = FloatProperty(default=0.0, min=0.0, max=1.0)
-    edge_crease_inner = FloatProperty(default=0.0, min=0.0, max=1.0)
-    edge_crease_outer = FloatProperty(default=0.0, min=0.0, max=1.0)
-    edge_crease_rim = FloatProperty(default=0.0, min=0.0, max=1.0)
-    offset = FloatProperty(name="Offset", default=-1.0)
-    use_flip_normals = BoolProperty(name="Flip Normals")
-    use_even_offset = BoolProperty(name="Even Thickness")
-    use_quality_normals = BoolProperty(name="High Quality Normals")
-    use_rim = BoolProperty(name="Fill Rim", default=True)
-    use_rim_only = BoolProperty(name="Only Rim")
-    material_offset = IntProperty(default=0, min=-32768, max=32767)
-    material_offset_rim = IntProperty(default=0, min=-32768, max=32767)
+    thickness = FloatProperty(name="Thickness", default=0.01, update=PcgNode.update_value)
+    thickness_clamp = FloatProperty(name="Clamp", default=0.0, min=0.0, max=100.0, update=PcgNode.update_value)
+    vertex_group = StringProperty(name="Vertex Group", update=PcgNode.update_value)
+    invert_vertex_group = BoolProperty(name="Invert", update=PcgNode.update_value)
+    thickness_vertex_group = FloatProperty(default=0.0, min=0.0, max=1.0, update=PcgNode.update_value)
+    edge_crease_inner = FloatProperty(default=0.0, min=0.0, max=1.0, update=PcgNode.update_value)
+    edge_crease_outer = FloatProperty(default=0.0, min=0.0, max=1.0, update=PcgNode.update_value)
+    edge_crease_rim = FloatProperty(default=0.0, min=0.0, max=1.0, update=PcgNode.update_value)
+    offset = FloatProperty(name="Offset", default=-1.0, update=PcgNode.update_value)
+    use_flip_normals = BoolProperty(name="Flip Normals", update=PcgNode.update_value)
+    use_even_offset = BoolProperty(name="Even Thickness", update=PcgNode.update_value)
+    use_quality_normals = BoolProperty(name="High Quality Normals", update=PcgNode.update_value)
+    use_rim = BoolProperty(name="Fill Rim", default=True, update=PcgNode.update_value)
+    use_rim_only = BoolProperty(name="Only Rim", update=PcgNode.update_value)
+    material_offset = IntProperty(default=0, min=-32768, max=32767, update=PcgNode.update_value)
+    material_offset_rim = IntProperty(default=0, min=-32768, max=32767, update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         split = layout.split()
@@ -1244,14 +1244,14 @@ class MeshNode(Node, PcgTransformNode):
     bl_idname = "MeshNode"
     bl_label = "Mesh Output"
     
-    print_output = BoolProperty(name="Print Output (Debug)", default=False)
+    print_output = BoolProperty(name="Print Output (Debug)", default=False, update=PcgNode.update_value)
     
     def init(self, context):
         self.inputs.new("MeshSocket", "Mesh")
     
     def draw_buttons(self, context, layout):
         if (self == self.id_data.nodes.active):
-            layout.operator("pcg.generate_mesh_op", "Generate Mesh")
+            layout.operator("pcg.refresh_mesh_op", "Refresh Mesh")
         layout.column().prop(self, "print_output")
     
     def functionality(self):
@@ -1261,11 +1261,11 @@ class DrawModeNode(Node, PcgTransformNode):
     bl_idname = "DrawModeNode"
     bl_label = "Mesh Draw Mode (Viewport)"
 
-    prop_name = BoolProperty(name="Name")
-    prop_wire = BoolProperty(name="Wire")
-    prop_xray = BoolProperty(name="X-Ray")
-    prop_transparency = BoolProperty(name="Transparency")
-    prop_max_draw_type = EnumProperty(name="Maximum Draw Type", items=[("SOLID", "Solid", ""), ("WIRE", "Wire", ""), ("BOUNDS", "Bounds", "")], default="SOLID")
+    prop_name = BoolProperty(name="Name", update=PcgNode.update_value)
+    prop_wire = BoolProperty(name="Wire", update=PcgNode.update_value)
+    prop_xray = BoolProperty(name="X-Ray", update=PcgNode.update_value)
+    prop_transparency = BoolProperty(name="Transparency", update=PcgNode.update_value)
+    prop_max_draw_type = EnumProperty(name="Maximum Draw Type", items=[("SOLID", "Solid", ""), ("WIRE", "Wire", ""), ("BOUNDS", "Bounds", "")], default="SOLID", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         split = layout.split()
@@ -1284,7 +1284,7 @@ class DrawModeNode(Node, PcgTransformNode):
         bpy.data.objects[self.mesh].show_x_ray = self.prop_xray
         bpy.data.objects[self.mesh].show_transparent = self.prop_transparency
         bpy.data.objects[self.mesh].draw_type = self.prop_max_draw_type
-##############################################################
+################                                                                  ##############################################
 
 
 inputs = [PlaneNode, CubeNode, SphereNode, CylinderNode, ConeNode] #TorusNode
