@@ -89,7 +89,7 @@ class PcgModifierNode(PcgNode):
             print("Debug: " + self.name + ": Error: Modifier failed to execute")
             return ""
         self.name = bpy.data.objects[self.mesh].modifiers[0].name
-        bpy.ops.object.modifier_apply(modifier=self.name)
+        bpy.ops.object.modifier_apply(modifier=bpy.data.objects[self.mesh].modifiers[0].name)
         return self.mesh
     def functionality(self):
         print("Debug: PcgModifierNode: Main functionality of the node")
@@ -403,11 +403,11 @@ class ResizeNode(Node, PcgOperatorNode):
     
     def functionality(self):
         window = bpy.data.window_managers['WinMan'].windows[0]
-        screen=window.screen
-        area=screen.areas[4]
-        space=area.spaces[0]
-        scene=bpy.data.scenes[0]
-        region=area.regions[4]
+        screen = window.screen
+        area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
+        space = area.spaces[0]
+        scene = bpy.data.scenes[0]
+        region = [i for i in area.regions if i.type == 'WINDOW'][0]
         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
         bpy.ops.transform.resize(override, value=self.prop_value, constraint_axis=self.prop_axis, constraint_orientation=self.prop_orientation, mirror=self.prop_mirror, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1.0, snap=False, snap_target='CLOSEST', snap_point=(0.0, 0.0, 0.0), snap_align=False, snap_normal=(0.0, 0.0, 0.0), gpencil_strokes=False, texture_space=False, remove_on_cancel=False, release_confirm=False, use_accurate=False)
 
@@ -892,11 +892,11 @@ class ExtrudeFacesNode(Node, PcgOperatorNode):
     
     def functionality(self):
         window = bpy.data.window_managers['WinMan'].windows[0]
-        screen=window.screen
-        area=screen.areas[4]
-        space=area.spaces[0]
-        scene=bpy.data.scenes[0]
-        region=area.regions[4]
+        screen = window.screen
+        area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
+        space = area.spaces[0]
+        scene = bpy.data.scenes[0]
+        region = [i for i in area.regions if i.type == 'WINDOW'][0]
         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
         bpy.ops.mesh.extrude_faces_move(override ,MESH_OT_extrude_faces_indiv={"mirror":self.prop_mirror}, TRANSFORM_OT_shrink_fatten={"value":self.prop_amount, "use_even_offset":False, "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "release_confirm":True, "use_accurate":False})
 class ExtrudeRegionNode(Node, PcgOperatorNode):
@@ -912,11 +912,11 @@ class ExtrudeRegionNode(Node, PcgOperatorNode):
     
     def functionality(self):
         window = bpy.data.window_managers['WinMan'].windows[0]
-        screen=window.screen
-        area=screen.areas[4]
-        space=area.spaces[0]
-        scene=bpy.data.scenes[0]
-        region=area.regions[4]
+        screen = window.screen
+        area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
+        space = area.spaces[0]
+        scene = bpy.data.scenes[0]
+        region = [i for i in area.regions if i.type == 'WINDOW'][0]
         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
         bpy.ops.mesh.extrude_region_shrink_fatten(override ,MESH_OT_extrude_region={"mirror":self.prop_mirror}, TRANSFORM_OT_shrink_fatten={"value":self.prop_amount, "use_even_offset":False, "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "release_confirm":True, "use_accurate":False})
 class InsetNode(Node, PcgOperatorNode):
