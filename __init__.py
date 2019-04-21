@@ -961,6 +961,23 @@ class MergeNode(Node, PcgOperatorNode):
 
     def functionality(self):
         bpy.ops.mesh.merge(type=self.prop_type, uvs=self.prop_uv)
+class ScrewNode(Node, PcgOperatorNode):
+    bl_idname = "ScrewNode"
+    bl_label = "Screw"
+
+    prop_steps = IntProperty(name="Steps",default=9, min=1, max=100000, update=PcgNode.update_value)
+    prop_turns = IntProperty(name="Turns",default=1, min=1, max=100000, update=PcgNode.update_value)
+    prop_center = FloatVectorProperty(name="Center", update=PcgNode.update_value)
+    prop_axis = FloatVectorProperty(name="Axis", default=(1.0, 0.0, 0.0), min=-1.0, max=1.0, update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_steps")
+        layout.prop(self, "prop_turns")
+        layout.prop(self, "prop_center")
+        layout.prop(self, "prop_axis")
+
+    def functionality(self):
+        bpy.ops.mesh.screw(steps=self.prop_steps, turns=self.prop_turns, center=self.prop_center, axis=self.prop_axis)
 class SolidifyNode(Node, PcgOperatorNode):
     bl_idname = "SolidifyNode"
     bl_label = "Solidify"
@@ -1022,7 +1039,7 @@ class ArrayNode(Node, PcgModifierNode):
     fit_type = EnumProperty(name="Fit Type", items=[("FIXED_COUNT", "Fixed Count", ""), ("FIT_LENGTH", "Fit Length", ""), ("FIT_CURVE", "Fit Curve", "")], default="FIXED_COUNT", update=PcgNode.update_value)
     count = IntProperty(name="Count", default=2, min=1, max=1000, update=PcgNode.update_value)
     fit_length = FloatProperty(name="Length", default=0.0, min=0.0, update=PcgNode.update_value)
-    curve = PointerProperty(name="Curve", type=bpy.types.Curve, update=PcgNode.update_value)
+    curve = PointerProperty(name="Curve", type=bpy.types.Object, update=PcgNode.update_value)
     use_constant_offset = BoolProperty(name="Constant Offset", update=PcgNode.update_value)
     constant_offset_displace = FloatVectorProperty(name="Offset", update=PcgNode.update_value)
     use_merge_vertices = BoolProperty(name="Merge Vertices", update=PcgNode.update_value)
@@ -1159,6 +1176,70 @@ class BooleanNode(Node, PcgModifierNode):
         bpy.data.objects[self.mesh].modifiers[0].double_threshold = self.prop_overlap
         self.prop_obj.draw_type = self.prop_draw_mode
         return True
+class ScrewModNode(Node, PcgModifierNode):
+    bl_idname = "ScrewModNode"
+    bl_label = "Screw"
+
+    axis = EnumProperty(name="Axis", items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="Z", update=PcgNode.update_value)
+    object = PointerProperty(type=bpy.types.Object, update=PcgNode.update_value)
+    angle = FloatProperty(name="Angle", default=6.283185, subtype="ANGLE", unit="ROTATION", update=PcgNode.update_value)
+    steps = IntProperty(name="Steps", default=16, min=2, max=10000, soft_max=512, update=PcgNode.update_value)
+    render_steps = IntProperty(name="Render Steps", default=16, min=2, max=10000, soft_max=512, update=PcgNode.update_value)
+    use_smooth_shade = BoolProperty(name="Smooth Shading", default=True, update=PcgNode.update_value)
+    use_merge_vertices = BoolProperty(name="Merge Vertices", update=PcgNode.update_value)
+    merge_threshold = FloatProperty(name="Merge Distance", default=0.01, min=0, update=PcgNode.update_value)
+    screw_offset = FloatProperty(name="Screw", update=PcgNode.update_value)
+    use_object_screw_offset = BoolProperty(name="Object Screw", update=PcgNode.update_value)
+    use_normal_calculate = BoolProperty(name="Calc Order", update=PcgNode.update_value)
+    use_normal_flip = BoolProperty(name="Flip", update=PcgNode.update_value)
+    iterations = IntProperty(default=1, min=1, max=10000, name="Iterations", update=PcgNode.update_value)
+    use_stretch_u = BoolProperty(name="Stretch U", update=PcgNode.update_value)
+    use_stretch_v = BoolProperty(name="Stretch V", update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        split = layout.split()
+        col = split.column()
+        col.prop(self, "axis")
+        col.prop(self, "object", text="AxisOb")
+        col.prop(self, "angle")
+        col.prop(self, "steps")
+        col.prop(self, "render_steps")
+        col.prop(self, "use_smooth_shade")
+        col.prop(self, "use_merge_vertices")
+        sub = col.column()
+        sub.active = self.use_merge_vertices
+        sub.prop(self, "merge_threshold")
+        col = split.column()
+        row = col.row()
+        row.active = (self.object is None or self.use_object_screw_offset is False)
+        row.prop(self, "screw_offset")
+        row = col.row()
+        row.active = (self.object is not None)
+        row.prop(self, "use_object_screw_offset")
+        col.prop(self, "use_normal_calculate")
+        col.prop(self, "use_normal_flip")
+        col.prop(self, "iterations")
+        col.prop(self, "use_stretch_u")
+        col.prop(self, "use_stretch_v")
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="SCREW")
+        bpy.data.objects[self.mesh].modifiers[0].axis = self.axis
+        bpy.data.objects[self.mesh].modifiers[0].object = self.object
+        bpy.data.objects[self.mesh].modifiers[0].angle = self.angle
+        bpy.data.objects[self.mesh].modifiers[0].steps = self.steps
+        bpy.data.objects[self.mesh].modifiers[0].render_steps = self.render_steps
+        bpy.data.objects[self.mesh].modifiers[0].use_smooth_shade = self.use_smooth_shade
+        bpy.data.objects[self.mesh].modifiers[0].use_merge_vertices = self.use_merge_vertices
+        bpy.data.objects[self.mesh].modifiers[0].merge_threshold = self.merge_threshold
+        bpy.data.objects[self.mesh].modifiers[0].screw_offset = self.screw_offset
+        bpy.data.objects[self.mesh].modifiers[0].use_object_screw_offset = self.use_object_screw_offset
+        bpy.data.objects[self.mesh].modifiers[0].use_normal_calculate = self.use_normal_calculate
+        bpy.data.objects[self.mesh].modifiers[0].use_normal_flip = self.use_normal_flip
+        bpy.data.objects[self.mesh].modifiers[0].iterations = self.iterations
+        bpy.data.objects[self.mesh].modifiers[0].use_stretch_u = self.use_stretch_u
+        bpy.data.objects[self.mesh].modifiers[0].use_stretch_v = self.use_stretch_v
+        return True
 class SolidifyModNode(Node, PcgModifierNode):
     bl_idname = "SolidifyModNode"
     bl_label = "Solidify"
@@ -1236,6 +1317,97 @@ class SolidifyModNode(Node, PcgModifierNode):
         bpy.data.objects[self.mesh].modifiers[0].material_offset = self.material_offset
         bpy.data.objects[self.mesh].modifiers[0].material_offset_rim = self.material_offset_rim
         return True
+class SubdivideModNode(Node, PcgModifierNode):
+    bl_idname = "SubdivideModNode"
+    bl_label = "Subdivision Surface"
+    
+    subdivision_type = EnumProperty(items=[("CATMULL_CLARK", "Catmull-Clark", ""), ("SIMPLE", "Simple", "")], default="CATMULL_CLARK", update=PcgNode.update_value)
+    levels = IntProperty(default=1, min=0, max=11, soft_max=6, update=PcgNode.update_value)
+    render_levels = IntProperty(default=2, min=0, max=11, soft_max=6, update=PcgNode.update_value)
+    use_subsurf_uv = BoolProperty(name="Subdivide UVs", default=True, update=PcgNode.update_value)
+    show_only_control_edges = BoolProperty(name="Optimal Display", update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        layout.row().prop(self, "subdivision_type", expand=True)
+        split = layout.split()
+        col = split.column()
+        col.label(text="Subdivisions:")
+        col.prop(self, "levels", text="View")
+        col.prop(self, "render_levels", text="Render")
+        col = split.column()
+        col.label(text="Options:")
+        sub = col.column()
+        sub.prop(self, "use_subsurf_uv")
+        col.prop(self, "show_only_control_edges")
+    
+    def functionality(self):
+        if (self.levels == 0):
+            return False
+        bpy.ops.object.modifier_add(type="SUBSURF")
+        bpy.data.objects[self.mesh].modifiers[0].subdivision_type = self.subdivision_type
+        bpy.data.objects[self.mesh].modifiers[0].levels = self.levels
+        bpy.data.objects[self.mesh].modifiers[0].render_levels = self.render_levels
+        bpy.data.objects[self.mesh].modifiers[0].use_subsurf_uv = self.use_subsurf_uv
+        bpy.data.objects[self.mesh].modifiers[0].show_only_control_edges = self.show_only_control_edges
+        return True
+class WireframeModNode(Node, PcgModifierNode):
+    bl_idname = "WireframeModNode"
+    bl_label = "Wireframe"
+
+    thickness = FloatProperty(update=PcgNode.update_value)
+    vertex_group = StringProperty(update=PcgNode.update_value)
+    invert_vertex_group = BoolProperty(update=PcgNode.update_value)
+    thickness_vertex_group = FloatProperty(default=0.0, min=0.0, max=1.0, update=PcgNode.update_value)
+    use_crease = BoolProperty(update=PcgNode.update_value)
+    crease_weight = FloatProperty(update=PcgNode.update_value)
+    offset = FloatProperty(name="Offset", update=PcgNode.update_value)
+    use_even_offset = BoolProperty(update=PcgNode.update_value)
+    use_relative_offset = BoolProperty(update=PcgNode.update_value)
+    use_boundary = BoolProperty(update=PcgNode.update_value)
+    use_replace = BoolProperty(update=PcgNode.update_value)
+    material_offset = IntProperty(default=0, min=-32768, max=32767, update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        has_vgroup = bool(self.vertex_group)
+        split = layout.split()
+        col = split.column()
+        col.prop(self, "thickness", text="Thickness")
+        row = col.row(align=True)
+        if (not self.mesh == ""):
+            row.prop_search(self, "vertex_group", bpy.data.objects[self.mesh], "vertex_groups", text="")
+        sub = row.row(align=True)
+        sub.active = has_vgroup
+        sub.prop(self, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
+        row = col.row(align=True)
+        row.active = has_vgroup
+        row.prop(self, "thickness_vertex_group", text="Factor")
+        col.prop(self, "use_crease", text="Crease Edges")
+        row = col.row()
+        row.active = self.use_crease
+        row.prop(self, "crease_weight", text="Crease Weight")
+        col = split.column()
+        col.prop(self, "offset")
+        col.prop(self, "use_even_offset", text="Even Thickness")
+        col.prop(self, "use_relative_offset", text="Relative Thickness")
+        col.prop(self, "use_boundary", text="Boundary")
+        col.prop(self, "use_replace", text="Replace Original")
+        col.prop(self, "material_offset", text="Material Offset")
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="WIREFRAME")
+        bpy.data.objects[self.mesh].modifiers[0].thickness = self.thickness
+        bpy.data.objects[self.mesh].modifiers[0].vertex_group = self.vertex_group
+        bpy.data.objects[self.mesh].modifiers[0].invert_vertex_group = self.invert_vertex_group
+        bpy.data.objects[self.mesh].modifiers[0].thickness_vertex_group = self.thickness_vertex_group
+        bpy.data.objects[self.mesh].modifiers[0].use_crease = self.use_crease
+        bpy.data.objects[self.mesh].modifiers[0].crease_weight = self.crease_weight
+        bpy.data.objects[self.mesh].modifiers[0].offset = self.offset
+        bpy.data.objects[self.mesh].modifiers[0].use_even_offset = self.use_even_offset
+        bpy.data.objects[self.mesh].modifiers[0].use_relative_offset = self.use_relative_offset
+        bpy.data.objects[self.mesh].modifiers[0].use_boundary = self.use_boundary
+        bpy.data.objects[self.mesh].modifiers[0].use_replace = self.use_replace
+        bpy.data.objects[self.mesh].modifiers[0].material_offset = self.material_offset
+        return True
 
 class MeshNode(Node, PcgTransformNode):
     bl_idname = "MeshNode"
@@ -1281,16 +1453,16 @@ class DrawModeNode(Node, PcgTransformNode):
         bpy.data.objects[self.mesh].show_x_ray = self.prop_xray
         bpy.data.objects[self.mesh].show_transparent = self.prop_transparency
         bpy.data.objects[self.mesh].draw_type = self.prop_max_draw_type
-################                                                                  ##############################################
+##############################################################                                                            ##############################################
 
 
 inputs = [PlaneNode, CubeNode, SphereNode, CylinderNode, ConeNode] #TorusNode
 transform = [LocationNode, RotationNode, ScaleNode, ResizeNode] #ComponentTransform
-modifiers = [ArrayNode, BevelModNode, BooleanNode, SolidifyModNode]
+modifiers = [ArrayNode, BevelModNode, BooleanNode, ScrewModNode, SolidifyModNode, SubdivideModNode, WireframeModNode]
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode, PivotNode]
 selection = [SelectComponentsManuallyNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectSimilarNode, SelectSimilarRegionNode, SelectUngroupedNode, SelectEdgesSharpNode, SelectFacesLinkedFlatNode]
 deletion = [DeleteNode, DissolveFacesNode]
-operators = [BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, DecimateNode, ExtrudeFacesNode, ExtrudeRegionNode, InsetNode, MergeNode, SolidifyNode, SpinNode, SubdivideNode] #Overrides
+operators = [BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, DecimateNode, ExtrudeFacesNode, ExtrudeRegionNode, InsetNode, MergeNode, ScrewNode, SolidifyNode, SpinNode, SubdivideNode] #Overrides
 outputs = [MeshNode, DrawModeNode]
 
 node_categories = [PcgNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
