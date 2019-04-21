@@ -1032,8 +1032,8 @@ class SubdivideNode(Node, PcgOperatorNode):
     def functionality(self):
         bpy.ops.mesh.subdivide(number_cuts=self.prop_number_cuts, smoothness=self.prop_smoothness, quadtri=self.prop_quadtri, quadcorner=self.prop_quadcorner, fractal=self.prop_fractal, fractal_along_normal=self.prop_fractal_along_normal, seed=self.prop_seed)
 
-class ArrayNode(Node, PcgModifierNode):
-    bl_idname = "ArrayNode"
+class ArrayModNode(Node, PcgModifierNode):
+    bl_idname = "ArrayModNode"
     bl_label = "Array"
 
     fit_type = EnumProperty(name="Fit Type", items=[("FIXED_COUNT", "Fixed Count", ""), ("FIT_LENGTH", "Fit Length", ""), ("FIT_CURVE", "Fit Curve", "")], default="FIXED_COUNT", update=PcgNode.update_value)
@@ -1151,8 +1151,8 @@ class BevelModNode(Node, PcgModifierNode):
         bpy.data.objects[self.mesh].modifiers[0].angle_limit = self.angle_limit
         bpy.data.objects[self.mesh].modifiers[0].offset_type = self.offset_type
         return True
-class BooleanNode(Node, PcgModifierNode):
-    bl_idname = "BooleanNode"
+class BooleanModNode(Node, PcgModifierNode):
+    bl_idname = "BooleanModNode"
     bl_label = "Boolean"
     
     prop_op = EnumProperty(name="Operation", items=[("DIFFERENCE", "Difference", ""), ("UNION", "Union", ""), ("INTERSECT", "Intersect", "")], default="INTERSECT", update=PcgNode.update_value)
@@ -1175,6 +1175,191 @@ class BooleanNode(Node, PcgModifierNode):
         bpy.data.objects[self.mesh].modifiers[0].object = self.prop_obj
         bpy.data.objects[self.mesh].modifiers[0].double_threshold = self.prop_overlap
         self.prop_obj.draw_type = self.prop_draw_mode
+        return True
+class CastModNode(Node, PcgModifierNode):
+    bl_idname = "CastModNode"
+    bl_label = "Cast"
+
+    cast_type = EnumProperty(items=[("SPHERE", "Sphere", ""), ("CYLINDER", "Cylinder", ""), ("CUBOID", "Cuboid", "")], update=PcgNode.update_value)
+    use_x = BoolProperty(name="X", default=True, update=PcgNode.update_value)
+    use_y = BoolProperty(name="Y", default=True, update=PcgNode.update_value)
+    use_z = BoolProperty(name="Z", default=True, update=PcgNode.update_value)
+    factor = FloatProperty(name="Factor", default=0.5, update=PcgNode.update_value)
+    radius = FloatProperty(name="Radius", default=0.0, min=0.0, update=PcgNode.update_value)
+    size = FloatProperty(name="Size", default=0.0, min=0.0, update=PcgNode.update_value)
+    use_radius_as_size = BoolProperty(name="From Radius", default=True, update=PcgNode.update_value)
+    vertex_group = StringProperty(name="Vertex Group", update=PcgNode.update_value)
+    object = PointerProperty(type=bpy.types.Object, update=PcgNode.update_value)
+    use_transform = BoolProperty(name="Use transform", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        split = layout.split(percentage=0.25)
+        split.label(text="Cast Type:")
+        split.prop(self, "cast_type", text="")
+        split = layout.split(percentage=0.25)
+        col = split.column()
+        col.prop(self, "use_x")
+        col.prop(self, "use_y")
+        col.prop(self, "use_z")
+        col = split.column()
+        col.prop(self, "factor")
+        col.prop(self, "radius")
+        col.prop(self, "size")
+        col.prop(self, "use_radius_as_size")
+        split = layout.split()
+        col = split.column()
+        col.label(text="Vertex Group:")
+        if (not self.mesh == ""):
+            col.prop_search(self, "vertex_group", bpy.data.objects[self.mesh], "vertex_groups", text="")
+        col = split.column()
+        col.label(text="Control Object:")
+        col.prop(self, "object", text="")
+        if self.object:
+            col.prop(self, "use_transform")
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="CAST")
+        bpy.data.objects[self.mesh].modifiers[0].cast_type = self.cast_type
+        bpy.data.objects[self.mesh].modifiers[0].use_x = self.use_x
+        bpy.data.objects[self.mesh].modifiers[0].use_y = self.use_y
+        bpy.data.objects[self.mesh].modifiers[0].use_z = self.use_z
+        bpy.data.objects[self.mesh].modifiers[0].factor = self.factor
+        bpy.data.objects[self.mesh].modifiers[0].radius = self.radius
+        bpy.data.objects[self.mesh].modifiers[0].size = self.size
+        bpy.data.objects[self.mesh].modifiers[0].use_radius_as_size = self.use_radius_as_size
+        bpy.data.objects[self.mesh].modifiers[0].vertex_group = self.vertex_group
+        bpy.data.objects[self.mesh].modifiers[0].object = self.object
+        bpy.data.objects[self.mesh].modifiers[0].use_transform = self.use_transform
+        return True
+class CurveModNode(Node, PcgModifierNode):
+    bl_idname = "CurveModNode"
+    bl_label = "Curve"
+    
+    vertex_group = StringProperty(name="Vertex Group", update=PcgNode.update_value)
+    object = PointerProperty(type=bpy.types.Object, update=PcgNode.update_value)
+    deform_axis = EnumProperty(items=[("POS_X", "X", ""), ("POS_Y", "Y", ""), ("POS_Z", "Z", ""), ("NEG_X", "-X", ""), ("NEG_Y", "-Y", ""), ("NEG_Z", "-Z", "")], default="POS_X", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        split = layout.split()
+        col = split.column()
+        col.label(text="Object:")
+        col.prop(self, "object", text="")
+        col = split.column()
+        col.label(text="Vertex Group:")
+        if (not self.mesh == ""):
+            col.prop_search(self, "vertex_group", bpy.data.objects[self.mesh], "vertex_groups", text="")
+        layout.label(text="Deformation Axis:")
+        layout.row().prop(self, "deform_axis", expand=True)
+    
+    def functionality(self):
+        if (self.object == None):
+            return False
+        bpy.ops.object.modifier_add(type="CURVE")
+        bpy.data.objects[self.mesh].modifiers[0].vertex_group = self.vertex_group
+        bpy.data.objects[self.mesh].modifiers[0].object = self.object
+        bpy.data.objects[self.mesh].modifiers[0].deform_axis = self.deform_axis
+        return True
+class DecimateModNode(Node, PcgModifierNode):
+    bl_idname = "DecimateModNode"
+    bl_label = "Decimate"
+
+    decimate_type = EnumProperty(items=[("COLLAPSE", "Collapse", ""), ("UNSUBDIV", "Un-Subdivide", ""), ("DISSOLVE", "Planar", "")], default="COLLAPSE", update=PcgNode.update_value)
+    vertex_group = StringProperty(update=PcgNode.update_value)
+    ratio = FloatProperty(name="Ratio", default=1.0, min=0.0, max=1.0, update=PcgNode.update_value)
+    invert_vertex_group = BoolProperty(update=PcgNode.update_value)
+    vertex_group_factor = FloatProperty(name="Factor", default=1.0, min=0, max=1000, soft_max=10, update=PcgNode.update_value)
+    use_collapse_triangulate = BoolProperty(name="Triangulate", update=PcgNode.update_value)
+    use_symmetry = BoolProperty(name="Symmetry", update=PcgNode.update_value)
+    symmetry_axis = EnumProperty(items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="X", update=PcgNode.update_value)
+    iterations = IntProperty(name="Iterations", default=0, min=0, max=32767, soft_max=100, update=PcgNode.update_value)
+    angle_limit = FloatProperty(name="Angle Limit", default=0.087266, min=0, max=3.14159, subtype="ANGLE", unit="ROTATION", update=PcgNode.update_value)
+    use_dissolve_boundaries = BoolProperty(name="All Boundaries", update=PcgNode.update_value)
+    delimit = EnumProperty(items=[("NORMAL", "Normal", "", 2), ("MATERIAL", "Material", "", 4), ("SEAM", "Seam", "", 8), ("SHARP", "Sharp", "", 16), ("UV", "UVs", "", 32)], default={"NORMAL"}, options={'ENUM_FLAG'}, update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        decimate_type = self.decimate_type
+        row = layout.row()
+        row.prop(self, "decimate_type", expand=True)
+        if decimate_type == 'COLLAPSE':
+            has_vgroup = bool(self.vertex_group)
+            layout.prop(self, "ratio")
+            split = layout.split()
+            col = split.column()
+            row = col.row(align=True)
+            if (not self.mesh == ""):
+                row.prop_search(self, "vertex_group", bpy.data.objects[self.mesh], "vertex_groups", text="")
+            row.prop(self, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
+            layout_info = col
+            col = split.column()
+            row = col.row()
+            row.active = has_vgroup
+            row.prop(self, "vertex_group_factor")
+            col.prop(self, "use_collapse_triangulate")
+            row = col.split(percentage=0.75)
+            row.prop(self, "use_symmetry")
+            row.prop(self, "symmetry_axis", text="")
+        elif decimate_type == 'UNSUBDIV':
+            layout.prop(self, "iterations")
+            layout_info = layout
+        else:  # decimate_type == 'DISSOLVE':
+            layout.prop(self, "angle_limit")
+            layout.prop(self, "use_dissolve_boundaries")
+            layout.label("Delimit:")
+            row = layout.row()
+            row.prop(self, "delimit", expand=True)
+            layout_info = layout
+        if (not self.mesh == ""):
+            layout.label(text="Faces: " + str(len(bpy.data.objects[self.mesh].data.polygons)))
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="DECIMATE")
+        bpy.data.objects[self.mesh].modifiers[0].decimate_type = self.decimate_type
+        bpy.data.objects[self.mesh].modifiers[0].vertex_group = self.vertex_group
+        bpy.data.objects[self.mesh].modifiers[0].ratio = self.ratio
+        bpy.data.objects[self.mesh].modifiers[0].invert_vertex_group = self.invert_vertex_group
+        bpy.data.objects[self.mesh].modifiers[0].vertex_group_factor = self.vertex_group_factor
+        bpy.data.objects[self.mesh].modifiers[0].use_collapse_triangulate = self.use_collapse_triangulate
+        bpy.data.objects[self.mesh].modifiers[0].use_symmetry = self.use_symmetry
+        bpy.data.objects[self.mesh].modifiers[0].symmetry_axis = self.symmetry_axis
+        bpy.data.objects[self.mesh].modifiers[0].iterations = self.iterations
+        bpy.data.objects[self.mesh].modifiers[0].angle_limit = self.angle_limit
+        bpy.data.objects[self.mesh].modifiers[0].use_dissolve_boundaries = self.use_dissolve_boundaries
+        bpy.data.objects[self.mesh].modifiers[0].delimit = self.delimit
+        return True
+class RemeshModNode(Node, PcgModifierNode):
+    bl_idname = "RemeshModNode"
+    bl_label = "Remesh"
+    
+    mode = EnumProperty(name="Mode", items=[("BLOCKS", "Blocks", ""), ("SMOOTH", "Smooth", ""), ("SHARP", "Sharp", "")], default="SHARP", update=PcgNode.update_value)
+    octree_depth = IntProperty(name="Octree Depth", default=4, min=1, max=12, update=PcgNode.update_value)
+    scale = FloatProperty(name="Scale", default=0.9, min=0.0, max=0.99, update=PcgNode.update_value)
+    sharpness = FloatProperty(name="Sharpness", default=1.0, update=PcgNode.update_value)
+    use_smooth_shade = BoolProperty(name="Smooth Shading", update=PcgNode.update_value)
+    use_remove_disconnected = BoolProperty(name="Remove Disconnected Pieces", default=True, update=PcgNode.update_value)
+    threshold = FloatProperty(name="Threshold", default=1.0, min=0.0, max=1.0, update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "mode")
+        row = layout.row()
+        row.prop(self, "octree_depth")
+        row.prop(self, "scale")
+        if self.mode == 'SHARP':
+            layout.prop(self, "sharpness")
+        layout.prop(self, "use_smooth_shade")
+        layout.prop(self, "use_remove_disconnected")
+        row = layout.row()
+        row.active = self.use_remove_disconnected
+        row.prop(self, "threshold")
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="REMESH")
+        bpy.data.objects[self.mesh].modifiers[0].mode = self.mode
+        bpy.data.objects[self.mesh].modifiers[0].octree_depth = self.octree_depth
+        bpy.data.objects[self.mesh].modifiers[0].scale = self.scale
+        bpy.data.objects[self.mesh].modifiers[0].sharpness = self.sharpness
+        bpy.data.objects[self.mesh].modifiers[0].use_smooth_shade = self.use_smooth_shade
+        bpy.data.objects[self.mesh].modifiers[0].use_remove_disconnected = self.use_remove_disconnected
+        bpy.data.objects[self.mesh].modifiers[0].threshold = self.threshold
         return True
 class ScrewModNode(Node, PcgModifierNode):
     bl_idname = "ScrewModNode"
@@ -1239,6 +1424,49 @@ class ScrewModNode(Node, PcgModifierNode):
         bpy.data.objects[self.mesh].modifiers[0].iterations = self.iterations
         bpy.data.objects[self.mesh].modifiers[0].use_stretch_u = self.use_stretch_u
         bpy.data.objects[self.mesh].modifiers[0].use_stretch_v = self.use_stretch_v
+        return True
+class SkinModNode(Node, PcgModifierNode):
+    bl_idname = "SkinModNode"
+    bl_label = "Skin"
+
+    branch_smoothing = FloatProperty(name="Branch Smoothing", default=0.0, min=0.0, max=1.0, update=PcgNode.update_value)
+    use_smooth_shade = BoolProperty(name="Smooth Shading", update=PcgNode.update_value)
+    use_x_symmetry = BoolProperty(name="X", default=True, update=PcgNode.update_value)
+    use_y_symmetry = BoolProperty(name="Y", update=PcgNode.update_value)
+    use_z_symmetry = BoolProperty(name="Z", update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        row = layout.row()
+        row.operator("object.skin_armature_create", text="Create Armature")
+        row.operator("mesh.customdata_skin_add")
+        layout.separator()
+        row = layout.row(align=True)
+        row.prop(self, "branch_smoothing")
+        row.prop(self, "use_smooth_shade")
+        split = layout.split()
+        col = split.column()
+        col.label(text="Selected Vertices:")
+        sub = col.column(align=True)
+        # None of the operators below will work as the mesh will be in object mode
+        # Even if it is in the edit mode, the modifier will have already been applied
+        sub.operator("object.skin_loose_mark_clear", text="Mark Loose").action = 'MARK'
+        sub.operator("object.skin_loose_mark_clear", text="Clear Loose").action = 'CLEAR'
+        sub = col.column()
+        sub.operator("object.skin_root_mark", text="Mark Root")
+        sub.operator("object.skin_radii_equalize", text="Equalize Radii")
+        col = split.column()
+        col.label(text="Symmetry Axes:")
+        col.prop(self, "use_x_symmetry")
+        col.prop(self, "use_y_symmetry")
+        col.prop(self, "use_z_symmetry")
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="SKIN")
+        bpy.data.objects[self.mesh].modifiers[0].branch_smoothing = self.branch_smoothing
+        bpy.data.objects[self.mesh].modifiers[0].use_smooth_shade = self.use_smooth_shade
+        bpy.data.objects[self.mesh].modifiers[0].use_x_symmetry = self.use_x_symmetry
+        bpy.data.objects[self.mesh].modifiers[0].use_y_symmetry = self.use_y_symmetry
+        bpy.data.objects[self.mesh].modifiers[0].use_z_symmetry = self.use_z_symmetry
         return True
 class SolidifyModNode(Node, PcgModifierNode):
     bl_idname = "SolidifyModNode"
@@ -1458,7 +1686,7 @@ class DrawModeNode(Node, PcgTransformNode):
 
 inputs = [PlaneNode, CubeNode, SphereNode, CylinderNode, ConeNode] #TorusNode
 transform = [LocationNode, RotationNode, ScaleNode, ResizeNode] #ComponentTransform
-modifiers = [ArrayNode, BevelModNode, BooleanNode, ScrewModNode, SolidifyModNode, SubdivideModNode, WireframeModNode]
+modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CurveModNode, DecimateModNode, RemeshModNode, ScrewModNode, SkinModNode, SolidifyModNode, SubdivideModNode, WireframeModNode]
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode, PivotNode]
 selection = [SelectComponentsManuallyNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectSimilarNode, SelectSimilarRegionNode, SelectUngroupedNode, SelectEdgesSharpNode, SelectFacesLinkedFlatNode]
 deletion = [DeleteNode, DissolveFacesNode]
