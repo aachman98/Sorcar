@@ -1425,6 +1425,59 @@ class ScrewModNode(Node, PcgModifierNode):
         bpy.data.objects[self.mesh].modifiers[0].use_stretch_u = self.use_stretch_u
         bpy.data.objects[self.mesh].modifiers[0].use_stretch_v = self.use_stretch_v
         return True
+class SimpleDeformModNode(Node, PcgModifierNode):
+    bl_idname = "SimpleDeformModNode"
+    bl_label = "Simple Deform"
+
+    vertex_group = StringProperty(name="Vertex Group", update=PcgNode.update_value)
+    deform_method = EnumProperty(items=[("TWIST", "Twist", ""), ("BEND", "Bend", ""), ("TAPER", "Taper", ""), ("STRETCH", "Stretch", "")], default="TWIST", update=PcgNode.update_value)
+    invert_vertex_group = BoolProperty(update=PcgNode.update_value)
+    origin = PointerProperty(type=bpy.types.Object, update=PcgNode.update_value)
+    lock_x = BoolProperty(name="Lock X Axis", update=PcgNode.update_value)
+    lock_y = BoolProperty(name="Lock Y Axis", update=PcgNode.update_value)
+    factor = FloatProperty(name="Factor", default=0.785398, update=PcgNode.update_value)
+    angle = FloatProperty(name="Angle", default=0.785398, subtype="ANGLE", unit="ROTATION", update=PcgNode.update_value)
+    limits = FloatVectorProperty(size=2, default=(0.0, 1.0), min=0.0, max=1.0, update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        layout.row().prop(self, "deform_method", expand=True)
+        split = layout.split()
+        col = split.column()
+        col.label(text="Vertex Group:")
+        row = col.row(align=True)
+        if (not self.mesh == ""):
+            row.prop_search(self, "vertex_group", bpy.data.objects[self.mesh], "vertex_groups", text="")
+        row.prop(self, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
+        split = layout.split()
+        col = split.column()
+        col.label(text="Axis, Origin:")
+        col.prop(self, "origin", text="")
+        if self.deform_method in {'TAPER', 'STRETCH', 'TWIST'}:
+            col.label(text="Lock:")
+            col.prop(self, "lock_x")
+            col.prop(self, "lock_y")
+        col = split.column()
+        col.label(text="Deform:")
+        if self.deform_method in {'TAPER', 'STRETCH'}:
+            col.prop(self, "factor")
+        else:
+            col.prop(self, "angle")
+        col.prop(self, "limits", slider=True)
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="SIMPLE_DEFORM")
+        bpy.data.objects[self.mesh].modifiers[0].deform_method = self.deform_method
+        bpy.data.objects[self.mesh].modifiers[0].vertex_group = self.vertex_group
+        bpy.data.objects[self.mesh].modifiers[0].invert_vertex_group = self.invert_vertex_group
+        bpy.data.objects[self.mesh].modifiers[0].origin = self.origin
+        bpy.data.objects[self.mesh].modifiers[0].lock_x = self.lock_x
+        bpy.data.objects[self.mesh].modifiers[0].lock_y = self.lock_y
+        if self.deform_method in {'TAPER', 'STRETCH'}:
+            bpy.data.objects[self.mesh].modifiers[0].factor = self.factor
+        else:
+            bpy.data.objects[self.mesh].modifiers[0].angle = self.angle
+        bpy.data.objects[self.mesh].modifiers[0].limits = self.limits
+        return True
 class SkinModNode(Node, PcgModifierNode):
     bl_idname = "SkinModNode"
     bl_label = "Skin"
@@ -1467,6 +1520,40 @@ class SkinModNode(Node, PcgModifierNode):
         bpy.data.objects[self.mesh].modifiers[0].use_x_symmetry = self.use_x_symmetry
         bpy.data.objects[self.mesh].modifiers[0].use_y_symmetry = self.use_y_symmetry
         bpy.data.objects[self.mesh].modifiers[0].use_z_symmetry = self.use_z_symmetry
+        return True
+class SmoothModNode(Node, PcgModifierNode):
+    bl_idname = "SmoothModNode"
+    bl_label = "Smooth"
+
+    use_x = BoolProperty(name="X", default=True, update=PcgNode.update_value)
+    use_y = BoolProperty(name="Y", default=True, update=PcgNode.update_value)
+    use_z = BoolProperty(name="Z", default=True, update=PcgNode.update_value)
+    factor = FloatProperty(name="Factor", default=0.5, update=PcgNode.update_value)
+    iterations = IntProperty(name="Repeat", default=1, min=0, max=32767, soft_max=30, update=PcgNode.update_value)
+    vertex_group = StringProperty(name="Vertex Group", update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        split = layout.split(percentage=0.25)
+        col = split.column()
+        col.label(text="Axis:")
+        col.prop(self, "use_x")
+        col.prop(self, "use_y")
+        col.prop(self, "use_z")
+        col = split.column()
+        col.prop(self, "factor")
+        col.prop(self, "iterations")
+        col.label(text="Vertex Group:")
+        if (not self.mesh == ""):
+            col.prop_search(self, "vertex_group", bpy.data.objects[self.mesh], "vertex_groups", text="")
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="SMOOTH")
+        bpy.data.objects[self.mesh].modifiers[0].use_x = self.use_x
+        bpy.data.objects[self.mesh].modifiers[0].use_y = self.use_y
+        bpy.data.objects[self.mesh].modifiers[0].use_z = self.use_z
+        bpy.data.objects[self.mesh].modifiers[0].factor = self.factor
+        bpy.data.objects[self.mesh].modifiers[0].iterations = self.iterations
+        bpy.data.objects[self.mesh].modifiers[0].vertex_group = self.vertex_group
         return True
 class SolidifyModNode(Node, PcgModifierNode):
     bl_idname = "SolidifyModNode"
@@ -1686,7 +1773,7 @@ class DrawModeNode(Node, PcgTransformNode):
 
 inputs = [PlaneNode, CubeNode, SphereNode, CylinderNode, ConeNode] #TorusNode
 transform = [LocationNode, RotationNode, ScaleNode, ResizeNode] #ComponentTransform
-modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CurveModNode, DecimateModNode, RemeshModNode, ScrewModNode, SkinModNode, SolidifyModNode, SubdivideModNode, WireframeModNode]
+modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CurveModNode, DecimateModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, WireframeModNode]
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode, PivotNode]
 selection = [SelectComponentsManuallyNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectSimilarNode, SelectSimilarRegionNode, SelectUngroupedNode, SelectEdgesSharpNode, SelectFacesLinkedFlatNode]
 deletion = [DeleteNode, DissolveFacesNode]
