@@ -54,8 +54,8 @@ class PcgInputNode(PcgNode):
         print("Debug: PcgInputNode: Main functionality of the node")
 class PcgTransformNode(PcgNode):
     def init(self, context):
-        self.inputs.new("MeshSocket", "Mesh")
-        self.outputs.new("MeshSocket", "Mesh")
+        self.inputs.new("UniversalSocket", "Mesh")
+        self.outputs.new("UniversalSocket", "Mesh")
         self.hide = True
         self.use_custom_color = True
         self.color = (0.0, 0.5, 0.0)
@@ -134,6 +134,25 @@ class PcgOperatorNode(PcgNode):
         return self.mesh
     def functionality(self):
         print("Debug: PcgOperationNode: Main functionality of the node")
+class PcgSettingNode(PcgNode):
+    def init(self, context):
+        self.inputs.new("UniversalSocket", "")
+        self.outputs.new("UniversalSocket", "")
+        self.hide = True
+        self.use_custom_color = True
+        self.color = (0.5, 0.5, 0.0)
+    def execute(self):
+        if (not self.inputs[0].is_linked):
+            print("Debug: " + self.name + ": Not linked")
+            return ""
+        self.mesh = self.inputs[0].links[0].from_node.execute()
+        if (self.mesh == ""):
+            print("Debug: " + self.name + ": Empty object recieved")
+            return ""
+        self.functionality()
+        return self.mesh
+    def functionality(self):
+        print("Debug: PcgSettingNode: Main functionality of the node")
 
 
 ########################### SOCKETS ##########################
@@ -158,6 +177,15 @@ class ComponentSocket(NodeSocket):
 
     def draw_color(self, context, node):
         return 0, 0, 0, 1
+class UniversalSocket(NodeSocket):
+    bl_idname = "UniversalSocket"
+    bl_label = "Universal"
+
+    def draw(self, context, layout, node, text):
+        layout.label("")
+
+    def draw_color(self, context, node):
+        return 1, 0, 0, 1
 ##############################################################
 
 
@@ -348,7 +376,7 @@ class TorusNode(Node, PcgInputNode):
 
 class LocationNode(Node, PcgTransformNode):
     bl_idname = "LocationNode"
-    bl_label = "Location"
+    bl_label = "Set Location"
     
     prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
     
@@ -359,7 +387,7 @@ class LocationNode(Node, PcgTransformNode):
         bpy.data.objects[self.mesh].location = self.prop_location
 class RotationNode(Node, PcgTransformNode):
     bl_idname = "RotationNode"
-    bl_label = "Rotation"
+    bl_label = "Set Rotation"
     
     prop_rotation = FloatVectorProperty(name="Rotation", subtype="EULER", unit="ROTATION", update=PcgNode.update_value)
     
@@ -370,7 +398,7 @@ class RotationNode(Node, PcgTransformNode):
         bpy.data.objects[self.mesh].rotation_euler = self.prop_rotation
 class ScaleNode(Node, PcgTransformNode):
     bl_idname = "ScaleNode"
-    bl_label = "Scale"
+    bl_label = "Set Scale"
     
     prop_scale = FloatVectorProperty(name="Scale", default=(1.0, 1.0, 1.0), update=PcgNode.update_value)
     
@@ -379,19 +407,18 @@ class ScaleNode(Node, PcgTransformNode):
     
     def functionality(self):
         bpy.data.objects[self.mesh].scale = self.prop_scale
-class ResizeNode(Node, PcgOperatorNode):
-    bl_idname = "ResizeNode"
-    bl_label = "Component Scale"
+class TranslateNode(Node, PcgTransformNode):
+    bl_idname = "TranslateNode"
+    bl_label = "Translate"
 
-    prop_value = FloatVectorProperty(name="Value", default=(1.0, 1.0, 1.0), update=PcgNode.update_value)
-    prop_axis = BoolVectorProperty(name="Constraint Axis", update=PcgNode.update_value)
-    prop_orientation = EnumProperty(name="Constraint Orientation", items=[("GLOBAL", "Global", "")], default="GLOBAL", update=PcgNode.update_value)
+    prop_value = FloatVectorProperty(name="Value", update=PcgNode.update_value)
+    prop_constraint_axis = BoolVectorProperty(name="Constraint Axis", update=PcgNode.update_value)
     prop_mirror = BoolProperty(name="Mirror", update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "prop_value")
-        layout.prop(self, "prop_axis")
-        layout.prop(self, "prop_orientation")
+        col = layout.column()
+        col.prop(self, "prop_value")
+        layout.prop(self, "prop_constraint_axis")
         layout.prop(self, "prop_mirror")
     
     def functionality(self):
@@ -401,8 +428,56 @@ class ResizeNode(Node, PcgOperatorNode):
         space = area.spaces[0]
         scene = bpy.data.scenes[0]
         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-        override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
-        bpy.ops.transform.resize(override, value=self.prop_value, constraint_axis=self.prop_axis, constraint_orientation=self.prop_orientation, mirror=self.prop_mirror, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1.0, snap=False, snap_target='CLOSEST', snap_point=(0.0, 0.0, 0.0), snap_align=False, snap_normal=(0.0, 0.0, 0.0), gpencil_strokes=False, texture_space=False, remove_on_cancel=False, release_confirm=False, use_accurate=False)
+        override = {'window':window, 'screen':screen, 'area':area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'gpencil_data':bpy.context.gpencil_data}
+        bpy.ops.transform.translate(override, value=self.prop_value, constraint_axis=self.prop_constraint_axis, constraint_orientation=space.transform_orientation, mirror=self.prop_mirror, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1.0, snap=False, snap_target='CLOSEST', snap_point=(0.0, 0.0, 0.0), snap_align=False, snap_normal=(0.0, 0.0, 0.0), gpencil_strokes=False, texture_space=False, remove_on_cancel=False, release_confirm=False, use_accurate=False)
+class RotateNode(Node, PcgTransformNode):
+    bl_idname = "RotateNode"
+    bl_label = "Rotate"
+
+    prop_value = FloatProperty(name="Value", subtype="ANGLE", unit="ROTATION", update=PcgNode.update_value)
+    prop_axis = FloatVectorProperty(name="Axis", default=(0.0, 0.0, 1.0), update=PcgNode.update_value)
+    prop_constraint_axis = BoolVectorProperty(name="Constraint Axis", update=PcgNode.update_value)
+    prop_mirror = BoolProperty(name="Mirror", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_value")
+        col = layout.column()
+        col.prop(self, "prop_axis")
+        layout.prop(self, "prop_constraint_axis")
+        layout.prop(self, "prop_mirror")
+    
+    def functionality(self):
+        window = bpy.data.window_managers['WinMan'].windows[0]
+        screen = window.screen
+        area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
+        space = area.spaces[0]
+        scene = bpy.data.scenes[0]
+        region = [i for i in area.regions if i.type == 'WINDOW'][0]
+        override = {'window':window, 'screen':screen, 'area':area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'gpencil_data':bpy.context.gpencil_data}
+        bpy.ops.transform.rotate(override, value=self.prop_value, axis=self.prop_axis, constraint_axis=self.prop_constraint_axis, constraint_orientation=space.transform_orientation, mirror=self.prop_mirror, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1.0, snap=False, snap_target='CLOSEST', snap_point=(0.0, 0.0, 0.0), snap_align=False, snap_normal=(0.0, 0.0, 0.0), gpencil_strokes=False, release_confirm=False, use_accurate=False)
+class ResizeNode(Node, PcgTransformNode):
+    bl_idname = "ResizeNode"
+    bl_label = "Resize"
+
+    prop_value = FloatVectorProperty(name="Value", default=(1.0, 1.0, 1.0), update=PcgNode.update_value)
+    prop_constraint_axis = BoolVectorProperty(name="Constraint Axis", update=PcgNode.update_value)
+    prop_mirror = BoolProperty(name="Mirror", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        col = layout.column()
+        col.prop(self, "prop_value")
+        layout.prop(self, "prop_constraint_axis")
+        layout.prop(self, "prop_mirror")
+    
+    def functionality(self):
+        window = bpy.data.window_managers['WinMan'].windows[0]
+        screen = window.screen
+        area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
+        space = area.spaces[0]
+        scene = bpy.data.scenes[0]
+        region = [i for i in area.regions if i.type == 'WINDOW'][0]
+        override = {'window':window, 'screen':screen, 'area':area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'gpencil_data':bpy.context.gpencil_data}
+        bpy.ops.transform.resize(override, value=self.prop_value, constraint_axis=self.prop_constraint_axis, constraint_orientation=space.transform_orientation, mirror=self.prop_mirror, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1.0, snap=False, snap_target='CLOSEST', snap_point=(0.0, 0.0, 0.0), snap_align=False, snap_normal=(0.0, 0.0, 0.0), gpencil_strokes=False, texture_space=False, remove_on_cancel=False, release_confirm=False, use_accurate=False)
 
 class ToComponentNode(Node, PcgNode):
     bl_idname = "ToComponentNode"
@@ -475,25 +550,6 @@ class ChangeModeNode(Node, PcgNode):
             return ""
         bpy.ops.mesh.select_mode(type=self.prop_selection_type)
         return self.mesh
-class PivotNode(Node, PcgTransformNode):
-    bl_idname = "PivotNode"
-    bl_label = "Change Pivot-Point"
-
-    prop_pivot = EnumProperty(name="Pivot Point", items=[("BOUNDING_BOX_CENTER", "Bound Box Center", ""), ("CURSOR", "Cursor", ""), ("INDIVIDUAL_ORIGINS", "Individual Origins", ""), ("MEDIAN_POINT", "Median Point", ""), ("ACTIVE_ELEMENT", "Active Element", "")], default="MEDIAN_POINT", update=PcgNode.update_value)
-
-    def init(self, context):
-        self.inputs.new("MeshSocket", "")
-        self.outputs.new("MeshSocket", "")
-    
-    def draw_buttons(self, context, layout):
-        layout.column().prop(self, "prop_pivot", expand=True)
-    
-    def functionality(self):
-        window = bpy.data.window_managers['WinMan'].windows[0]
-        screen = window.screen
-        area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
-        space = area.spaces[0]
-        space.pivot_point = self.prop_pivot
 
 class SelectComponentsManuallyNode(Node, PcgSelectionNode):
     bl_idname = "SelectComponentsManuallyNode"
@@ -1724,14 +1780,45 @@ class WireframeModNode(Node, PcgModifierNode):
         bpy.data.objects[self.mesh].modifiers[0].material_offset = self.material_offset
         return True
 
-class MeshNode(Node, PcgTransformNode):
+class PivotNode(Node, PcgSettingNode):
+    bl_idname = "PivotNode"
+    bl_label = "Pivot Center"
+
+    prop_pivot = EnumProperty(name="Pivot Point", items=[("BOUNDING_BOX_CENTER", "Bound Box Center", ""), ("CURSOR", "Cursor", ""), ("INDIVIDUAL_ORIGINS", "Individual Origins", ""), ("MEDIAN_POINT", "Median Point", ""), ("ACTIVE_ELEMENT", "Active Element", "")], default="MEDIAN_POINT", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.column().prop(self, "prop_pivot", expand=True)
+    
+    def functionality(self):
+        window = bpy.data.window_managers['WinMan'].windows[0]
+        screen = window.screen
+        area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
+        space = area.spaces[0]
+        space.pivot_point = self.prop_pivot
+class OrientationNode(Node, PcgSettingNode):
+    bl_idname = "OrientationNode"
+    bl_label = "Transform Orientation"
+
+    prop_orientation = EnumProperty(name="Pivot Point", items=[("GLOBAL", "Global", ""), ("LOCAL", "Local", ""), ("NORMAL", "Normal", ""), ("GIMBAL", "Gimbal", ""), ("VIEW", "View", "")], default="GLOBAL", update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        layout.column().prop(self, "prop_orientation", expand=True)
+    
+    def functionality(self):
+        window = bpy.data.window_managers['WinMan'].windows[0]
+        screen = window.screen
+        area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
+        space = area.spaces[0]
+        space.transform_orientation = self.prop_orientation
+
+class MeshNode(Node, PcgSettingNode):
     bl_idname = "MeshNode"
     bl_label = "Mesh Output"
     
     print_output = BoolProperty(name="Print Output (Debug)", default=False, update=PcgNode.update_value)
     
     def init(self, context):
-        self.inputs.new("MeshSocket", "Mesh")
+        self.inputs.new("UniversalSocket", "Mesh")
     
     def draw_buttons(self, context, layout):
         if (self == self.id_data.nodes.active):
@@ -1741,7 +1828,7 @@ class MeshNode(Node, PcgTransformNode):
     def functionality(self):
         if (self.print_output):
             print(self.name + ": " + self.mesh)
-class DrawModeNode(Node, PcgTransformNode):
+class DrawModeNode(Node, PcgSettingNode):
     bl_idname = "DrawModeNode"
     bl_label = "Mesh Draw Mode (Viewport)"
 
@@ -1772,12 +1859,13 @@ class DrawModeNode(Node, PcgTransformNode):
 
 
 inputs = [PlaneNode, CubeNode, SphereNode, CylinderNode, ConeNode] #TorusNode
-transform = [LocationNode, RotationNode, ScaleNode, ResizeNode] #ComponentTransform
+transform = [LocationNode, RotationNode, ScaleNode, TranslateNode, RotateNode, ResizeNode]
 modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CurveModNode, DecimateModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, WireframeModNode]
-conversion = [ToComponentNode, ToMeshNode, ChangeModeNode, PivotNode]
+conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
 selection = [SelectComponentsManuallyNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectSimilarNode, SelectSimilarRegionNode, SelectUngroupedNode, SelectEdgesSharpNode, SelectFacesLinkedFlatNode]
 deletion = [DeleteNode, DissolveFacesNode]
 operators = [BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, DecimateNode, ExtrudeFacesNode, ExtrudeRegionNode, InsetNode, MergeNode, ScrewNode, SolidifyNode, SpinNode, SubdivideNode] #Overrides
+settings = [PivotNode, OrientationNode]
 outputs = [MeshNode, DrawModeNode]
 
 node_categories = [PcgNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
@@ -1787,6 +1875,7 @@ node_categories = [PcgNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idna
                    PcgNodeCategory("selection", "Selection", items=[NodeItem(i.bl_idname) for i in selection]),
                    PcgNodeCategory("deletion", "Deletion", items=[NodeItem(i.bl_idname) for i in deletion]),
                    PcgNodeCategory("operators", "Operators", items=[NodeItem(i.bl_idname) for i in operators]),
+                   PcgNodeCategory("settings", "Settings", items=[NodeItem(i.bl_idname) for i in settings]),
                    PcgNodeCategory("outputs", "Outputs", items=[NodeItem(i.bl_idname) for i in outputs])]
 
 def register():
