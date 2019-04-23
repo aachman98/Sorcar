@@ -529,7 +529,7 @@ class ToMeshNode(Node, PcgSelectionNode):
         return self.mesh
 class ChangeModeNode(Node, PcgNode):
     bl_idname = "ChangeModeNode"
-    bl_label = "Change Mode Mode"
+    bl_label = "Change Component Mode"
     
     prop_selection_type = EnumProperty(name="Component", items=[("FACE", "Faces", ""), ("VERT", "Vertices", ""), ("EDGE", "Edges", "")], default="FACE", update=PcgNode.update_value)
 
@@ -602,6 +602,23 @@ class SelectComponentsManuallyNode(Node, PcgSelectionNode):
         if len(list_edge) == len(bpy.data.objects[self.mesh].data.edges):
             for i in range(0, len(bpy.data.objects[self.mesh].data.edges)):
                 bpy.data.objects[self.mesh].data.edges[i].select = list_edge[i]
+        bpy.ops.object.mode_set(mode="EDIT")
+class SelectFaceByIndexNode(Node, PcgSelectionNode):
+    bl_idname = "SelectFaceByIndexNode"
+    bl_label = "Select Face By Index"
+
+    prop_index = IntProperty(name="Index", min=0, update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_index")
+    
+    def functionality(self):
+        bpy.ops.mesh.select_all(action="DESELECT")
+        bpy.ops.object.mode_set(mode="OBJECT")
+        total_faces = len(bpy.data.objects[self.mesh].data.polygons)
+        if (self.prop_index > total_faces - 1):
+            self.prop_index = total_faces - 1
+        bpy.data.objects[self.mesh].data.polygons[self.prop_index].select = True
         bpy.ops.object.mode_set(mode="EDIT")
 class SelectAllNode(Node, PcgSelectionNode):
     bl_idname = "SelectAllNode"
@@ -836,6 +853,17 @@ class DeleteNode(Node, PcgOperatorNode):
     
     def functionality(self):
         bpy.ops.mesh.delete(type=self.prop_type)
+class DeleteEdgeLoopNode(Node, PcgOperatorNode):
+    bl_idname = "DeleteEdgeLoopNode"
+    bl_label = "Delete Edge Loop"
+
+    prop_split = BoolProperty(name="Face Split", default=True, update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_split")
+    
+    def functionality(self):
+        bpy.ops.mesh.delete_edgeloop(use_face_split=self.prop_split)
 class DissolveFacesNode(Node, PcgOperatorNode):
     bl_idname = "DissolveFacesNode"
     bl_label = "Dissolve Faces"
@@ -843,10 +871,16 @@ class DissolveFacesNode(Node, PcgOperatorNode):
     prop_verts = BoolProperty(name="Use Vertices", update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
-        layout(self, "prop_verts")
+        layout.prop(self, "prop_verts")
     
     def functionality(self):
         bpy.ops.mesh.dissolve_faces(use_verts=self.prop_verts)
+class EdgeCollapseNode(Node, PcgOperatorNode):
+    bl_idname = "EdgeCollapseNode"
+    bl_label = "Edge Collapse"
+    
+    def functionality(self):
+        bpy.ops.mesh.edge_collapse()
 
 class BeautifyFillNode(Node, PcgOperatorNode):
     bl_idname = "BeautifyFillNode"
@@ -864,7 +898,7 @@ class BevelNode(Node, PcgOperatorNode):
     bl_label = "Bevel"
 
     prop_offset_type = EnumProperty(name="Offset Type", items=[("OFFSET", "Offset", ""), ("WIDTH", "Width", ""), ("PERCENT", "Percent", ""), ("DEPTH", "Depth", "")], default="OFFSET", update=PcgNode.update_value)
-    prop_offset = FloatProperty(name="Offset", default=0.0, min=-1000000, max=1000000, update=PcgNode.update_value)
+    prop_offset = FloatProperty(name="Offset", default=0.0, min=-1000000.0, max=1000000.0, update=PcgNode.update_value)
     prop_segments = IntProperty(name="Segments", default=1, min=1, max=1000, update=PcgNode.update_value)
     prop_profile = FloatProperty(name="Profile", default=0.5, min=0.15, max=1.0, update=PcgNode.update_value)
     prop_vertex_only = BoolProperty(name="Vertex Only", update=PcgNode.update_value)
@@ -883,7 +917,7 @@ class BevelNode(Node, PcgOperatorNode):
         layout.prop(self, "prop_material")
     
     def functionality(self):
-        bpy.ops.mesh.bevel(offset_type=self.prop_offset_type, offset=self.prop_offset, segments=self.prop_segments, profile=self.prop_segments, vertex_only=self.prop_vertex_only, clamp_overlap=self.prop_clamp_overlap, loop_slide=self.prop_loop_slide, material=self.prop_material)
+        bpy.ops.mesh.bevel(offset_type=self.prop_offset_type, offset=self.prop_offset, segments=self.prop_segments, profile=self.prop_profile, vertex_only=self.prop_vertex_only, clamp_overlap=self.prop_clamp_overlap, loop_slide=self.prop_loop_slide, material=self.prop_material)
 class BridgeEdgeLoopsNode(Node, PcgOperatorNode):
     bl_idname = "BridgeEdgeLoopsNode"
     bl_label = "Bridge Edge Loops"
@@ -1017,6 +1051,21 @@ class MergeNode(Node, PcgOperatorNode):
 
     def functionality(self):
         bpy.ops.mesh.merge(type=self.prop_type, uvs=self.prop_uv)
+class PokeNode(Node, PcgOperatorNode):
+    bl_idname = "PokeNode"
+    bl_label = "Poke"
+
+    prop_offset = FloatProperty(name="Poke Offset", default=0.0, min=-1000.0, max=1000.0, update=PcgNode.update_value)
+    prop_use_relative_offset = BoolProperty(name="Relative Offset", update=PcgNode.update_value)
+    prop_center_mode = EnumProperty(name="Poke Center", items=[("MEAN_WEIGHTED", "Mean Weighted", ""), ("MEAN", "Mean", ""), ("BOUNDS", "Bounds", "")], default="MEAN_WEIGHTED", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_offset")
+        layout.prop(self, "prop_use_relative_offset")
+        layout.prop(self, "prop_center_mode")
+    
+    def functionality(self):
+        bpy.ops.mesh.poke(offset=self.prop_offset, use_relative_offset=self.prop_use_relative_offset, center_mode=self.prop_center_mode)
 class ScrewNode(Node, PcgOperatorNode):
     bl_idname = "ScrewNode"
     bl_label = "Screw"
@@ -1064,6 +1113,12 @@ class SpinNode(Node, PcgOperatorNode):
 
     def functionality(self):
         bpy.ops.mesh.spin(steps=self.prop_steps, dupli=self.prop_dupli, angle=self.prop_angle, center=self.prop_center, axis=self.prop_axis)
+class SplitNode(Node, PcgOperatorNode):
+    bl_idname = "SplitNode"
+    bl_label = "Split"
+    
+    def functionality(self):
+        bpy.ops.mesh.split()
 class SubdivideNode(Node, PcgOperatorNode):
     bl_idname = "SubdivideNode"
     bl_label = "Subdivide"
@@ -1862,9 +1917,9 @@ inputs = [PlaneNode, CubeNode, SphereNode, CylinderNode, ConeNode] #TorusNode
 transform = [LocationNode, RotationNode, ScaleNode, TranslateNode, RotateNode, ResizeNode]
 modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CurveModNode, DecimateModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, WireframeModNode]
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
-selection = [SelectComponentsManuallyNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectSimilarNode, SelectSimilarRegionNode, SelectUngroupedNode, SelectEdgesSharpNode, SelectFacesLinkedFlatNode]
-deletion = [DeleteNode, DissolveFacesNode]
-operators = [BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, DecimateNode, ExtrudeFacesNode, ExtrudeRegionNode, InsetNode, MergeNode, ScrewNode, SolidifyNode, SpinNode, SubdivideNode] #Overrides
+selection = [SelectComponentsManuallyNode, SelectFaceByIndexNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectSimilarNode, SelectSimilarRegionNode, SelectUngroupedNode, SelectEdgesSharpNode, SelectFacesLinkedFlatNode]
+deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, EdgeCollapseNode]
+operators = [BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, DecimateNode, ExtrudeFacesNode, ExtrudeRegionNode, InsetNode, MergeNode, PokeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode]
 settings = [PivotNode, OrientationNode]
 outputs = [MeshNode, DrawModeNode]
 
