@@ -115,7 +115,7 @@ class PcgSelectionNode(PcgNode):
         return self.mesh
     def functionality(self):
         print("Debug: PcgSelectionNode: Main functionality of the node")
-class PcgOperatorNode(PcgNode):
+class PcgEditOperatorNode(PcgNode):
     def init(self, context):
         self.inputs.new("ComponentSocket", "Component")
         self.outputs.new("ComponentSocket", "Component")
@@ -134,13 +134,32 @@ class PcgOperatorNode(PcgNode):
         return self.mesh
     def functionality(self):
         print("Debug: PcgOperationNode: Main functionality of the node")
+class PcgObjectOperatorNode(PcgNode):
+    def init(self, context):
+        self.inputs.new("MeshSocket", "Mesh")
+        self.outputs.new("MeshSocket", "Mesh")
+        self.hide = True
+        self.use_custom_color = True
+        self.color = (0.5, 0.5, 0.0)
+    def execute(self):
+        if (not self.inputs[0].is_linked):
+            print("Debug: " + self.name + ": Not linked")
+            return ""
+        self.mesh = self.inputs[0].links[0].from_node.execute()
+        if (self.mesh == ""):
+            print("Debug: " + self.name + ": Empty object recieved")
+            return ""
+        self.functionality()
+        return self.mesh
+    def functionality(self):
+        print("Debug: PcgOperationNode: Main functionality of the node")
 class PcgSettingNode(PcgNode):
     def init(self, context):
         self.inputs.new("UniversalSocket", "")
         self.outputs.new("UniversalSocket", "")
         self.hide = True
         self.use_custom_color = True
-        self.color = (0.5, 0.5, 0.0)
+        self.color = (0.5, 0.5, 0.5)
     def execute(self):
         if (not self.inputs[0].is_linked):
             print("Debug: " + self.name + ": Not linked")
@@ -608,17 +627,63 @@ class SelectFaceByIndexNode(Node, PcgSelectionNode):
     bl_label = "Select Face By Index"
 
     prop_index = IntProperty(name="Index", min=0, update=PcgNode.update_value)
+    prop_extend = BoolProperty(name="Extend", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_index")
+        layout.prop(self, "prop_extend")
     
     def functionality(self):
-        bpy.ops.mesh.select_all(action="DESELECT")
+        if (not self.prop_extend):
+            bpy.ops.mesh.select_all(action="DESELECT")
         bpy.ops.object.mode_set(mode="OBJECT")
         total_faces = len(bpy.data.objects[self.mesh].data.polygons)
         if (self.prop_index > total_faces - 1):
             self.prop_index = total_faces - 1
         bpy.data.objects[self.mesh].data.polygons[self.prop_index].select = True
+        bpy.ops.object.mode_set(mode="EDIT")
+class SelectAlternativeFacesNode(Node, PcgSelectionNode):
+    bl_idname = "SelectAlternativeFacesNode"
+    bl_label = "Select Alternative Faces"
+
+    prop_nth = IntProperty(name="Every Nth", default=1, min=1, update=PcgNode.update_value)
+    prop_offset = IntProperty(name="Offset", default=0, min=0, update=PcgNode.update_value)
+    prop_extend = BoolProperty(name="Extend", update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_nth")
+        layout.prop(self, "prop_offset")
+        layout.prop(self, "prop_extend")
+    
+    def functionality(self):
+        if (not self.prop_extend):
+            bpy.ops.mesh.select_all(action="DESELECT")
+        bpy.ops.object.mode_set(mode="OBJECT")
+        i = self.prop_offset
+        while (i < len(bpy.data.objects[self.mesh].data.polygons)):
+            bpy.data.objects[self.mesh].data.polygons[i].select = True
+            i += self.prop_nth
+        bpy.ops.object.mode_set(mode="EDIT")
+class SelectFacesByNormalNode(Node, PcgSelectionNode):
+    bl_idname = "SelectFacesByNormalNode"
+    bl_label = "Select Faces By Normal"
+    
+    prop_min = FloatVectorProperty(name="Minimum", default=(-1.0, -1.0, -1.0), min=-1.0, max=1.0, update=PcgNode.update_value)
+    prop_max = FloatVectorProperty(name="Maximum", default=(1.0, 1.0, 1.0), min=-1.0, max=1.0, update=PcgNode.update_value)
+    prop_extend = BoolProperty(name="Extend", update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_min")
+        layout.prop(self, "prop_max")
+        layout.prop(self, "prop_extend")
+    
+    def functionality(self):
+        if (not self.prop_extend):
+            bpy.ops.mesh.select_all(action="DESELECT")
+        bpy.ops.object.mode_set(mode="OBJECT")
+        for face in bpy.data.objects[self.mesh].data.polygons:
+            if ((face.normal[0] >= self.prop_min[0] and face.normal[1] >= self.prop_min[1] and face.normal[2] >= self.prop_min[2]) and (face.normal[0] <= self.prop_max[0] and face.normal[1] <= self.prop_max[1] and face.normal[2] <= self.prop_max[2])):
+                face.select = True
         bpy.ops.object.mode_set(mode="EDIT")
 class SelectAllNode(Node, PcgSelectionNode):
     bl_idname = "SelectAllNode"
@@ -842,7 +907,7 @@ class SelectFacesLinkedFlatNode(Node, PcgSelectionNode):
     def functionality(self):
         bpy.ops.mesh.faces_select_linked_flat(sharpness=self.prop_sharpness)
 
-class DeleteNode(Node, PcgOperatorNode):
+class DeleteNode(Node, PcgEditOperatorNode):
     bl_idname = "DeleteNode"
     bl_label = "Delete"
 
@@ -853,7 +918,7 @@ class DeleteNode(Node, PcgOperatorNode):
     
     def functionality(self):
         bpy.ops.mesh.delete(type=self.prop_type)
-class DeleteEdgeLoopNode(Node, PcgOperatorNode):
+class DeleteEdgeLoopNode(Node, PcgEditOperatorNode):
     bl_idname = "DeleteEdgeLoopNode"
     bl_label = "Delete Edge Loop"
 
@@ -864,7 +929,7 @@ class DeleteEdgeLoopNode(Node, PcgOperatorNode):
     
     def functionality(self):
         bpy.ops.mesh.delete_edgeloop(use_face_split=self.prop_split)
-class DissolveFacesNode(Node, PcgOperatorNode):
+class DissolveFacesNode(Node, PcgEditOperatorNode):
     bl_idname = "DissolveFacesNode"
     bl_label = "Dissolve Faces"
 
@@ -875,14 +940,14 @@ class DissolveFacesNode(Node, PcgOperatorNode):
     
     def functionality(self):
         bpy.ops.mesh.dissolve_faces(use_verts=self.prop_verts)
-class EdgeCollapseNode(Node, PcgOperatorNode):
+class EdgeCollapseNode(Node, PcgEditOperatorNode):
     bl_idname = "EdgeCollapseNode"
     bl_label = "Edge Collapse"
     
     def functionality(self):
         bpy.ops.mesh.edge_collapse()
 
-class BeautifyFillNode(Node, PcgOperatorNode):
+class BeautifyFillNode(Node, PcgEditOperatorNode):
     bl_idname = "BeautifyFillNode"
     bl_label = "Beautify Fill"
 
@@ -893,7 +958,7 @@ class BeautifyFillNode(Node, PcgOperatorNode):
     
     def functionality(self):
         bpy.ops.mesh.beautify_fill(angle_limit=self.prop_angle_limit)
-class BevelNode(Node, PcgOperatorNode):
+class BevelNode(Node, PcgEditOperatorNode):
     bl_idname = "BevelNode"
     bl_label = "Bevel"
 
@@ -918,7 +983,7 @@ class BevelNode(Node, PcgOperatorNode):
     
     def functionality(self):
         bpy.ops.mesh.bevel(offset_type=self.prop_offset_type, offset=self.prop_offset, segments=self.prop_segments, profile=self.prop_profile, vertex_only=self.prop_vertex_only, clamp_overlap=self.prop_clamp_overlap, loop_slide=self.prop_loop_slide, material=self.prop_material)
-class BridgeEdgeLoopsNode(Node, PcgOperatorNode):
+class BridgeEdgeLoopsNode(Node, PcgEditOperatorNode):
     bl_idname = "BridgeEdgeLoopsNode"
     bl_label = "Bridge Edge Loops"
 
@@ -945,7 +1010,7 @@ class BridgeEdgeLoopsNode(Node, PcgOperatorNode):
     
     def functionality(self):
         bpy.ops.mesh.bridge_edge_loops(type=self.prop_type, use_merge=self.prop_use_merge, merge_factor=self.prop_merge_factor, twist_offset=self.prop_twist_offset, number_cuts=self.prop_number_cuts, interpolation=self.prop_interpolation, smoothness=self.prop_smoothness, profile_shape_factor=self.prop_profile_shape_factor, profile_shape=self.prop_profile_shape)
-class DecimateNode(Node, PcgOperatorNode):
+class DecimateNode(Node, PcgEditOperatorNode):
     bl_idname = "DecimateNode"
     bl_label = "Decimate"
 
@@ -966,7 +1031,7 @@ class DecimateNode(Node, PcgOperatorNode):
     
     def functionality(self):
         bpy.ops.mesh.decimate(ratio=self.prop_ratio, use_vertex_group=self.prop_use_vertex_group, vertex_group_factor=self.prop_vertex_group_factor, invert_vertex_group=self.prop_invert_vertex_group, use_symmetry=self.prop_use_symmetry, symmetry_axis=self.prop_symmetry_axis)
-class ExtrudeFacesNode(Node, PcgOperatorNode):
+class ExtrudeFacesNode(Node, PcgEditOperatorNode):
     bl_idname = "ExtrudeFacesNode"
     bl_label = "Extrude Faces"
 
@@ -986,7 +1051,7 @@ class ExtrudeFacesNode(Node, PcgOperatorNode):
         region = [i for i in area.regions if i.type == 'WINDOW'][0]
         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
         bpy.ops.mesh.extrude_faces_move(override ,MESH_OT_extrude_faces_indiv={"mirror":self.prop_mirror}, TRANSFORM_OT_shrink_fatten={"value":self.prop_amount, "use_even_offset":False, "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "release_confirm":True, "use_accurate":False})
-class ExtrudeRegionNode(Node, PcgOperatorNode):
+class ExtrudeRegionNode(Node, PcgEditOperatorNode):
     bl_idname = "ExtrudeRegionNode"
     bl_label = "Extrude Region"
 
@@ -1006,7 +1071,7 @@ class ExtrudeRegionNode(Node, PcgOperatorNode):
         region = [i for i in area.regions if i.type == 'WINDOW'][0]
         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
         bpy.ops.mesh.extrude_region_shrink_fatten(override ,MESH_OT_extrude_region={"mirror":self.prop_mirror}, TRANSFORM_OT_shrink_fatten={"value":self.prop_amount, "use_even_offset":False, "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "release_confirm":True, "use_accurate":False})
-class InsetNode(Node, PcgOperatorNode):
+class InsetNode(Node, PcgEditOperatorNode):
     bl_idname = "InsetNode"
     bl_label = "Inset"
     
@@ -1038,7 +1103,7 @@ class InsetNode(Node, PcgOperatorNode):
 
     def functionality(self):
         bpy.ops.mesh.inset(use_boundary=self.prop_boundary, use_even_offset=self.prop_even_offset, use_relative_offset=self.prop_relative_offset, use_edge_rail=self.prop_edge_rail, thickness=self.prop_thickness, depth=self.prop_depth, use_outset=self.prop_outset, use_select_inset=self.prop_select_inset, use_individual=self.prop_individual, use_interpolate=self.prop_interpolate)
-class MergeNode(Node, PcgOperatorNode):
+class MergeNode(Node, PcgEditOperatorNode):
     bl_idname = "MergeNode"
     bl_label = "Merge"
     
@@ -1051,7 +1116,7 @@ class MergeNode(Node, PcgOperatorNode):
 
     def functionality(self):
         bpy.ops.mesh.merge(type=self.prop_type, uvs=self.prop_uv)
-class PokeNode(Node, PcgOperatorNode):
+class PokeNode(Node, PcgEditOperatorNode):
     bl_idname = "PokeNode"
     bl_label = "Poke"
 
@@ -1066,7 +1131,7 @@ class PokeNode(Node, PcgOperatorNode):
     
     def functionality(self):
         bpy.ops.mesh.poke(offset=self.prop_offset, use_relative_offset=self.prop_use_relative_offset, center_mode=self.prop_center_mode)
-class ScrewNode(Node, PcgOperatorNode):
+class ScrewNode(Node, PcgEditOperatorNode):
     bl_idname = "ScrewNode"
     bl_label = "Screw"
 
@@ -1083,7 +1148,7 @@ class ScrewNode(Node, PcgOperatorNode):
 
     def functionality(self):
         bpy.ops.mesh.screw(steps=self.prop_steps, turns=self.prop_turns, center=self.prop_center, axis=self.prop_axis)
-class SolidifyNode(Node, PcgOperatorNode):
+class SolidifyNode(Node, PcgEditOperatorNode):
     bl_idname = "SolidifyNode"
     bl_label = "Solidify"
     
@@ -1094,7 +1159,7 @@ class SolidifyNode(Node, PcgOperatorNode):
 
     def functionality(self):
         bpy.ops.mesh.solidify(thickness=self.prop_thickness)
-class SpinNode(Node, PcgOperatorNode):
+class SpinNode(Node, PcgEditOperatorNode):
     bl_idname = "SpinNode"
     bl_label = "Spin"
     
@@ -1113,13 +1178,13 @@ class SpinNode(Node, PcgOperatorNode):
 
     def functionality(self):
         bpy.ops.mesh.spin(steps=self.prop_steps, dupli=self.prop_dupli, angle=self.prop_angle, center=self.prop_center, axis=self.prop_axis)
-class SplitNode(Node, PcgOperatorNode):
+class SplitNode(Node, PcgEditOperatorNode):
     bl_idname = "SplitNode"
     bl_label = "Split"
     
     def functionality(self):
         bpy.ops.mesh.split()
-class SubdivideNode(Node, PcgOperatorNode):
+class SubdivideNode(Node, PcgEditOperatorNode):
     bl_idname = "SubdivideNode"
     bl_label = "Subdivide"
 
@@ -1142,6 +1207,20 @@ class SubdivideNode(Node, PcgOperatorNode):
     
     def functionality(self):
         bpy.ops.mesh.subdivide(number_cuts=self.prop_number_cuts, smoothness=self.prop_smoothness, quadtri=self.prop_quadtri, quadcorner=self.prop_quadcorner, fractal=self.prop_fractal, fractal_along_normal=self.prop_fractal_along_normal, seed=self.prop_seed)
+
+class SetOriginNode(Node, PcgObjectOperatorNode):
+    bl_idname = "SetOriginNode"
+    bl_label = "Set Origin"
+
+    prop_type = EnumProperty(name="Type", items=[("GEOMETRY_ORIGIN", "Geometry to Origin", ""), ("ORIGIN_GEOMETRY", "Origin to Geometry", ""), ("ORIGIN_CURSOR", "Origin to 3D Cursor", ""), ("ORIGIN_CENTER_OF_MASS", "Origin to Center of Mass (Surface)", ""), ("ORIGIN_CENTER_OF_VOLUME", "Origin to Center of Mass (Volume)", "")], default="GEOMETRY_ORIGIN", update=PcgNode.update_value)
+    prop_center = EnumProperty(name="Center", items=[("MEDIAN", "Median", ""), ("BOUNDS", "Bounds", "")], default="MEDIAN", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_type")
+        layout.prop(self, "prop_center", expand=True)
+    
+    def functionality(self):
+        bpy.ops.object.origin_set(type=self.prop_type, center=self.prop_center)
 
 class ArrayModNode(Node, PcgModifierNode):
     bl_idname = "ArrayModNode"
@@ -1865,6 +1944,21 @@ class OrientationNode(Node, PcgSettingNode):
         area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
         space = area.spaces[0]
         space.transform_orientation = self.prop_orientation
+class CursorLocationNode(Node, PcgSettingNode):
+    bl_idname = "CursorLocationNode"
+    bl_label = "Cursor Location"
+
+    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        layout.column().prop(self, "prop_location", expand=True)
+    
+    def functionality(self):
+        window = bpy.data.window_managers['WinMan'].windows[0]
+        screen = window.screen
+        area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
+        space = area.spaces[0]
+        space.cursor_location = self.prop_location
 
 class MeshNode(Node, PcgSettingNode):
     bl_idname = "MeshNode"
@@ -1917,10 +2011,11 @@ inputs = [PlaneNode, CubeNode, SphereNode, CylinderNode, ConeNode] #TorusNode
 transform = [LocationNode, RotationNode, ScaleNode, TranslateNode, RotateNode, ResizeNode]
 modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CurveModNode, DecimateModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, WireframeModNode]
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
-selection = [SelectComponentsManuallyNode, SelectFaceByIndexNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectSimilarNode, SelectSimilarRegionNode, SelectUngroupedNode, SelectEdgesSharpNode, SelectFacesLinkedFlatNode]
+selection = [SelectComponentsManuallyNode, SelectFaceByIndexNode, SelectAlternativeFacesNode, SelectFacesByNormalNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectSimilarNode, SelectSimilarRegionNode, SelectUngroupedNode, SelectEdgesSharpNode, SelectFacesLinkedFlatNode]
 deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, EdgeCollapseNode]
-operators = [BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, DecimateNode, ExtrudeFacesNode, ExtrudeRegionNode, InsetNode, MergeNode, PokeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode]
-settings = [PivotNode, OrientationNode]
+edit_operators = [BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, DecimateNode, ExtrudeFacesNode, ExtrudeRegionNode, InsetNode, MergeNode, PokeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode]
+object_operators = [SetOriginNode]
+settings = [PivotNode, OrientationNode, CursorLocationNode]
 outputs = [MeshNode, DrawModeNode]
 
 node_categories = [PcgNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
@@ -1929,7 +2024,8 @@ node_categories = [PcgNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idna
                    PcgNodeCategory("conversion", "Conversion", items=[NodeItem(i.bl_idname) for i in conversion]),
                    PcgNodeCategory("selection", "Selection", items=[NodeItem(i.bl_idname) for i in selection]),
                    PcgNodeCategory("deletion", "Deletion", items=[NodeItem(i.bl_idname) for i in deletion]),
-                   PcgNodeCategory("operators", "Operators", items=[NodeItem(i.bl_idname) for i in operators]),
+                   PcgNodeCategory("edit_operators", "Component Operators", items=[NodeItem(i.bl_idname) for i in edit_operators]),
+                   PcgNodeCategory("object_operators", "Mesh Operators", items=[NodeItem(i.bl_idname) for i in object_operators]),
                    PcgNodeCategory("settings", "Settings", items=[NodeItem(i.bl_idname) for i in settings]),
                    PcgNodeCategory("outputs", "Outputs", items=[NodeItem(i.bl_idname) for i in outputs])]
 
