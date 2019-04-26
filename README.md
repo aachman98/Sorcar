@@ -4,7 +4,7 @@ Procedural modeling in Blender using Node Editor
 ![alt text](https://raw.githubusercontent.com/aachman98/ProcGenMod/master/img.PNG)
 (outdated image)
 
-Video: https://www.youtube.com/watch?v=wbYwQ6igXoI (outdated)
+*(NEW)* Video: https://www.youtube.com/watch?v=nKEeGVtGdlk (updated)
 
 BlenderArtist thread: https://blenderartists.org/t/procgenmod-procedural-modeling-in-blender-using-node-editor/1156769
 Progress tracker (Trello): https://trello.com/b/aKIFRoTh
