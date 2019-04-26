@@ -1296,9 +1296,17 @@ class SpinNode(Node, PcgEditOperatorNode):
 class SplitNode(Node, PcgEditOperatorNode):
     bl_idname = "SplitNode"
     bl_label = "Split"
+
+    prop_individual = BoolProperty(name="Individual", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_individual")
     
     def functionality(self):
-        bpy.ops.mesh.split()
+        if (self.prop_individual):
+            bpy.ops.mesh.edge_split()
+        else:
+            bpy.ops.mesh.split()
 class SubdivideNode(Node, PcgEditOperatorNode):
     bl_idname = "SubdivideNode"
     bl_label = "Subdivide"
