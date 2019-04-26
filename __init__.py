@@ -11,6 +11,7 @@ bl_info = {
 import bpy
 import bmesh
 import nodeitems_utils
+import random
 
 from bpy.types import NodeTree, Node, NodeSocket, Operator
 from bpy.props import IntProperty, FloatProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, PointerProperty, BoolVectorProperty
@@ -214,7 +215,24 @@ class MeshArraySocket(NodeSocket):
 
     def draw_color(self, context, node):
         return 0.5, 0.5, 0.5, 1
+class FloatSocket(NodeSocket):
+    bl_idname = "FloatSocket"
+    bl_label = "Float"
 
+    prop_prop = StringProperty(name="Node Property", default="prop_dummy")
+
+    def draw(self, context, layout, node, text):
+        if (self.is_output):
+            layout.label("Float")
+        else:
+            if (self.is_linked):
+                # layout.label(self.name + ": " + str(round(eval("node." + self.prop_prop), 4)))
+                layout.label(self.name)
+            else:
+                layout.prop(node, self.prop_prop)
+
+    def draw_color(self, context, node):
+        return 0, 1, 0, 1
 ##############################################################
 
 
@@ -1092,9 +1110,12 @@ class ExtrudeFacesNode(Node, PcgEditOperatorNode):
 
     prop_value = FloatProperty(name="Value", update=PcgNode.update_value)
     prop_mirror = BoolProperty(name="Mirror", update=PcgNode.update_value)
+
+    def init(self, context):
+        super().init(context)
+        self.inputs.new("FloatSocket", "Value").prop_prop = "prop_value"
     
     def draw_buttons(self, context, layout):
-        layout.prop(self, "prop_value")
         layout.prop(self, "prop_mirror")
     
     def functionality(self):
@@ -1105,7 +1126,11 @@ class ExtrudeFacesNode(Node, PcgEditOperatorNode):
         scene = bpy.data.scenes[0]
         region = [i for i in area.regions if i.type == 'WINDOW'][0]
         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
-        bpy.ops.mesh.extrude_faces_move(override, MESH_OT_extrude_faces_indiv={"mirror":self.prop_mirror}, TRANSFORM_OT_shrink_fatten={"value":self.prop_value})
+        if (self.inputs["Value"].is_linked):
+            prop_value = self.inputs["Value"].links[0].from_node.execute()
+        else:
+            prop_value = self.prop_value
+        bpy.ops.mesh.extrude_faces_move(override, MESH_OT_extrude_faces_indiv={"mirror":self.prop_mirror}, TRANSFORM_OT_shrink_fatten={"value":prop_value})
 class ExtrudeEdgesNode(Node, PcgEditOperatorNode):
     bl_idname = "ExtrudeEdgesNode"
     bl_label = "Extrude Edges"
@@ -1186,6 +1211,12 @@ class ExtrudeRepeatNode(Node, PcgEditOperatorNode):
         region = [i for i in area.regions if i.type == 'WINDOW'][0]
         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
         bpy.ops.mesh.extrude_repeat(override, offset=self.prop_offset, steps=self.prop_steps)
+class FlipNormalsNode(Node, PcgEditOperatorNode):
+    bl_idname = "FlipNormalsNode"
+    bl_label = "Flip Normals"
+    
+    def functionality(self):
+        bpy.ops.mesh.flip_normals()
 class InsetNode(Node, PcgEditOperatorNode):
     bl_idname = "InsetNode"
     bl_label = "Inset"
@@ -1201,9 +1232,12 @@ class InsetNode(Node, PcgEditOperatorNode):
     prop_individual = BoolProperty(name="Individual", update=PcgNode.update_value)
     prop_interpolate = BoolProperty(name="Interpolate", default=True, update=PcgNode.update_value)
 
+    def init(self, context):
+        super().init(context)
+        self.inputs.new("FloatSocket", "Thickness").prop_prop = "prop_thickness"
+        self.inputs.new("FloatSocket", "Depth").prop_prop = "prop_depth"
+
     def draw_buttons(self, context, layout):
-        layout.prop(self, "prop_thickness")
-        layout.prop(self, "prop_depth")
         split = layout.split()
         col=split.column()
         col.prop(self, "prop_boundary")
@@ -1217,7 +1251,26 @@ class InsetNode(Node, PcgEditOperatorNode):
         col.prop(self, "prop_interpolate")
 
     def functionality(self):
-        bpy.ops.mesh.inset(use_boundary=self.prop_boundary, use_even_offset=self.prop_even_offset, use_relative_offset=self.prop_relative_offset, use_edge_rail=self.prop_edge_rail, thickness=self.prop_thickness, depth=self.prop_depth, use_outset=self.prop_outset, use_select_inset=self.prop_select_inset, use_individual=self.prop_individual, use_interpolate=self.prop_interpolate)
+        if (self.inputs["Thickness"].is_linked):
+            prop_thickness = self.inputs["Thickness"].links[0].from_node.execute()
+        else:
+            prop_thickness = self.prop_thickness
+        if (self.inputs["Depth"].is_linked):
+            prop_depth = self.inputs["Depth"].links[0].from_node.execute()
+        else:
+            prop_depth = self.prop_depth
+        bpy.ops.mesh.inset(use_boundary=self.prop_boundary, use_even_offset=self.prop_even_offset, use_relative_offset=self.prop_relative_offset, use_edge_rail=self.prop_edge_rail, thickness=prop_thickness, depth=prop_depth, use_outset=self.prop_outset, use_select_inset=self.prop_select_inset, use_individual=self.prop_individual, use_interpolate=self.prop_interpolate)
+class MakeNormalsConsistentNode(Node, PcgEditOperatorNode):
+    bl_idname = "MakeNormalsConsistentNode"
+    bl_label = "Make Normals Consistent"
+    
+    prop_inside = BoolProperty(name="Inside", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_inside")
+
+    def functionality(self):
+        bpy.ops.mesh.normals_make_consistent(inside=self.prop_inside)
 class MergeComponentsNode(Node, PcgEditOperatorNode):
     bl_idname = "MergeComponentsNode"
     bl_label = "Merge Components"
@@ -1246,6 +1299,19 @@ class PokeNode(Node, PcgEditOperatorNode):
     
     def functionality(self):
         bpy.ops.mesh.poke(offset=self.prop_offset, use_relative_offset=self.prop_use_relative_offset, center_mode=self.prop_center_mode)
+class RemoveDoublesNode(Node, PcgEditOperatorNode): # Contributed by @lucaspedrajas
+    bl_idname = "RemoveDoublesNode"
+    bl_label = "Remove Doubles"
+
+    prop_threshold = FloatProperty(name="Threshold", default=0.0001, min=0.000001, max=50.0, update=PcgNode.update_value)
+    prop_unselected = BoolProperty(name="Unselected", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_threshold")
+        layout.prop(self, "prop_unselected")
+    
+    def functionality(self):
+        bpy.ops.mesh.remove_doubles(threshold=self.prop_threshold, use_unselected=self.prop_unselected)
 class ScrewNode(Node, PcgEditOperatorNode):
     bl_idname = "ScrewNode"
     bl_label = "Screw"
@@ -1344,6 +1410,25 @@ class SymmetrizeNode(Node, PcgEditOperatorNode):
     def functionality(self):
         bpy.ops.mesh.symmetrize(direction=self.prop_direction, threshold=self.prop_threshold)
 
+class CopyTransformNode(Node, PcgObjectOperatorNode):
+    bl_idname = "CopyTransformNode"
+    bl_label = "Copy Transform"
+
+    prop_object = PointerProperty(type=bpy.types.Object, update=PcgNode.update_value)
+    prop_transform = EnumProperty(items=[("LOCATION", "Location", "", 2), ("ROTATION", "Rotation", "", 4), ("SCALE", "Scale", "", 8)], default={"LOCATION"}, options={"ENUM_FLAG"}, update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_object")
+        layout.column().prop(self, "prop_transform", expand=True)
+    
+    def functionality(self):
+        if (not self.prop_object == None):
+            if ("LOCATION" in self.prop_transform):
+                bpy.data.objects[self.mesh].location = self.prop_object.location
+            if ("ROTATION" in self.prop_transform):
+                bpy.data.objects[self.mesh].rotation_euler = self.prop_object.rotation_euler
+            if ("SCALE" in self.prop_transform):
+                bpy.data.objects[self.mesh].scale = self.prop_object.scale
 class SetOriginNode(Node, PcgObjectOperatorNode):
     bl_idname = "SetOriginNode"
     bl_label = "Set Origin"
@@ -2108,36 +2193,6 @@ class WireframeModNode(Node, PcgModifierNode):
         bpy.data.objects[self.mesh].modifiers[0].material_offset = self.material_offset
         return True
 
-class PivotNode(Node, PcgSettingNode):
-    bl_idname = "PivotNode"
-    bl_label = "Pivot Center"
-
-    prop_pivot = EnumProperty(name="Pivot Point", items=[("BOUNDING_BOX_CENTER", "Bound Box Center", ""), ("CURSOR", "Cursor", ""), ("INDIVIDUAL_ORIGINS", "Individual Origins", ""), ("MEDIAN_POINT", "Median Point", ""), ("ACTIVE_ELEMENT", "Active Element", "")], default="MEDIAN_POINT", update=PcgNode.update_value)
-
-    def draw_buttons(self, context, layout):
-        layout.column().prop(self, "prop_pivot", expand=True)
-    
-    def functionality(self):
-        window = bpy.data.window_managers['WinMan'].windows[0]
-        screen = window.screen
-        area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
-        space = area.spaces[0]
-        space.pivot_point = self.prop_pivot
-class OrientationNode(Node, PcgSettingNode):
-    bl_idname = "OrientationNode"
-    bl_label = "Transform Orientation"
-
-    prop_orientation = EnumProperty(name="Pivot Point", items=[("GLOBAL", "Global", ""), ("LOCAL", "Local", ""), ("NORMAL", "Normal", ""), ("GIMBAL", "Gimbal", ""), ("VIEW", "View", "")], default="GLOBAL", update=PcgNode.update_value)
-    
-    def draw_buttons(self, context, layout):
-        layout.column().prop(self, "prop_orientation", expand=True)
-    
-    def functionality(self):
-        window = bpy.data.window_managers['WinMan'].windows[0]
-        screen = window.screen
-        area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
-        space = area.spaces[0]
-        space.transform_orientation = self.prop_orientation
 class CursorLocationNode(Node, PcgSettingNode):
     bl_idname = "CursorLocationNode"
     bl_label = "Cursor Location"
@@ -2153,6 +2208,97 @@ class CursorLocationNode(Node, PcgSettingNode):
         area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
         space = area.spaces[0]
         space.cursor_location = self.prop_location
+class OrientationNode(Node, PcgSettingNode):
+    bl_idname = "OrientationNode"
+    bl_label = "Transform Orientation"
+
+    prop_orientation = EnumProperty(name="Pivot Point", items=[("GLOBAL", "Global", ""), ("LOCAL", "Local", ""), ("NORMAL", "Normal", ""), ("GIMBAL", "Gimbal", ""), ("VIEW", "View", "")], default="GLOBAL", update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        layout.column().prop(self, "prop_orientation", expand=True)
+    
+    def functionality(self):
+        window = bpy.data.window_managers['WinMan'].windows[0]
+        screen = window.screen
+        area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
+        space = area.spaces[0]
+        space.transform_orientation = self.prop_orientation
+class PivotNode(Node, PcgSettingNode):
+    bl_idname = "PivotNode"
+    bl_label = "Pivot Center"
+
+    prop_pivot = EnumProperty(name="Pivot Point", items=[("BOUNDING_BOX_CENTER", "Bound Box Center", ""), ("CURSOR", "Cursor", ""), ("INDIVIDUAL_ORIGINS", "Individual Origins", ""), ("MEDIAN_POINT", "Median Point", ""), ("ACTIVE_ELEMENT", "Active Element", "")], default="MEDIAN_POINT", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.column().prop(self, "prop_pivot", expand=True)
+    
+    def functionality(self):
+        window = bpy.data.window_managers['WinMan'].windows[0]
+        screen = window.screen
+        area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
+        space = area.spaces[0]
+        space.pivot_point = self.prop_pivot
+class CustomPythonNode(Node, PcgSettingNode):
+    bl_idname = "CustomPythonNode"
+    bl_label = "Custom Python Script"
+
+    prop_script = StringProperty(name="Script", description="Variables to use: _MESH (active object), _window, _screen, _area, _space, _scene, _region, _OVERRIDE, _M (bpy.ops.mesh), _O (bpy.ops.object), [;] - separator", update=PcgNode.update_value)
+    prop_iteration = IntProperty(name="Iterations", default=1, min=1, max=1000, update=PcgNode.update_value)
+    prop_print = BoolProperty(name="Print Script", default=True, update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_script")
+        layout.prop(self, "prop_iteration")
+        layout.prop(self, "prop_print")
+    
+    def functionality(self):
+        _MESH = self.mesh
+        _window = bpy.data.window_managers['WinMan'].windows[0]
+        _screen = _window.screen
+        _area = [i for i in _screen.areas if i.type == 'VIEW_3D'][0]
+        _space = _area.spaces[0]
+        _scene = bpy.data.scenes[0]
+        _region = [i for i in _area.regions if i.type == 'WINDOW'][0]
+        _OVERRIDE = {'window':_window, 'screen':_screen, 'area':_area, 'space':_space, 'scene':_scene, 'active_object':bpy.data.objects[self.mesh], 'region':_region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
+        _M = bpy.ops.mesh
+        _O = bpy.ops.object
+        if (self.prop_print):
+            print("SCRIPT: " + self.prop_script)
+        for i in range (0, self.prop_iteration):
+            try:
+                exec(self.prop_script)
+            except:
+                print("Debug: " + self.name + ": Invalid script")
+                break
+
+class FloatNode(Node, PcgNode):
+    bl_idname = "FloatNode"
+    bl_label = "Float"
+
+    prop_float = FloatProperty(name="Float", update=PcgNode.update_value)
+    prop_random = BoolProperty(name="Random", update=PcgNode.update_value)
+    prop_min = FloatProperty(name="Min", update=PcgNode.update_value)
+    prop_max = FloatProperty(name="Max", default=1.0, update=PcgNode.update_value)
+    prop_seed = IntProperty(name="Seed", update=PcgNode.update_value)
+
+    def init(self, context):
+        self.outputs.new("FloatSocket", "Float").prop_prop = "prop_float"
+    
+    def draw_buttons(self, context, layout):
+        if (self.prop_random):
+            layout.prop(self, "prop_min")
+            layout.prop(self, "prop_max")
+            layout.prop(self, "prop_seed")
+        else:
+            layout.prop(self, "prop_float")
+        layout.prop(self, "prop_random")
+    
+    def execute(self):
+        if (self.prop_random):
+            random.seed(self.prop_seed)
+            return random.uniform(self.prop_min, self.prop_max)
+        else:
+            return self.prop_float
 
 class MeshNode(Node, PcgSettingNode):
     bl_idname = "MeshNode"
@@ -2207,10 +2353,11 @@ modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CurveModNo
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
 selection = [SelectComponentsManuallyNode, SelectFaceByIndexNode, SelectAlternativeFacesNode, SelectFacesByNormalNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectSimilarNode, SelectSimilarRegionNode, SelectUngroupedNode, SelectEdgesSharpNode, SelectFacesLinkedFlatNode]
 deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode, DissolveVerticesNode, DissolveDegenerateNode, EdgeCollapseNode]
-edit_operators = [BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, ExtrudeRepeatNode, InsetNode, MergeComponentsNode, PokeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode]
-object_operators = [MergeMeshesNode, SetOriginNode, SetShadingNode]
-settings = [PivotNode, OrientationNode, CursorLocationNode]
+edit_operators = [BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, ExtrudeRepeatNode, FlipNormalsNode, InsetNode, MakeNormalsConsistentNode, MergeComponentsNode, PokeNode, RemoveDoublesNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode]
+object_operators = [CopyTransformNode, MergeMeshesNode, SetOriginNode, SetShadingNode]
+settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
 outputs = [MeshNode, DrawModeNode]
+maths = [FloatNode]
 
 node_categories = [PcgNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
                    PcgNodeCategory("transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
@@ -2221,6 +2368,7 @@ node_categories = [PcgNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idna
                    PcgNodeCategory("edit_operators", "Component Operators", items=[NodeItem(i.bl_idname) for i in edit_operators]),
                    PcgNodeCategory("object_operators", "Mesh Operators", items=[NodeItem(i.bl_idname) for i in object_operators]),
                    PcgNodeCategory("settings", "Settings", items=[NodeItem(i.bl_idname) for i in settings]),
+                   PcgNodeCategory("maths", "Maths", items=[NodeItem(i.bl_idname) for i in maths]),
                    PcgNodeCategory("outputs", "Outputs", items=[NodeItem(i.bl_idname) for i in outputs])]
 
 def register():
