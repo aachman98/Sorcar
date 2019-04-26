@@ -1410,7 +1410,7 @@ class MergeMeshesNode(Node, PcgNode):
 
 class ArrayModNode(Node, PcgModifierNode):
     bl_idname = "ArrayModNode"
-    bl_label = "Array"
+    bl_label = "Array Modifier"
 
     fit_type = EnumProperty(name="Fit Type", items=[("FIXED_COUNT", "Fixed Count", ""), ("FIT_LENGTH", "Fit Length", ""), ("FIT_CURVE", "Fit Curve", "")], default="FIXED_COUNT", update=PcgNode.update_value)
     count = IntProperty(name="Count", default=2, min=1, max=1000, update=PcgNode.update_value)
@@ -1483,7 +1483,7 @@ class ArrayModNode(Node, PcgModifierNode):
         return True
 class BevelModNode(Node, PcgModifierNode):
     bl_idname = "BevelModNode"
-    bl_label = "Bevel"
+    bl_label = "Bevel Modifier"
     
     width = FloatProperty(name="Width", default=0.1, min=0.0, update=PcgNode.update_value)
     segments = IntProperty(name="Segments", default=1, min=0, max=100, update=PcgNode.update_value)
@@ -1529,7 +1529,7 @@ class BevelModNode(Node, PcgModifierNode):
         return True
 class BooleanModNode(Node, PcgModifierNode):
     bl_idname = "BooleanModNode"
-    bl_label = "Boolean"
+    bl_label = "Boolean Modifier"
     
     prop_op = EnumProperty(name="Operation", items=[("DIFFERENCE", "Difference", ""), ("UNION", "Union", ""), ("INTERSECT", "Intersect", "")], default="INTERSECT", update=PcgNode.update_value)
     prop_obj = PointerProperty(name="Object", type=bpy.types.Object, update=PcgNode.update_value)
@@ -1554,7 +1554,7 @@ class BooleanModNode(Node, PcgModifierNode):
         return True
 class CastModNode(Node, PcgModifierNode):
     bl_idname = "CastModNode"
-    bl_label = "Cast"
+    bl_label = "Cast Modifier"
 
     cast_type = EnumProperty(items=[("SPHERE", "Sphere", ""), ("CYLINDER", "Cylinder", ""), ("CUBOID", "Cuboid", "")], update=PcgNode.update_value)
     use_x = BoolProperty(name="X", default=True, update=PcgNode.update_value)
@@ -1609,7 +1609,7 @@ class CastModNode(Node, PcgModifierNode):
         return True
 class CurveModNode(Node, PcgModifierNode):
     bl_idname = "CurveModNode"
-    bl_label = "Curve"
+    bl_label = "Curve Modifier"
     
     vertex_group = StringProperty(name="Vertex Group", update=PcgNode.update_value)
     object = PointerProperty(type=bpy.types.Object, update=PcgNode.update_value)
@@ -1637,7 +1637,7 @@ class CurveModNode(Node, PcgModifierNode):
         return True
 class DecimateModNode(Node, PcgModifierNode):
     bl_idname = "DecimateModNode"
-    bl_label = "Decimate"
+    bl_label = "Decimate Modifier"
 
     decimate_type = EnumProperty(items=[("COLLAPSE", "Collapse", ""), ("UNSUBDIV", "Un-Subdivide", ""), ("DISSOLVE", "Planar", "")], default="COLLAPSE", update=PcgNode.update_value)
     vertex_group = StringProperty(update=PcgNode.update_value)
@@ -1704,7 +1704,7 @@ class DecimateModNode(Node, PcgModifierNode):
         return True
 class RemeshModNode(Node, PcgModifierNode):
     bl_idname = "RemeshModNode"
-    bl_label = "Remesh"
+    bl_label = "Remesh Modifier"
     
     mode = EnumProperty(name="Mode", items=[("BLOCKS", "Blocks", ""), ("SMOOTH", "Smooth", ""), ("SHARP", "Sharp", "")], default="SHARP", update=PcgNode.update_value)
     octree_depth = IntProperty(name="Octree Depth", default=4, min=1, max=12, update=PcgNode.update_value)
@@ -1739,7 +1739,7 @@ class RemeshModNode(Node, PcgModifierNode):
         return True
 class ScrewModNode(Node, PcgModifierNode):
     bl_idname = "ScrewModNode"
-    bl_label = "Screw"
+    bl_label = "Screw Modifier"
 
     axis = EnumProperty(name="Axis", items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="Z", update=PcgNode.update_value)
     object = PointerProperty(type=bpy.types.Object, update=PcgNode.update_value)
@@ -1803,7 +1803,7 @@ class ScrewModNode(Node, PcgModifierNode):
         return True
 class SimpleDeformModNode(Node, PcgModifierNode):
     bl_idname = "SimpleDeformModNode"
-    bl_label = "Simple Deform"
+    bl_label = "Simple Deform Modifier"
 
     vertex_group = StringProperty(name="Vertex Group", update=PcgNode.update_value)
     deform_method = EnumProperty(items=[("TWIST", "Twist", ""), ("BEND", "Bend", ""), ("TAPER", "Taper", ""), ("STRETCH", "Stretch", "")], default="TWIST", update=PcgNode.update_value)
@@ -1856,7 +1856,7 @@ class SimpleDeformModNode(Node, PcgModifierNode):
         return True
 class SkinModNode(Node, PcgModifierNode):
     bl_idname = "SkinModNode"
-    bl_label = "Skin"
+    bl_label = "Skin Modifier"
 
     branch_smoothing = FloatProperty(name="Branch Smoothing", default=0.0, min=0.0, max=1.0, update=PcgNode.update_value)
     use_smooth_shade = BoolProperty(name="Smooth Shading", update=PcgNode.update_value)
@@ -1899,7 +1899,7 @@ class SkinModNode(Node, PcgModifierNode):
         return True
 class SmoothModNode(Node, PcgModifierNode):
     bl_idname = "SmoothModNode"
-    bl_label = "Smooth"
+    bl_label = "Smooth Modifier"
 
     use_x = BoolProperty(name="X", default=True, update=PcgNode.update_value)
     use_y = BoolProperty(name="Y", default=True, update=PcgNode.update_value)
@@ -1933,7 +1933,7 @@ class SmoothModNode(Node, PcgModifierNode):
         return True
 class SolidifyModNode(Node, PcgModifierNode):
     bl_idname = "SolidifyModNode"
-    bl_label = "Solidify"
+    bl_label = "Solidify Modifier"
     
     thickness = FloatProperty(name="Thickness", default=0.01, update=PcgNode.update_value)
     thickness_clamp = FloatProperty(name="Clamp", default=0.0, min=0.0, max=100.0, update=PcgNode.update_value)
@@ -2010,7 +2010,7 @@ class SolidifyModNode(Node, PcgModifierNode):
         return True
 class SubdivideModNode(Node, PcgModifierNode):
     bl_idname = "SubdivideModNode"
-    bl_label = "Subdivision Surface"
+    bl_label = "Subdivision Surface Modifier"
     
     subdivision_type = EnumProperty(items=[("CATMULL_CLARK", "Catmull-Clark", ""), ("SIMPLE", "Simple", "")], default="CATMULL_CLARK", update=PcgNode.update_value)
     levels = IntProperty(default=1, min=0, max=11, soft_max=6, update=PcgNode.update_value)
@@ -2043,7 +2043,7 @@ class SubdivideModNode(Node, PcgModifierNode):
         return True
 class WireframeModNode(Node, PcgModifierNode):
     bl_idname = "WireframeModNode"
-    bl_label = "Wireframe"
+    bl_label = "Wireframe Modifier"
 
     thickness = FloatProperty(update=PcgNode.update_value)
     vertex_group = StringProperty(update=PcgNode.update_value)
