@@ -46,6 +46,7 @@ class PcgInputNode(PcgNode):
         if (not self.mesh == ""):
             try:
                 bpy.data.objects.remove(bpy.data.objects[self.mesh])
+                bpy.data.meshes.remove(bpy.data.meshes[self.mesh])
             except:
                 print("Debug: " + self.name + ": Mesh object non-existant")
         self.functionality()
@@ -888,6 +889,34 @@ class SelectRandomNode(Node, PcgSelectionNode):
 
     def functionality(self):
         bpy.ops.mesh.select_random(percent=self.prop_percent, seed=self.prop_seed, action=self.prop_action)
+class SelectSharpEdgesNode(Node, PcgSelectionNode):
+    bl_idname = "SelectSharpEdgesNode"
+    bl_label = "Select Sharp Edges"
+
+    prop_sharpness = FloatProperty(name="Sharpness", default=0.523599, min=0.000174533, max=3.14159, update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_sharpness")
+
+    def functionality(self):
+        bpy.ops.mesh.edges_select_sharp(sharpness=self.prop_sharpness)
+class SelectEdgeRingNode(Node, PcgSelectionNode):
+    bl_idname = "SelectEdgeRingNode"
+    bl_label = "Select Edge Ring"
+
+    prop_extend = BoolProperty(name="Extend", update=PcgNode.update_value)
+    prop_deselect = BoolProperty(name="Deselect", update=PcgNode.update_value)
+    prop_toggle = BoolProperty(name="Toggle", update=PcgNode.update_value)
+    prop_ring = BoolProperty(name="Ring", default=True, update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_extend")
+        layout.prop(self, "prop_deselect")
+        layout.prop(self, "prop_toggle")
+        layout.prop(self, "prop_ring")
+
+    def functionality(self):
+        bpy.ops.mesh.edgering_select(extend=self.prop_extend, deselect=self.prop_deselect, toggle=self.prop_toggle, ring=self.prop_ring)
 class SelectSimilarNode(Node, PcgSelectionNode):
     bl_idname = "SelectSimilarNode"
     bl_label = "Select Similar"
@@ -920,17 +949,6 @@ class SelectUngroupedNode(Node, PcgSelectionNode):
     
     def functionality(self):
         bpy.ops.mesh.select_ungrouped(extend=self.prop_extend)
-class SelectEdgesSharpNode(Node, PcgSelectionNode):
-    bl_idname = "SelectEdgesSharpNode"
-    bl_label = "Select Sharp-Enough Edges"
-
-    prop_sharpness = FloatProperty(name="Sharpness", default=0.523599, min=0.000174533, max=3.14159, precision=6, update=PcgNode.update_value)
-    
-    def draw_buttons(self, context, layout):
-        layout.prop(self, "prop_sharpness")
-    
-    def functionality(self):
-        bpy.ops.mesh.edges_select_sharp(sharpness=self.prop_sharpness)
 class SelectFacesLinkedFlatNode(Node, PcgSelectionNode):
     bl_idname = "SelectFacesLinkedFlatSharpNode"
     bl_label = "Select Linked Faces By Angle"
@@ -1447,15 +1465,22 @@ class SetShadingNode(Node, PcgObjectOperatorNode):
     bl_label = "Set Shading"
 
     prop_shading = EnumProperty(name="Shading", items=[("SMOOTH", "Smooth", ""), ("FLAT", "Flat", "")], default="FLAT", update=PcgNode.update_value)
+    prop_auto = BoolProperty(name="Auto Smooth", update=PcgNode.update_value)
+    prop_angle = FloatProperty(name="Angle", default=0.523599, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION", update=PcgNode.update_value)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_shading", expand=True)
+        if (self.prop_shading == "SMOOTH"):
+            layout.prop(self, "prop_auto")
+            layout.prop(self, "prop_angle")
     
     def functionality(self):
         if (self.prop_shading == "FLAT"):
             bpy.ops.object.shade_flat()
         else:
             bpy.ops.object.shade_smooth()
+            bpy.data.meshes[self.mesh].use_auto_smooth = self.prop_auto
+            bpy.data.meshes[self.mesh].auto_smooth_angle = self.prop_angle
 class MergeMeshesNode(Node, PcgNode):
     bl_idname = "MergeMeshesNode"
     bl_label = "Merge Meshes"
@@ -1700,6 +1725,44 @@ class CastModNode(Node, PcgModifierNode):
         bpy.data.objects[self.mesh].modifiers[0].object = self.object
         bpy.data.objects[self.mesh].modifiers[0].use_transform = self.use_transform
         return True
+class CorrectiveSmoothModNode(Node, PcgModifierNode):
+    bl_idname = "CorrectiveSmoothModNode"
+    bl_label = "Corrective Smooth Modifier"
+    
+    factor = FloatProperty(default=0.5, soft_min=0.0, soft_max=1.0, update=PcgNode.update_value)
+    iterations = IntProperty(name="Repeat", default=5, min=-32768, max=32767, soft_min=0, soft_max=200, update=PcgNode.update_value)
+    smooth_type = EnumProperty(name="Smooth Type", items=[("SIMPLE", "Simple", ""), ("LENGTH_WEIGHTED", "Length Weight", "")], default="SIMPLE", update=PcgNode.update_value)
+    use_only_smooth = BoolProperty(name="Only Smooth", update=PcgNode.update_value)
+    use_pin_boundary = BoolProperty(name="Pin Boundaries", update=PcgNode.update_value)
+    vertex_group = StringProperty(name="Vertex Group", update=PcgNode.update_value)
+    invert_vertex_group = BoolProperty(update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "factor", text="Factor")
+        layout.prop(self, "iterations")
+        row = layout.row()
+        row.prop(self, "smooth_type")
+        split = layout.split()
+        col = split.column()
+        col.label(text="Vertex Group:")
+        row = col.row(align=True)
+        if (not self.mesh == ""):
+            row.prop_search(self, "vertex_group", bpy.data.objects[self.mesh], "vertex_groups", text="")
+        row.prop(self, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
+        col = split.column()
+        col.prop(self, "use_only_smooth")
+        col.prop(self, "use_pin_boundary")
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="CORRECTIVE_SMOOTH")
+        bpy.data.objects[self.mesh].modifiers[0].factor = self.factor
+        bpy.data.objects[self.mesh].modifiers[0].iterations = self.iterations
+        bpy.data.objects[self.mesh].modifiers[0].smooth_type = self.smooth_type
+        bpy.data.objects[self.mesh].modifiers[0].use_only_smooth = self.use_only_smooth
+        bpy.data.objects[self.mesh].modifiers[0].use_pin_boundary = self.use_pin_boundary
+        bpy.data.objects[self.mesh].modifiers[0].vertex_group = self.vertex_group
+        bpy.data.objects[self.mesh].modifiers[0].invert_vertex_group = self.invert_vertex_group
+        return True
 class CurveModNode(Node, PcgModifierNode):
     bl_idname = "CurveModNode"
     bl_label = "Curve Modifier"
@@ -1794,6 +1857,133 @@ class DecimateModNode(Node, PcgModifierNode):
         bpy.data.objects[self.mesh].modifiers[0].angle_limit = self.angle_limit
         bpy.data.objects[self.mesh].modifiers[0].use_dissolve_boundaries = self.use_dissolve_boundaries
         bpy.data.objects[self.mesh].modifiers[0].delimit = self.delimit
+        return True
+class EdgeSplitModNode(Node, PcgModifierNode):
+    bl_idname = "EdgeSplitModNode"
+    bl_label = "Edge Split Modifier"
+    
+    split_angle = FloatProperty(name="Sharpness", default=0.523599, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION", update=PcgNode.update_value)
+    use_edge_angle = BoolProperty(default=True, update=PcgNode.update_value)
+    use_edge_sharp = BoolProperty(default=True, update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        split = layout.split()
+        col = split.column()
+        col.prop(self, "use_edge_angle", text="Edge Angle")
+        sub = col.column()
+        sub.active = self.use_edge_angle
+        sub.prop(self, "split_angle")
+        split.prop(self, "use_edge_sharp", text="Sharp Edges")
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="EDGE_SPLIT")
+        bpy.data.objects[self.mesh].modifiers[0].split_angle = self.split_angle
+        bpy.data.objects[self.mesh].modifiers[0].use_edge_angle = self.use_edge_angle
+        bpy.data.objects[self.mesh].modifiers[0].use_edge_sharp = self.use_edge_sharp
+        return True
+class LaplacianSmoothModNode(Node, PcgModifierNode):
+    bl_idname = "LaplacianSmoothModNode"
+    bl_label = "Laplacian Smooth Modifier"
+
+    iterations = IntProperty(name="Repeat", default=1, min=-32768, max=32767, soft_min=0, soft_max=200, update=PcgNode.update_value)
+    use_x = BoolProperty(name="X", default=True, update=PcgNode.update_value)
+    use_y = BoolProperty(name="Y", default=True, update=PcgNode.update_value)
+    use_z = BoolProperty(name="Z", default=True, update=PcgNode.update_value)
+    lambda_factor = FloatProperty(default=0.01, soft_min=-1000.0, soft_max=1000.0, update=PcgNode.update_value)
+    lambda_border = FloatProperty(default=0.01, soft_min=-1000.0, soft_max=1000.0, update=PcgNode.update_value)
+    use_volume_preserve = BoolProperty(name="Preserve Volume", default=True, update=PcgNode.update_value)
+    use_normalized = BoolProperty(name="Normalized", default=True, update=PcgNode.update_value)
+    vertex_group = StringProperty(name="Vertex Group", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "iterations")
+        split = layout.split(percentage=0.25)
+        col = split.column()
+        col.label(text="Axis:")
+        col.prop(self, "use_x")
+        col.prop(self, "use_y")
+        col.prop(self, "use_z")
+        col = split.column()
+        col.label(text="Lambda:")
+        col.prop(self, "lambda_factor", text="Factor")
+        col.prop(self, "lambda_border", text="Border")
+        col.separator()
+        col.prop(self, "use_volume_preserve")
+        col.prop(self, "use_normalized")
+        layout.label(text="Vertex Group:")
+        if (not self.mesh == ""):
+            layout.prop_search(self, "vertex_group", bpy.data.objects[self.mesh], "vertex_groups", text="")
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="LAPLACIANSMOOTH")
+        bpy.data.objects[self.mesh].modifiers[0].iterations = self.iterations
+        bpy.data.objects[self.mesh].modifiers[0].use_x = self.use_x
+        bpy.data.objects[self.mesh].modifiers[0].use_y = self.use_y
+        bpy.data.objects[self.mesh].modifiers[0].use_z = self.use_z
+        bpy.data.objects[self.mesh].modifiers[0].lambda_factor = self.lambda_factor
+        bpy.data.objects[self.mesh].modifiers[0].lambda_border = self.lambda_border
+        bpy.data.objects[self.mesh].modifiers[0].use_volume_preserve = self.use_volume_preserve
+        bpy.data.objects[self.mesh].modifiers[0].use_normalized = self.use_normalized
+        bpy.data.objects[self.mesh].modifiers[0].vertex_group = self.vertex_group
+        return True
+class MirrorModNode(Node, PcgModifierNode):
+    bl_idname = "MirrorModNode"
+    bl_label = "Mirror Modifier"
+
+    use_x = BoolProperty(name="X", default=True, update=PcgNode.update_value)
+    use_y = BoolProperty(name="Y", update=PcgNode.update_value)
+    use_z = BoolProperty(name="Z", update=PcgNode.update_value)
+    use_mirror_merge = BoolProperty(default=True, update=PcgNode.update_value)
+    use_clip = BoolProperty(update=PcgNode.update_value)
+    use_mirror_vertex_groups = BoolProperty(default=True, update=PcgNode.update_value)
+    use_mirror_u = BoolProperty(update=PcgNode.update_value)
+    use_mirror_v = BoolProperty(update=PcgNode.update_value)
+    mirror_offset_u = FloatProperty(name="U Offset", default=0.0, min=-1.0, max=1.0, update=PcgNode.update_value)
+    mirror_offset_v = FloatProperty(name="V Offset", default=0.0, min=-1.0, max=1.0, update=PcgNode.update_value)
+    merge_threshold = FloatProperty(name="Merge Limit", default=0.001, min=0, soft_max=1, update=PcgNode.update_value)
+    mirror_object = PointerProperty(type=bpy.types.Object, update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        split = layout.split(percentage=0.25)
+        col = split.column()
+        col.label(text="Axis:")
+        col.prop(self, "use_x")
+        col.prop(self, "use_y")
+        col.prop(self, "use_z")
+        col = split.column()
+        col.label(text="Options:")
+        col.prop(self, "use_mirror_merge", text="Merge")
+        col.prop(self, "use_clip", text="Clipping")
+        col.prop(self, "use_mirror_vertex_groups", text="Vertex Groups")
+        col = split.column()
+        col.label(text="Textures:")
+        col.prop(self, "use_mirror_u", text="U")
+        col.prop(self, "use_mirror_v", text="V")
+        col = layout.column(align=True)
+        if self.use_mirror_u:
+            col.prop(self, "mirror_offset_u")
+        if self.use_mirror_v:
+            col.prop(self, "mirror_offset_v")
+        col = layout.column()
+        if self.use_mirror_merge is True:
+            col.prop(self, "merge_threshold")
+        col.label(text="Mirror Object:")
+        col.prop(self, "mirror_object", text="")
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="MIRROR")
+        bpy.data.objects[self.mesh].modifiers[0].use_x = self.use_x
+        bpy.data.objects[self.mesh].modifiers[0].use_y = self.use_y
+        bpy.data.objects[self.mesh].modifiers[0].use_z = self.use_z
+        bpy.data.objects[self.mesh].modifiers[0].use_mirror_merge = self.use_mirror_merge
+        bpy.data.objects[self.mesh].modifiers[0].use_clip = self.use_clip
+        bpy.data.objects[self.mesh].modifiers[0].use_mirror_vertex_groups = self.use_mirror_vertex_groups
+        bpy.data.objects[self.mesh].modifiers[0].use_mirror_u = self.use_mirror_u
+        bpy.data.objects[self.mesh].modifiers[0].use_mirror_v = self.use_mirror_v
+        bpy.data.objects[self.mesh].modifiers[0].mirror_offset_u = self.mirror_offset_u
+        bpy.data.objects[self.mesh].modifiers[0].mirror_offset_v = self.mirror_offset_v
+        bpy.data.objects[self.mesh].modifiers[0].merge_threshold = self.merge_threshold
+        bpy.data.objects[self.mesh].modifiers[0].mirror_object = self.mirror_object
         return True
 class RemeshModNode(Node, PcgModifierNode):
     bl_idname = "RemeshModNode"
@@ -2134,6 +2324,27 @@ class SubdivideModNode(Node, PcgModifierNode):
         bpy.data.objects[self.mesh].modifiers[0].use_subsurf_uv = self.use_subsurf_uv
         bpy.data.objects[self.mesh].modifiers[0].show_only_control_edges = self.show_only_control_edges
         return True
+class TriangulateModNode(Node, PcgModifierNode):
+    bl_idname = "TriangulateModNode"
+    bl_label = "Triangulate Modifier"
+    
+    quad_method = EnumProperty(items=[("BEAUTY", "Beauty", ""), ("FIXED", "Fixed", ""), ("FIXED_ALTERNATE", "Fixed Alternate", ""), ("SHORTEST_DIAGONAL", "Shortest Diagonal", "")], default="SHORTEST_DIAGONAL", update=PcgNode.update_value)
+    ngon_method = EnumProperty(items=[("BEAUTY", "Beauty", ""), ("CLIP", "Clip", "")], default="BEAUTY", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        row = layout.row()
+        col = row.column()
+        col.label(text="Quad Method:")
+        col.prop(self, "quad_method", text="")
+        col = row.column()
+        col.label(text="Ngon Method:")
+        col.prop(self, "ngon_method", text="")
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="TRIANGULATE")
+        bpy.data.objects[self.mesh].modifiers[0].quad_method = self.quad_method
+        bpy.data.objects[self.mesh].modifiers[0].ngon_method = self.ngon_method
+        return True
 class WireframeModNode(Node, PcgModifierNode):
     bl_idname = "WireframeModNode"
     bl_label = "Wireframe Modifier"
@@ -2344,14 +2555,14 @@ class DrawModeNode(Node, PcgSettingNode):
         bpy.data.objects[self.mesh].show_x_ray = self.prop_xray
         bpy.data.objects[self.mesh].show_transparent = self.prop_transparency
         bpy.data.objects[self.mesh].draw_type = self.prop_max_draw_type
-##############################################################                                                            ##############################################
+##############################################################
 
 
-inputs = [PlaneNode, CubeNode, SphereNode, CylinderNode, ConeNode] #TorusNode
+inputs = [PlaneNode, CubeNode, SphereNode, CylinderNode, ConeNode] # TorusNode
 transform = [LocationNode, RotationNode, ScaleNode, TranslateNode, RotateNode, ResizeNode]
-modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CurveModNode, DecimateModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, WireframeModNode]
+modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CorrectiveSmoothModNode, CurveModNode, DecimateModNode, EdgeSplitModNode, LaplacianSmoothModNode, MirrorModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, TriangulateModNode, WireframeModNode]
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
-selection = [SelectComponentsManuallyNode, SelectFaceByIndexNode, SelectAlternativeFacesNode, SelectFacesByNormalNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectSimilarNode, SelectSimilarRegionNode, SelectUngroupedNode, SelectEdgesSharpNode, SelectFacesLinkedFlatNode]
+selection = [SelectComponentsManuallyNode, SelectFaceByIndexNode, SelectAlternativeFacesNode, SelectFacesByNormalNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectUngroupedNode, SelectSharpEdgesNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
 deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode, DissolveVerticesNode, DissolveDegenerateNode, EdgeCollapseNode]
 edit_operators = [BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, ExtrudeRepeatNode, FlipNormalsNode, InsetNode, MakeNormalsConsistentNode, MergeComponentsNode, PokeNode, RemoveDoublesNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode]
 object_operators = [CopyTransformNode, MergeMeshesNode, SetOriginNode, SetShadingNode]
