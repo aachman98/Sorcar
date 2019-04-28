@@ -1038,6 +1038,12 @@ class EdgeCollapseNode(Node, PcgEditOperatorNode):
     def functionality(self):
         bpy.ops.mesh.edge_collapse()
 
+class AddEdgeFaceNode(Node, PcgEditOperatorNode):
+    bl_idname = "AddEdgeFaceNode"
+    bl_label = "Add Edge/Face"
+
+    def functionality(self):
+        bpy.ops.mesh.edge_face_add()
 class BeautifyFillNode(Node, PcgEditOperatorNode):
     bl_idname = "BeautifyFillNode"
     bl_label = "Beautify Fill"
@@ -1235,6 +1241,79 @@ class FlipNormalsNode(Node, PcgEditOperatorNode):
     
     def functionality(self):
         bpy.ops.mesh.flip_normals()
+class MakeNormalsConsistentNode(Node, PcgEditOperatorNode):
+    bl_idname = "MakeNormalsConsistentNode"
+    bl_label = "Make Normals Consistent"
+    
+    prop_inside = BoolProperty(name="Inside", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_inside")
+
+    def functionality(self):
+        bpy.ops.mesh.normals_make_consistent(inside=self.prop_inside)
+class FlattenNode(Node, PcgEditOperatorNode):
+    bl_idname = "FlattenNode"
+    bl_label = "Flatten"
+    
+    prop_mode = EnumProperty(name="Mode", items=[("FACES", "Faces", ""), ("VERTICES", "Vertices", "")], default="FACES", update=PcgNode.update_value)
+    prop_factor = FloatProperty(name="Factor", default=0.5, min=-10.0, max=10.0, update=PcgNode.update_value)
+    prop_repeat = IntProperty(name="Repeat", default=1, min=0, max=1000, update=PcgNode.update_value)
+    prop_x = BoolProperty(name="X", default=True, update=PcgNode.update_value)
+    prop_y = BoolProperty(name="Y", default=True, update=PcgNode.update_value)
+    prop_z = BoolProperty(name="Z", default=True, update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_mode", expand=True)
+        layout.prop(self, "prop_factor")
+        layout.prop(self, "prop_repeat")
+        if (self.prop_mode == "VERTICES"):
+            layout.prop(self, "prop_x")
+            layout.prop(self, "prop_y")
+            layout.prop(self, "prop_z")
+
+    def functionality(self):
+        if (self.prop_mode == "VERTICES"):
+            bpy.ops.mesh.vertices_smooth(factor=self.prop_factor, repeat=self.prop_repeat, xaxis=self.prop_x, yaxis=self.prop_y, zaxis=self.prop_z)
+        else:
+            bpy.ops.mesh.face_make_planar(factor=self.prop_factor, repeat=self.prop_repeat)
+class FillEdgeLoopNode(Node, PcgEditOperatorNode):
+    bl_idname = "FillEdgeLoopNode"
+    bl_label = "Fill Edge Loop"
+    
+    prop_beauty = BoolProperty(name="Beauty", default=True, update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_beauty")
+
+    def functionality(self):
+        bpy.ops.mesh.fill(use_beauty=self.prop_beauty)
+class FillGridNode(Node, PcgEditOperatorNode):
+    bl_idname = "FillGridNode"
+    bl_label = "Fill Grid"
+    
+    prop_span = IntProperty(name="Span", default=1, min=1, max=1000, update=PcgNode.update_value)
+    prop_offset = IntProperty(name="Offset", default=0, min=-1000, max=1000, update=PcgNode.update_value)
+    prop_interp = BoolProperty(name="Simple Blending", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_span")
+        layout.prop(self, "prop_offset")
+        layout.prop(self, "prop_interp")
+
+    def functionality(self):
+        bpy.ops.mesh.fill_grid(span=self.prop_span, offset=self.prop_offset, use_interp_simple=self.prop_interp)
+class FillHolesBySidesNode(Node, PcgEditOperatorNode):
+    bl_idname = "FillHolesBySidesNode"
+    bl_label = "Fill Holes By Sides"
+    
+    prop_sides = IntProperty(name="Sides", default=4, min=0, max=1000, update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_sides")
+
+    def functionality(self):
+        bpy.ops.mesh.fill_holes(sides=self.prop_sides)
 class InsetNode(Node, PcgEditOperatorNode):
     bl_idname = "InsetNode"
     bl_label = "Inset"
@@ -1278,17 +1357,6 @@ class InsetNode(Node, PcgEditOperatorNode):
         else:
             prop_depth = self.prop_depth
         bpy.ops.mesh.inset(use_boundary=self.prop_boundary, use_even_offset=self.prop_even_offset, use_relative_offset=self.prop_relative_offset, use_edge_rail=self.prop_edge_rail, thickness=prop_thickness, depth=prop_depth, use_outset=self.prop_outset, use_select_inset=self.prop_select_inset, use_individual=self.prop_individual, use_interpolate=self.prop_interpolate)
-class MakeNormalsConsistentNode(Node, PcgEditOperatorNode):
-    bl_idname = "MakeNormalsConsistentNode"
-    bl_label = "Make Normals Consistent"
-    
-    prop_inside = BoolProperty(name="Inside", update=PcgNode.update_value)
-
-    def draw_buttons(self, context, layout):
-        layout.prop(self, "prop_inside")
-
-    def functionality(self):
-        bpy.ops.mesh.normals_make_consistent(inside=self.prop_inside)
 class MergeComponentsNode(Node, PcgEditOperatorNode):
     bl_idname = "MergeComponentsNode"
     bl_label = "Merge Components"
@@ -1330,6 +1398,17 @@ class RemoveDoublesNode(Node, PcgEditOperatorNode): # Contributed by @lucaspedra
     
     def functionality(self):
         bpy.ops.mesh.remove_doubles(threshold=self.prop_threshold, use_unselected=self.prop_unselected)
+class RotateEdgeNode(Node, PcgEditOperatorNode):
+    bl_idname = "RotateEdgeNode"
+    bl_label = "Rotate Edge"
+    
+    prop_ccw = BoolProperty(name="Counter Clockwise", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_ccw")
+
+    def functionality(self):
+        bpy.ops.mesh.edge_rotate(use_ccw=self.prop_ccw)
 class ScrewNode(Node, PcgEditOperatorNode):
     bl_idname = "ScrewNode"
     bl_label = "Screw"
@@ -1427,6 +1506,30 @@ class SymmetrizeNode(Node, PcgEditOperatorNode):
 
     def functionality(self):
         bpy.ops.mesh.symmetrize(direction=self.prop_direction, threshold=self.prop_threshold)
+class TriangulateFacesNode(Node, PcgEditOperatorNode):
+    bl_idname = "TriangulateFacesNode"
+    bl_label = "Triangulate Faces"
+    
+    prop_quad = EnumProperty(items=[("BEAUTY", "Beauty", ""), ("FIXED", "Fixed", ""), ("FIXED_ALTERNATE", "Fixed Alternate", ""), ("SHORTEST_DIAGONAL", "Shortest Diagonal", "")], default="BEAUTY", update=PcgNode.update_value)
+    prop_ngon = EnumProperty(items=[("BEAUTY", "Beauty", ""), ("CLIP", "Clip", "")], default="BEAUTY", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_quad")
+        layout.prop(self, "prop_ngon")
+
+    def functionality(self):
+        bpy.ops.mesh.quads_convert_to_tris(quad_method=self.prop_quad, ngon_method=self.prop_ngon)
+class UnSubdivideNode(Node, PcgEditOperatorNode):
+    bl_idname = "UnSubdivideNode"
+    bl_label = "Un-Subdivide"
+    
+    prop_iterations = IntProperty(name="Iterations", default=2, min=1, max=1000, update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_iterations")
+
+    def functionality(self):
+        bpy.ops.mesh.unsubdivide(iterations=self.prop_iterations)
 
 class CopyTransformNode(Node, PcgObjectOperatorNode):
     bl_idname = "CopyTransformNode"
@@ -1611,7 +1714,7 @@ class BevelModNode(Node, PcgModifierNode):
     use_clamp_overlap = BoolProperty(name="Clamp Overlap", default=True, update=PcgNode.update_value)
     loop_slide = BoolProperty(name="Loop Slide", default=True, update=PcgNode.update_value)
     limit_method = EnumProperty(name="Limit Method", items=[("NONE", "None", ""), ("ANGLE", "Angle", ""), ("WEIGHT", "Weight", "")], default="NONE", update=PcgNode.update_value)
-    angle_limit = IntProperty(name="Angle", default=30, min=0, max=180, subtype="ANGLE", update=PcgNode.update_value)
+    angle_limit = FloatProperty(name="Angle", default=0.523599, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION", update=PcgNode.update_value)
     offset_type = EnumProperty(name="Limit Method", items=[("OFFSET", "Offset", ""), ("WIDTH", "Width", ""), ("DEPTH", "Depth", ""), ("PERCENT", "Percent", "")], default="OFFSET", update=PcgNode.update_value)
     
     def draw_buttons(self, context, layout):
@@ -2564,7 +2667,7 @@ modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, Corrective
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
 selection = [SelectComponentsManuallyNode, SelectFaceByIndexNode, SelectAlternativeFacesNode, SelectFacesByNormalNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
 deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode, DissolveVerticesNode, DissolveDegenerateNode, EdgeCollapseNode]
-edit_operators = [BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, ExtrudeRepeatNode, FlipNormalsNode, InsetNode, MakeNormalsConsistentNode, MergeComponentsNode, PokeNode, RemoveDoublesNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode]
+edit_operators = [AddEdgeFaceNode, BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, ExtrudeRepeatNode, FlipNormalsNode, MakeNormalsConsistentNode, FlattenNode, FillEdgeLoopNode, FillGridNode, FillHolesBySidesNode, InsetNode, MergeComponentsNode, PokeNode, RemoveDoublesNode, RotateEdgeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode, TriangulateFacesNode, UnSubdivideNode]
 object_operators = [CopyTransformNode, MergeMeshesNode, SetOriginNode, SetShadingNode]
 settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
 outputs = [MeshNode, DrawModeNode]
