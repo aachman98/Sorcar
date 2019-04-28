@@ -676,8 +676,10 @@ class SelectFaceByIndexNode(Node, PcgSelectionNode):
         bpy.ops.object.mode_set(mode="OBJECT")
         total_faces = len(bpy.data.objects[self.mesh].data.polygons)
         if (self.prop_index > total_faces - 1):
-            self.prop_index = total_faces - 1
-        bpy.data.objects[self.mesh].data.polygons[self.prop_index].select = True
+            prop_index = total_faces - 1
+        else:
+            prop_index = self.prop_index
+        bpy.data.objects[self.mesh].data.polygons[prop_index].select = True
         bpy.ops.object.mode_set(mode="EDIT")
 class SelectAlternativeFacesNode(Node, PcgSelectionNode):
     bl_idname = "SelectAlternativeFacesNode"
@@ -802,6 +804,28 @@ class SelectLinkedNode(Node, PcgSelectionNode):
     
     def functionality(self):
         bpy.ops.mesh.select_linked(delimit={self.prop_delimit})
+class SelectLoopNode(Node, PcgSelectionNode):
+    bl_idname = "SelectLoopNode"
+    bl_label = "Select Loop"
+
+    prop_ring = BoolProperty(name="Ring", update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_ring")
+    
+    def functionality(self):
+        bpy.ops.mesh.loop_multi_select(ring=self.prop_ring)
+class SelectLoopRegionNode(Node, PcgSelectionNode):
+    bl_idname = "SelectLoopRegionNode"
+    bl_label = "Select Loop Region"
+
+    prop_bigger = BoolProperty(name="Select Bigger", update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_bigger")
+    
+    def functionality(self):
+        bpy.ops.mesh.loop_to_region(select_bigger=self.prop_bigger)
 class SelectLooseNode(Node, PcgSelectionNode):
     bl_idname = "SelectLooseNode"
     bl_label = "Select Loose"
@@ -889,6 +913,12 @@ class SelectRandomNode(Node, PcgSelectionNode):
 
     def functionality(self):
         bpy.ops.mesh.select_random(percent=self.prop_percent, seed=self.prop_seed, action=self.prop_action)
+class SelectRegionBoundaryNode(Node, PcgSelectionNode):
+    bl_idname = "SelectRegionBoundaryNode"
+    bl_label = "Select Region Boundary"
+
+    def functionality(self):
+        bpy.ops.mesh.region_to_loop()
 class SelectSharpEdgesNode(Node, PcgSelectionNode):
     bl_idname = "SelectSharpEdgesNode"
     bl_label = "Select Sharp Edges"
@@ -938,6 +968,27 @@ class SelectSimilarRegionNode(Node, PcgSelectionNode):
 
     def functionality(self):
         bpy.ops.mesh.select_similar_region()
+class SelectShortestPathNode(Node, PcgSelectionNode):
+    bl_idname = "SelectShortestPathNode"
+    bl_label = "Select Shortest Path"
+
+    prop_step = BoolProperty(name="Face Stepping", update=PcgNode.update_value)
+    prop_distance = BoolProperty(name="Topology Distance", update=PcgNode.update_value)
+    prop_fill = BoolProperty(name="Fill Region", update=PcgNode.update_value)
+    prop_nth = IntProperty(name="Nth Selection", default=1, min=1, update=PcgNode.update_value)
+    prop_skip = IntProperty(name="Skip", default=1, min=1, update=PcgNode.update_value)
+    prop_offset = IntProperty(name="Offset", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_step")
+        layout.prop(self, "prop_distance")
+        layout.prop(self, "prop_fill")
+        layout.prop(self, "prop_nth")
+        layout.prop(self, "prop_skip")
+        layout.prop(self, "prop_offset")
+
+    def functionality(self):
+        bpy.ops.mesh.shortest_path_select(use_face_step=self.prop_step, use_topology_distance=self.prop_distance, use_fill=self.prop_fill, nth=self.prop_nth, skip=self.prop_skip, offset=self.prop_offset)
 class SelectUngroupedNode(Node, PcgSelectionNode):
     bl_idname = "SelectUngroupedNode"
     bl_label = "Select Ungrouped"
@@ -2665,7 +2716,7 @@ inputs = [PlaneNode, CubeNode, SphereNode, CylinderNode, ConeNode] # TorusNode
 transform = [LocationNode, RotationNode, ScaleNode, TranslateNode, RotateNode, ResizeNode]
 modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CorrectiveSmoothModNode, CurveModNode, DecimateModNode, EdgeSplitModNode, LaplacianSmoothModNode, MirrorModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, TriangulateModNode, WireframeModNode]
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
-selection = [SelectComponentsManuallyNode, SelectFaceByIndexNode, SelectAlternativeFacesNode, SelectFacesByNormalNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
+selection = [SelectComponentsManuallyNode, SelectFaceByIndexNode, SelectAlternativeFacesNode, SelectFacesByNormalNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLoopNode, SelectLoopRegionNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectRegionBoundaryNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectShortestPathNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
 deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode, DissolveVerticesNode, DissolveDegenerateNode, EdgeCollapseNode]
 edit_operators = [AddEdgeFaceNode, BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, ExtrudeRepeatNode, FlipNormalsNode, MakeNormalsConsistentNode, FlattenNode, FillEdgeLoopNode, FillGridNode, FillHolesBySidesNode, InsetNode, MergeComponentsNode, PokeNode, RemoveDoublesNode, RotateEdgeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode, TriangulateFacesNode, UnSubdivideNode]
 object_operators = [CopyTransformNode, MergeMeshesNode, SetOriginNode, SetShadingNode]
