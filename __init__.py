@@ -487,6 +487,41 @@ class SuzanneNode(Node, PcgInputNode):
     
     def functionality(self):
         bpy.ops.mesh.primitive_monkey_add(radius=self.prop_radius, location=self.prop_location, rotation=self.prop_rotation)
+class CustomMeshNode(Node, PcgInputNode):
+    bl_idname = "CustomMeshNode"
+    bl_label = "Custom Mesh"
+    
+    # prop_edit = BoolProperty(name="Edit Manually", update=PcgNode.update_value)
+    prop_object = PointerProperty(name="Mesh", type=bpy.types.Object, update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        # layout.column().prop(self, "prop_edit")
+        layout.column().prop(self, "prop_object")
+        layout.column().separator()
+        layout.row().prop(self, "prop_location")
+        layout.row().prop(self, "prop_rotation")
+    
+    def execute(self):
+        if (self.prop_object == None):
+            print("Debug: " + self.name + ": Mesh not selected")
+            return ""
+        if (not self.mesh == ""):
+            try:
+                bpy.data.objects.remove(bpy.data.objects[self.mesh])
+                bpy.data.meshes.remove(bpy.data.meshes[self.mesh])
+            except:
+                print("Debug: " + self.name + ": Mesh object non-existant")
+        self.functionality()
+        return self.mesh
+    
+    def functionality(self):
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.context.scene.objects.active = self.prop_object
+        self.prop_object.select = True
+        bpy.ops.object.duplicate()
+        self.mesh = bpy.context.active_object.name
+        bpy.data.objects[self.mesh].location = self.prop_location
+        bpy.data.objects[self.mesh].rotation_euler = self.prop_rotation
 
 class LocationNode(Node, PcgTransformNode):
     bl_idname = "LocationNode"
@@ -2936,7 +2971,7 @@ class DrawModeNode(Node, PcgSettingNode):
 ##############################################################
 
 
-inputs = [PlaneNode, CubeNode, CircleNode, UVSphereNode, IcoSphereNode, CylinderNode, ConeNode, GridNode, SuzanneNode] # TorusNode
+inputs = [PlaneNode, CubeNode, CircleNode, UVSphereNode, IcoSphereNode, CylinderNode, ConeNode, GridNode, SuzanneNode, CustomMeshNode] # TorusNode
 transform = [LocationNode, RotationNode, ScaleNode, TranslateNode, RotateNode, ResizeNode]
 modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CorrectiveSmoothModNode, CurveModNode, DecimateModNode, EdgeSplitModNode, LaplacianSmoothModNode, MirrorModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, TriangulateModNode, WireframeModNode]
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
