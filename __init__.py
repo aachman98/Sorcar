@@ -1963,7 +1963,7 @@ class BevelModNode(Node, PcgModifierNode):
     limit_method = EnumProperty(name="Limit Method", items=[("NONE", "None", ""), ("ANGLE", "Angle", ""), ("WEIGHT", "Weight", "")], default="NONE", update=PcgNode.update_value)
     angle_limit = FloatProperty(name="Angle", default=0.523599, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION", update=PcgNode.update_value)
     offset_type = EnumProperty(name="Limit Method", items=[("OFFSET", "Offset", ""), ("WIDTH", "Width", ""), ("DEPTH", "Depth", ""), ("PERCENT", "Percent", "")], default="OFFSET", update=PcgNode.update_value)
-    
+
     def draw_buttons(self, context, layout):
         split = layout.split()
         col = split.column()
@@ -2000,25 +2000,53 @@ class BooleanModNode(Node, PcgModifierNode):
     bl_label = "Boolean Modifier"
     
     prop_op = EnumProperty(name="Operation", items=[("DIFFERENCE", "Difference", ""), ("UNION", "Union", ""), ("INTERSECT", "Intersect", "")], default="INTERSECT", update=PcgNode.update_value)
-    prop_obj = PointerProperty(name="Object", type=bpy.types.Object, update=PcgNode.update_value)
+    # prop_obj = PointerProperty(name="Object", type=bpy.types.Object, update=PcgNode.update_value)
     prop_overlap = FloatProperty(name="Overlap Threshold", default=0.000001, min=0.0, max=1.0, precision=6, update=PcgNode.update_value)
     prop_draw_mode = EnumProperty(items=[("SOLID", "Solid", ""), ("WIRE", "Wire", ""), ("BOUNDS", "Bounds", "")], default="WIRE", update=PcgNode.update_value)
 
+    def init(self, context):
+        super().init(context)
+        self.inputs.new("MeshSocket", "Secondary Mesh")
+    def execute(self):
+        if (not self.inputs[0].is_linked):
+            print("Debug: " + self.name + ": Not linked")
+            return ""
+        self.mesh = self.inputs[0].links[0].from_node.execute()
+        if (self.mesh == ""):
+            print("Debug: " + self.name + ": Empty object recieved")
+            return ""
+        if (not self.inputs[1].is_linked):
+            print("Debug: " + self.name + ": Secondary Not linked")
+            return self.mesh
+        mesh = self.inputs[1].links[0].from_node.execute()
+        if (mesh == ""):
+            print("Debug: " + self.name + ": Empty secondary object recieved")
+            return ""
+        bpy.context.scene.objects.active = bpy.data.objects[self.mesh]
+        bpy.data.objects[self.mesh].select = True
+        bpy.data.objects[mesh].select = False
+        if (not self.functionality(mesh)):
+            print("Debug: " + self.name + ": Error: Modifier failed to execute")
+            return ""
+        self.name = bpy.data.objects[self.mesh].modifiers[0].name
+        bpy.ops.object.modifier_apply(modifier=bpy.data.objects[self.mesh].modifiers[0].name)
+        return self.mesh
+
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_op")
-        layout.prop(self, "prop_obj")
+        # layout.prop(self, "prop_obj")
         layout.prop(self, "prop_overlap")
         layout.label("Set Secondary Object Display Mode:")
         layout.prop(self, "prop_draw_mode", expand=True)
     
-    def functionality(self):
-        if (self.prop_obj == None):
+    def functionality(self, mesh):
+        if (mesh == None):
             return False
         bpy.ops.object.modifier_add(type="BOOLEAN")
         bpy.data.objects[self.mesh].modifiers[0].operation = self.prop_op
-        bpy.data.objects[self.mesh].modifiers[0].object = self.prop_obj
+        bpy.data.objects[self.mesh].modifiers[0].object = bpy.data.objects[mesh]
         bpy.data.objects[self.mesh].modifiers[0].double_threshold = self.prop_overlap
-        self.prop_obj.draw_type = self.prop_draw_mode
+        bpy.data.objects[mesh].draw_type = self.prop_draw_mode
         return True
 class CastModNode(Node, PcgModifierNode):
     bl_idname = "CastModNode"
