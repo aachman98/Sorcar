@@ -1313,7 +1313,7 @@ class DecimateNode(Node, PcgEditOperatorNode):
         bpy.ops.mesh.decimate(ratio=self.prop_ratio, use_vertex_group=self.prop_use_vertex_group, vertex_group_factor=self.prop_vertex_group_factor, invert_vertex_group=self.prop_invert_vertex_group, use_symmetry=self.prop_use_symmetry, symmetry_axis=self.prop_symmetry_axis)
 class ExtrudeFacesNode(Node, PcgEditOperatorNode):
     bl_idname = "ExtrudeFacesNode"
-    bl_label = "Extrude Faces"
+    bl_label = "Extrude Faces (Individual)"
 
     prop_value = FloatProperty(name="Value", update=PcgNode.update_value)
     prop_mirror = BoolProperty(name="Mirror", update=PcgNode.update_value)
@@ -1340,7 +1340,7 @@ class ExtrudeFacesNode(Node, PcgEditOperatorNode):
         bpy.ops.mesh.extrude_faces_move(override, MESH_OT_extrude_faces_indiv={"mirror":self.prop_mirror}, TRANSFORM_OT_shrink_fatten={"value":prop_value})
 class ExtrudeEdgesNode(Node, PcgEditOperatorNode):
     bl_idname = "ExtrudeEdgesNode"
-    bl_label = "Extrude Edges"
+    bl_label = "Extrude Edges (Individual)"
 
     prop_value = FloatVectorProperty(name="Value", update=PcgNode.update_value)
     prop_mirror = BoolProperty(name="Mirror", update=PcgNode.update_value)
@@ -1360,7 +1360,7 @@ class ExtrudeEdgesNode(Node, PcgEditOperatorNode):
         bpy.ops.mesh.extrude_edges_move(override, MESH_OT_extrude_edges_indiv={"mirror":self.prop_mirror}, TRANSFORM_OT_translate={"value":self.prop_value})
 class ExtrudeVerticesNode(Node, PcgEditOperatorNode):
     bl_idname = "ExtrudeVerticesNode"
-    bl_label = "Extrude Vertices"
+    bl_label = "Extrude Vertices (Individual)"
 
     prop_value = FloatVectorProperty(name="Value", update=PcgNode.update_value)
     prop_mirror = BoolProperty(name="Mirror", update=PcgNode.update_value)
