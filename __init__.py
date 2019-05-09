@@ -25,6 +25,9 @@ class PcgNodeCategory(NodeCategory):
     @classmethod
     def poll(cls, context):
         return context.space_data.tree_type == 'PcgNodeTree'
+
+
+########################## CATEGORIES ########################
 class PcgNode:
     mesh = StringProperty()
     @classmethod
@@ -38,6 +41,8 @@ class PcgInputNode(PcgNode):
     prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
     prop_rotation = FloatVectorProperty(name="Rotation", subtype="EULER", unit="ROTATION", update=PcgNode.update_value)
     def init(self, context):
+        self.inputs.new("FloatVectorSocket", "Location").prop_prop = "prop_location"
+        self.inputs.new("FloatVectorSocket", "Rotation").prop_prop = "prop_rotation"
         self.outputs.new("MeshSocket", "Mesh")
         self.hide = True
         self.use_custom_color = True
@@ -49,10 +54,18 @@ class PcgInputNode(PcgNode):
                 bpy.data.meshes.remove(bpy.data.meshes[self.mesh])
             except:
                 print("Debug: " + self.name + ": Mesh object non-existant")
-        self.functionality()
+        if (self.inputs["Location"].is_linked):
+            prop_location = self.inputs["Location"].links[0].from_node.execute()
+        else:
+            prop_location = self.prop_location
+        if (self.inputs["Rotation"].is_linked):
+            prop_rotation = self.inputs["Rotation"].links[0].from_node.execute()
+        else:
+            prop_rotation = self.prop_rotation
+        self.functionality(prop_location, prop_rotation)
         self.mesh = bpy.context.active_object.name
         return self.mesh
-    def functionality(self):
+    def functionality(self, loc, rot):
         print("Debug: PcgInputNode: Main functionality of the node")
 class PcgTransformNode(PcgNode):
     def init(self, context):
@@ -174,9 +187,18 @@ class PcgSettingNode(PcgNode):
         return self.mesh
     def functionality(self):
         print("Debug: PcgSettingNode: Main functionality of the node")
+##############################################################
 
 
 ########################### SOCKETS ##########################
+class PcgNodeSocket:
+    prop_prop = StringProperty(name="Node Property", default="prop_dummy")
+    def draw(self, context, layout, node, text):
+        layout.label(self.name)
+        if (not self.is_output):
+            if (not self.is_linked):
+                layout.prop(node, self.prop_prop)
+
 class MeshSocket(NodeSocket):
     bl_idname = "MeshSocket"
     bl_label = "Mesh"
@@ -216,24 +238,18 @@ class MeshArraySocket(NodeSocket):
 
     def draw_color(self, context, node):
         return 0.5, 0.5, 0.5, 1
-class FloatSocket(NodeSocket):
+class FloatSocket(NodeSocket, PcgNodeSocket):
     bl_idname = "FloatSocket"
     bl_label = "Float"
 
-    prop_prop = StringProperty(name="Node Property", default="prop_dummy")
-
-    def draw(self, context, layout, node, text):
-        if (self.is_output):
-            layout.label("Float")
-        else:
-            if (self.is_linked):
-                # layout.label(self.name + ": " + str(round(eval("node." + self.prop_prop), 4)))
-                layout.label(self.name)
-            else:
-                layout.prop(node, self.prop_prop)
-
     def draw_color(self, context, node):
         return 0, 1, 0, 1
+class FloatVectorSocket(NodeSocket, PcgNodeSocket):
+    bl_idname = "FloatVectorSocket"
+    bl_label = "Float Vector"
+
+    def draw_color(self, context, node):
+        return 1, 1, 0, 1
 ##############################################################
 
 
@@ -313,12 +329,9 @@ class PlaneNode(Node, PcgInputNode):
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_radius")
-        layout.column().separator()
-        layout.row().prop(self, "prop_location")
-        layout.row().prop(self, "prop_rotation")
     
-    def functionality(self):
-        bpy.ops.mesh.primitive_plane_add(radius=self.prop_radius, location=self.prop_location, rotation=self.prop_rotation)
+    def functionality(self, loc, rot):
+        bpy.ops.mesh.primitive_plane_add(radius=self.prop_radius, location=loc, rotation=rot)
 class CubeNode(Node, PcgInputNode):
     bl_idname = "CubeNode"
     bl_label = "Cube"
@@ -327,12 +340,9 @@ class CubeNode(Node, PcgInputNode):
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_radius")
-        layout.column().separator()
-        layout.row().prop(self, "prop_location")
-        layout.row().prop(self, "prop_rotation")
     
-    def functionality(self):
-        bpy.ops.mesh.primitive_cube_add(radius=self.prop_radius, location=self.prop_location, rotation=self.prop_rotation)
+    def functionality(self, loc, rot):
+        bpy.ops.mesh.primitive_cube_add(radius=self.prop_radius, location=loc, rotation=rot)
 class CircleNode(Node, PcgInputNode):
     bl_idname = "CircleNode"
     bl_label = "Circle"
@@ -345,12 +355,9 @@ class CircleNode(Node, PcgInputNode):
         layout.column().prop(self, "prop_vertices")
         layout.column().prop(self, "prop_radius")
         layout.column().prop(self, "prop_end")
-        layout.column().separator()
-        layout.row().prop(self, "prop_location")
-        layout.row().prop(self, "prop_rotation")
     
-    def functionality(self):
-        bpy.ops.mesh.primitive_circle_add(vertices=self.prop_vertices, radius=self.prop_radius, fill_type=self.prop_end, location=self.prop_location, rotation=self.prop_rotation)
+    def functionality(self, loc, rot):
+        bpy.ops.mesh.primitive_circle_add(vertices=self.prop_vertices, radius=self.prop_radius, fill_type=self.prop_end, location=loc, rotation=rot)
 class UVSphereNode(Node, PcgInputNode):
     bl_idname = "UVSphereNode"
     bl_label = "UV Sphere"
@@ -363,12 +370,9 @@ class UVSphereNode(Node, PcgInputNode):
         layout.column().prop(self, "prop_segments")
         layout.column().prop(self, "prop_rings")
         layout.column().prop(self, "prop_size")
-        layout.column().separator()
-        layout.row().prop(self, "prop_location")
-        layout.row().prop(self, "prop_rotation")
     
-    def functionality(self):
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=self.prop_segments, ring_count=self.prop_rings, size=self.prop_size, location=self.prop_location, rotation=self.prop_rotation)
+    def functionality(self, loc, rot):
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=self.prop_segments, ring_count=self.prop_rings, size=self.prop_size, location=loc, rotation=rot)
 class IcoSphereNode(Node, PcgInputNode):
     bl_idname = "IcoSphereNode"
     bl_label = "Ico Sphere"
@@ -379,12 +383,9 @@ class IcoSphereNode(Node, PcgInputNode):
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_subdivisions")
         layout.column().prop(self, "prop_size")
-        layout.column().separator()
-        layout.row().prop(self, "prop_location")
-        layout.row().prop(self, "prop_rotation")
     
-    def functionality(self):
-        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=self.prop_subdivisions, size=self.prop_size, location=self.prop_location, rotation=self.prop_rotation)
+    def functionality(self, loc, rot):
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=self.prop_subdivisions, size=self.prop_size, location=loc, rotation=rot)
 class CylinderNode(Node, PcgInputNode):
     bl_idname = "CylinderNode"
     bl_label = "Cylinder"
@@ -399,12 +400,9 @@ class CylinderNode(Node, PcgInputNode):
         layout.column().prop(self, "prop_radius")
         layout.column().prop(self, "prop_depth")
         layout.column().prop(self, "prop_end")
-        layout.column().separator()
-        layout.row().prop(self, "prop_location")
-        layout.row().prop(self, "prop_rotation")
     
-    def functionality(self):
-        bpy.ops.mesh.primitive_cylinder_add(vertices=self.prop_vertices, radius=self.prop_radius, depth=self.prop_depth, end_fill_type=self.prop_end, location=self.prop_location, rotation=self.prop_rotation)
+    def functionality(self, loc, rot):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=self.prop_vertices, radius=self.prop_radius, depth=self.prop_depth, end_fill_type=self.prop_end, location=loc, rotation=rot)
 class ConeNode(Node, PcgInputNode):
     bl_idname = "ConeNode"
     bl_label = "Cone"
@@ -421,12 +419,9 @@ class ConeNode(Node, PcgInputNode):
         layout.column().prop(self, "prop_radius2")
         layout.column().prop(self, "prop_depth")
         layout.column().prop(self, "prop_end")
-        layout.column().separator()
-        layout.row().prop(self, "prop_location")
-        layout.row().prop(self, "prop_rotation")
     
-    def functionality(self):
-        bpy.ops.mesh.primitive_cone_add(vertices=self.prop_vertices, radius1=self.prop_radius1, radius2=self.prop_radius2, depth=self.prop_depth, end_fill_type=self.prop_end, location=self.prop_location, rotation=self.prop_rotation)
+    def functionality(self, loc, rot):
+        bpy.ops.mesh.primitive_cone_add(vertices=self.prop_vertices, radius1=self.prop_radius1, radius2=self.prop_radius2, depth=self.prop_depth, end_fill_type=self.prop_end, location=loc, rotation=rot)
 class TorusNode(Node, PcgInputNode):
     bl_idname = "TorusNode"
     bl_label = "Torus"
@@ -449,12 +444,9 @@ class TorusNode(Node, PcgInputNode):
         else:
             layout.column().prop(self, "prop_ext_radius")
             layout.column().prop(self, "prop_int_radius")
-        layout.column().separator()
-        layout.row().prop(self, "prop_location")
-        layout.row().prop(self, "prop_rotation")
     
-    def functionality(self):
-        bpy.ops.mesh.primitive_torus_add(major_segments=self.prop_major_segments, minor_segments=self.prop_minor_segments, mode=self.prop_mode, major_radius = self.prop_major_radius, minor_radius = self.prop_minor_radius, abso_major_rad = self.prop_ext_radius, abso_minor_rad = self.prop_int_radius, location=self.prop_location, rotation=self.prop_rotation)
+    def functionality(self, loc, rot):
+        bpy.ops.mesh.primitive_torus_add(major_segments=self.prop_major_segments, minor_segments=self.prop_minor_segments, mode=self.prop_mode, major_radius = self.prop_major_radius, minor_radius = self.prop_minor_radius, abso_major_rad = self.prop_ext_radius, abso_minor_rad = self.prop_int_radius, location=loc, rotation=rot)
 class GridNode(Node, PcgInputNode):
     bl_idname = "GridNode"
     bl_label = "Grid"
@@ -467,12 +459,9 @@ class GridNode(Node, PcgInputNode):
         layout.prop(self, "prop_x")
         layout.prop(self, "prop_y")
         layout.column().prop(self, "prop_radius")
-        layout.column().separator()
-        layout.row().prop(self, "prop_location")
-        layout.row().prop(self, "prop_rotation")
     
-    def functionality(self):
-        bpy.ops.mesh.primitive_grid_add(x_subdivisions=self.prop_x, y_subdivisions=self.prop_y, radius=self.prop_radius, location=self.prop_location, rotation=self.prop_rotation)
+    def functionality(self, loc, rot):
+        bpy.ops.mesh.primitive_grid_add(x_subdivisions=self.prop_x, y_subdivisions=self.prop_y, radius=self.prop_radius, location=loc, rotation=rot)
 class SuzanneNode(Node, PcgInputNode):
     bl_idname = "SuzanneNode"
     bl_label = "Suzanne (Monkey)"
@@ -481,12 +470,9 @@ class SuzanneNode(Node, PcgInputNode):
     
     def draw_buttons(self, context, layout):
         layout.column().prop(self, "prop_radius")
-        layout.column().separator()
-        layout.row().prop(self, "prop_location")
-        layout.row().prop(self, "prop_rotation")
     
-    def functionality(self):
-        bpy.ops.mesh.primitive_monkey_add(radius=self.prop_radius, location=self.prop_location, rotation=self.prop_rotation)
+    def functionality(self, loc, rot):
+        bpy.ops.mesh.primitive_monkey_add(radius=self.prop_radius, location=loc, rotation=rot)
 class CustomMeshNode(Node, PcgInputNode):
     bl_idname = "CustomMeshNode"
     bl_label = "Custom Mesh"
@@ -497,9 +483,6 @@ class CustomMeshNode(Node, PcgInputNode):
     def draw_buttons(self, context, layout):
         # layout.column().prop(self, "prop_edit")
         layout.column().prop(self, "prop_object")
-        layout.column().separator()
-        layout.row().prop(self, "prop_location")
-        layout.row().prop(self, "prop_rotation")
     
     def execute(self):
         if (self.prop_object == None):
@@ -515,13 +498,21 @@ class CustomMeshNode(Node, PcgInputNode):
         return self.mesh
     
     def functionality(self):
+        if (self.inputs["Location"].is_linked):
+            prop_location = self.inputs["Location"].links[0].from_node.execute()
+        else:
+            prop_location = self.prop_location
+        if (self.inputs["Rotation"].is_linked):
+            prop_rotation = self.inputs["Rotation"].links[0].from_node.execute()
+        else:
+            prop_rotation = self.prop_rotation
         bpy.ops.object.select_all(action='DESELECT')
         bpy.context.scene.objects.active = self.prop_object
         self.prop_object.select = True
         bpy.ops.object.duplicate()
         self.mesh = bpy.context.active_object.name
-        bpy.data.objects[self.mesh].location = self.prop_location
-        bpy.data.objects[self.mesh].rotation_euler = self.prop_rotation
+        bpy.data.objects[self.mesh].location = prop_location
+        bpy.data.objects[self.mesh].rotation_euler = prop_rotation
 
 class LocationNode(Node, PcgTransformNode):
     bl_idname = "LocationNode"
@@ -2901,6 +2892,7 @@ class FloatNode(Node, PcgNode):
 
     prop_float = FloatProperty(name="Float", update=PcgNode.update_value)
     prop_random = BoolProperty(name="Random", update=PcgNode.update_value)
+    prop_use_seed = BoolProperty(name="Use Seed", update=PcgNode.update_value)
     prop_min = FloatProperty(name="Min", update=PcgNode.update_value)
     prop_max = FloatProperty(name="Max", default=1.0, update=PcgNode.update_value)
     prop_seed = IntProperty(name="Seed", update=PcgNode.update_value)
@@ -2912,17 +2904,49 @@ class FloatNode(Node, PcgNode):
         if (self.prop_random):
             layout.prop(self, "prop_min")
             layout.prop(self, "prop_max")
-            layout.prop(self, "prop_seed")
         else:
             layout.prop(self, "prop_float")
         layout.prop(self, "prop_random")
+        if (self.prop_random):
+            layout.prop(self, "prop_use_seed")
+            if (self.prop_use_seed):
+                layout.prop(self, "prop_seed")
     
     def execute(self):
         if (self.prop_random):
-            random.seed(self.prop_seed)
+            if (self.prop_use_seed):
+                random.seed(self.prop_seed)
             return random.uniform(self.prop_min, self.prop_max)
         else:
             return self.prop_float
+class FloatVectorNode(Node, PcgNode):
+    bl_idname = "FloatVectorNode"
+    bl_label = "Float Vector"
+
+    prop_x = FloatProperty(name="X", update=PcgNode.update_value)
+    prop_y = FloatProperty(name="Y", update=PcgNode.update_value)
+    prop_z = FloatProperty(name="Z", update=PcgNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("FloatSocket", "X").prop_prop = "prop_x"
+        self.inputs.new("FloatSocket", "Y").prop_prop = "prop_y"
+        self.inputs.new("FloatSocket", "Z").prop_prop = "prop_z"
+        self.outputs.new("FloatVectorSocket", "Vector")
+    
+    def execute(self):
+        if (self.inputs["X"].is_linked):
+            prop_x = self.inputs["X"].links[0].from_node.execute()
+        else:
+            prop_x = self.prop_x
+        if (self.inputs["Y"].is_linked):
+            prop_y = self.inputs["Y"].links[0].from_node.execute()
+        else:
+            prop_y = self.prop_y
+        if (self.inputs["Z"].is_linked):
+            prop_z = self.inputs["Z"].links[0].from_node.execute()
+        else:
+            prop_z = self.prop_z
+        return (prop_x, prop_y, prop_z)
 
 class MeshNode(Node, PcgSettingNode):
     bl_idname = "MeshNode"
@@ -2980,8 +3004,8 @@ deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode
 edit_operators = [AddEdgeFaceNode, BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, ConvexHullNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, ExtrudeRepeatNode, FlipNormalsNode, MakeNormalsConsistentNode, FlattenNode, FillEdgeLoopNode, FillGridNode, FillHolesBySidesNode, InsetNode, LoopCutNode, MergeComponentsNode, OffsetEdgeLoopNode, PokeNode, RemoveDoublesNode, RotateEdgeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode, TriangulateFacesNode, UnSubdivideNode]
 object_operators = [ApplyTransformNode, CopyTransformNode, MakeLinksNode, MergeMeshesNode, SetOriginNode, SetShadingNode]
 settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
+maths = [FloatNode, FloatVectorNode]
 outputs = [MeshNode, DrawModeNode]
-maths = [FloatNode]
 
 node_categories = [PcgNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
                    PcgNodeCategory("transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
