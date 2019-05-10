@@ -36,6 +36,60 @@ class PcgNode:
     def update_value(self, context):
         bpy.ops.pcg.refresh_mesh_op()
         return None
+class PcgNewNode:
+    # mesh = PointerProperty(name="Mesh", type=bpy.types.Object, update=update_value)
+    input_props = [("Name", "SocketType", "prop_to_mirror"),]
+    output_prop = ("Name", "SocketType")
+    node_color = (1, 1, 1)
+    exec_data = dict()
+    @classmethod
+    def poll(cls, ntree):
+        return ntree.bl_idname == 'PcgNodeTree'
+    def update_value(self, context):
+        bpy.ops.pcg.refresh_mesh_op()
+        return None
+    def init(self, context):
+        for inp in self.input_props:
+            self.inputs.new(inp[1], inp[0]).prop_prop = inp[2]
+        self.outputs.new(self.output_prop[1], self.output_prop[0])
+        self.hide = True
+        self.use_custom_color = True
+        self.color = self.node_color
+    def execute(self):
+        print("Debug: " + self.name + ": Main functionality of the node")
+    #     for inp in self.inputs:
+    #         self.exec_data[inp.name] = inp.execute()
+    #     self.functionality()
+    # def functionality(self):
+    #     print("Debug: " + self.name + ": Main functionality of the node")
+
+class NewAddNode(Node, PcgNewNode):
+    bl_idname = "NewAddNode"
+    bl_label = "New Addition"
+    node_color = (0.6, 0.6, 0.6)
+
+    prop_x = FloatProperty(name="X", update=PcgNewNode.update_value)
+    prop_y = FloatProperty(name="Y", update=PcgNewNode.update_value)
+
+    input_props = [("X", "NewFloatSocket", "prop_x"), ("Y", "NewFloatSocket", "prop_y")]
+    output_prop = ("Sum", "NewFloatSocket")
+
+    def execute(self):
+        return self.inputs["X"].execute() + self.inputs["Y"].execute()
+class NewPrintNode(Node, PcgNewNode):
+    bl_idname = "NewPrintNode"
+    bl_label = "New Print"
+    node_color = (0.6, 0.6, 0.0)
+
+    prop_x = BoolProperty(name="", update=PcgNewNode.update_value)
+
+    input_props = [("Print", "NewFloatSocket", "prop_x")]
+    output_prop = ("Output", "NewFloatSocket")
+
+    def execute(self):
+        temp = self.inputs["Print"].execute()
+        print(str(temp))
+        return temp
 
 class PcgInputNode(PcgNode):
     prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
@@ -198,6 +252,35 @@ class PcgNodeSocket:
         if (not self.is_output):
             if (not self.is_linked):
                 layout.prop(node, self.prop_prop)
+class PcgNewNodeSocket:
+    prop_prop = StringProperty(name="Node Property", default="prop_dummy")
+    color = (1, 1, 1, 1)
+    def draw_color(self, context, node):
+        return self.color
+    def draw(self, context, layout, node, text):
+        if (not self.is_output):
+            if (not self.is_linked):
+                layout.prop(node, self.prop_prop)
+            else:
+                layout.label(self.name)
+        else:
+            layout.label(self.name)
+    def execute(self):
+        if (self.is_output):
+            return self.node.execute()
+        else:
+            if (self.is_linked):
+                # for link in self.links:
+                #     temp[link.from_node.name] = link.from_socket.execute()
+                temp = self.links[0].from_socket.execute()
+                return temp
+            else:
+                return eval("self.node." + self.prop_prop)
+
+class NewFloatSocket(NodeSocket, PcgNewNodeSocket):
+    bl_idname = "NewFloatSocket"
+    bl_label = "New Float"
+    PcgNewNodeSocket.color = (1.0, 0.3, 0.0, 0.7)
 
 class MeshSocket(NodeSocket):
     bl_idname = "MeshSocket"
@@ -3006,6 +3089,7 @@ object_operators = [ApplyTransformNode, CopyTransformNode, MakeLinksNode, MergeM
 settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
 maths = [FloatNode, FloatVectorNode]
 outputs = [MeshNode, DrawModeNode]
+testing = [NewAddNode, NewPrintNode]
 
 node_categories = [PcgNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
                    PcgNodeCategory("transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
@@ -3017,7 +3101,8 @@ node_categories = [PcgNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idna
                    PcgNodeCategory("object_operators", "Mesh Operators", items=[NodeItem(i.bl_idname) for i in object_operators]),
                    PcgNodeCategory("settings", "Settings", items=[NodeItem(i.bl_idname) for i in settings]),
                    PcgNodeCategory("maths", "Maths", items=[NodeItem(i.bl_idname) for i in maths]),
-                   PcgNodeCategory("outputs", "Outputs", items=[NodeItem(i.bl_idname) for i in outputs])]
+                   PcgNodeCategory("outputs", "Outputs", items=[NodeItem(i.bl_idname) for i in outputs]),
+                   PcgNodeCategory("testing", "New System (Testing)", items=[NodeItem(i.bl_idname) for i in testing])]
 
 def register():
     nodeitems_utils.register_node_categories("PcgNodeCategories", node_categories)
