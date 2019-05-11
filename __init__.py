@@ -375,6 +375,7 @@ class RefreshMeshOp(Operator):
             for group in bpy.data.node_groups:
                 for node in group.nodes:
                     node.first_time = True
+                    node.last_time = False
             node.execute()
             return {'FINISHED'}
         print("Debug: RefreshMeshOp: No active node")
@@ -2948,9 +2949,9 @@ class CustomPythonNode(Node, PcgSettingNode):
                 print("Debug: " + self.name + ": Invalid script")
                 break
 
-class BeginLoopNode(Node, PcgEditOperatorNode):
-    bl_idname = "BeginLoopNode"
-    bl_label = "Begin Loop"
+class BeginForLoopNode(Node, PcgEditOperatorNode):
+    bl_idname = "BeginForLoopNode"
+    bl_label = "Begin For Loop"
 
     first_time = BoolProperty(default=True)
 
@@ -2965,9 +2966,9 @@ class BeginLoopNode(Node, PcgEditOperatorNode):
                 return ""
             self.first_time = False
         return self.mesh
-class EndLoopNode(Node, PcgEditOperatorNode):
-    bl_idname = "EndLoopNode"
-    bl_label = "End Loop"
+class EndForLoopNode(Node, PcgEditOperatorNode):
+    bl_idname = "EndForLoopNode"
+    bl_label = "End For Loop"
 
     prop_iteration = IntProperty(name="Iterations", default=1, min=1, update=PcgNode.update_value)
 
@@ -2983,6 +2984,96 @@ class EndLoopNode(Node, PcgEditOperatorNode):
             if (self.mesh == ""):
                 print("Debug: " + self.name + ": Empty object recieved")
                 return ""
+        return self.mesh
+class BeginForEachLoopNode(Node, PcgEditOperatorNode):
+    bl_idname = "BeginForEachLoopNode"
+    bl_label = "Begin For-Each Loop"
+
+    first_time = BoolProperty(default=True)
+    prop_selection = StringProperty()
+
+    def toList(self, string):
+        string = string.replace("[", "")
+        string = string.replace("]", "")
+        list_string = string.rsplit(", ")
+        list = []
+        for i in list_string:
+            list.append(int(i))
+        return list
+
+    def execute(self):
+        if (self.first_time):
+            if (not self.inputs[0].is_linked):
+                print("Debug: " + self.name + ": Not linked")
+                return ""
+            self.mesh = self.inputs[0].links[0].from_node.execute()
+            if (self.mesh == ""):
+                print("Debug: " + self.name + ": Empty object recieved")
+                return ""
+            bpy.ops.object.mode_set(mode="OBJECT")
+            self.prop_selection = str([i.index for i in bpy.data.objects[self.mesh].data.polygons if i.select])
+            self.first_time = False
+            if (self.prop_selection == "[]"):
+                print("Debug: " + self.name + ": No face selected")
+                for group in bpy.data.node_groups:
+                    for node in group.nodes:
+                        node.last_time = True
+                bpy.ops.object.mode_set(mode="EDIT")
+                return self.mesh
+        bpy.ops.object.mode_set(mode="OBJECT")
+        for face in bpy.data.objects[self.mesh].data.polygons:
+            face.select = False
+        temp_list = self.toList(self.prop_selection)
+        bpy.data.objects[self.mesh].data.polygons[temp_list.pop()].select = True
+        self.prop_selection = str(temp_list)
+        if (self.prop_selection == "[]"):
+                for group in bpy.data.node_groups:
+                    for node in group.nodes:
+                        node.last_time = True
+        bpy.ops.object.mode_set(mode="EDIT")
+        return self.mesh
+class EndForEachLoopNode(Node, PcgEditOperatorNode):
+    bl_idname = "EndForEachLoopNode"
+    bl_label = "End For-Each Loop"
+
+    last_time = BoolProperty()
+    prop_selection = StringProperty()
+
+    def toList(self, string):
+        list = []
+        if (string == ""):
+            return list
+        string = string.replace("[", "")
+        string = string.replace("]", "")
+        list_string = string.rsplit(", ")
+        for i in list_string:
+            list.append(int(i))
+        return list
+    
+    def execute(self):
+        self.prop_selection = ""
+        while(not self.last_time):
+            if (not self.inputs[0].is_linked):
+                print("Debug: " + self.name + ": Not linked")
+                return ""
+            self.mesh = self.inputs[0].links[0].from_node.execute()
+            if (self.mesh == ""):
+                print("Debug: " + self.name + ": Empty object recieved")
+                return ""
+            # bpy.ops.object.mode_set(mode="OBJECT")
+        #     try:
+        #         temp_index = [i.index for i in bpy.data.objects[self.mesh].data.polygons if i.select][0]
+        #         temp_list = self.toList(self.prop_selection)
+        #         temp_list.append(temp_index)
+        #         self.prop_selection = str(temp_list)
+        #         print(temp_index)
+        #     except:
+        #         print("Debug: " + self.name + ": No face selected")
+        #     bpy.ops.object.mode_set(mode="EDIT")
+        # bpy.ops.object.mode_set(mode="OBJECT")
+        # for i in self.toList(self.prop_selection):
+        #     bpy.data.objects[self.mesh].data.polygons[i].select = True            
+        # bpy.ops.object.mode_set(mode="EDIT")
         return self.mesh
 
 class FloatNode(Node, PcgNode):
@@ -3131,7 +3222,7 @@ deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode
 edit_operators = [AddEdgeFaceNode, BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, ConvexHullNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, ExtrudeRepeatNode, FlipNormalsNode, MakeNormalsConsistentNode, FlattenNode, FillEdgeLoopNode, FillGridNode, FillHolesBySidesNode, InsetNode, LoopCutNode, MergeComponentsNode, OffsetEdgeLoopNode, PokeNode, RemoveDoublesNode, RotateEdgeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode, TriangulateFacesNode, UnSubdivideNode]
 object_operators = [ApplyTransformNode, CopyTransformNode, MakeLinksNode, MergeMeshesNode, SetOriginNode, SetShadingNode]
 settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
-control = [BeginLoopNode, EndLoopNode]
+control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode]
 maths = [FloatNode, FloatVectorNode]
 outputs = [MeshNode, DrawModeNode]
 testing = [NewAddNode, NewPrintNode]
