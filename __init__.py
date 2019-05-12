@@ -54,8 +54,57 @@ class PcgNewNode:
         self.hide = True
         self.use_custom_color = True
         self.color = self.node_color
+    def override(self):
+        window = bpy.data.window_managers['WinMan'].windows[0]
+        screen = window.screen
+        area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
+        space = area.spaces[0]
+        scene = bpy.data.scenes[0]
+        region = [i for i in area.regions if i.type == 'WINDOW'][0]
+        return {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':self.prop_mesh, 'region':region, 'edit_object':self.prop_mesh, 'gpencil_data':bpy.context.gpencil_data}
     def execute(self):
-        print("Debug: " + self.name + ": Main functionality of the node")
+        print("Debug: " + self.name + ": Condition check, setting up environment, and overrides before execution")
+        self.functionality()
+        return ""
+    def functionality(self):
+        print("Debug: " + self.name + ": Main functionality of the node using props_ & self.inputs[]")
+
+class PcgNewInputNode(PcgNewNode):
+    node_color = (0.5, 0.0, 0.0)
+
+    prop_mesh = PointerProperty(type=bpy.types.Object)
+    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
+    prop_rotation = FloatVectorProperty(name="Rotation", subtype="EULER", unit="ROTATION", update=PcgNode.update_value)
+
+    input_props = [("Location", "NewVectorSocket", "prop_location"), ("Rotation", "NewVectorSocket", "prop_rotation")]
+    output_prop = ("Mesh", "NewMeshSocket")
+
+    def execute(self):
+        if (not self.prop_mesh == None):
+            try:
+                bpy.data.objects.remove(self.prop_mesh)
+                bpy.data.meshes.remove(bpy.data.meshes[self.prop_mesh.name])
+            except:
+                print("Debug: " + self.name + ": Mesh object non-existant")
+        if ((not bpy.context.active_object == None) and (not bpy.context.active_object.mode == "OBJECT")):
+            bpy.ops.object.mode_set(mode="OBJECT")
+        self.functionality()
+        self.prop_mesh = bpy.context.active_object
+        return self.prop_mesh
+class PcgNewConversionNode(PcgNewNode):
+    node_color = (0.0, 0.5, 0.0)
+
+    prop_mesh = PointerProperty(type=bpy.types.Object)
+
+    def execute(self):
+        self.prop_mesh = self.inputs["Mesh"].execute()
+        if (self.prop_mesh == None):
+            print("Debug: " + self.name + ": Empty object recieved")
+            return None
+        bpy.context.scene.objects.active = self.prop_mesh
+        self.functionality()
+        return self.prop_mesh
+
 
 class PcgInputNode(PcgNode):
     prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
@@ -226,7 +275,7 @@ class PcgNewNodeSocket:
     def draw(self, context, layout, node, text):
         if (not self.is_output):
             if (not self.is_linked):
-                layout.prop(node, self.prop_prop)
+                layout.prop(node, self.prop_prop, text=self.name)
             else:
                 layout.label(self.name)
         else:
@@ -236,8 +285,7 @@ class PcgNewNodeSocket:
             return self.node.execute()
         else:
             if (self.is_linked):
-                temp = self.links[0].from_socket.execute()
-                return temp
+                return self.links[0].from_socket.execute()
             else:
                 return eval("self.node." + self.prop_prop)
 
@@ -296,19 +344,23 @@ class FloatVectorSocket(NodeSocket, PcgNodeSocket):
 class NewMeshSocket(NodeSocket, PcgNewNodeSocket):
     bl_idname = "NewMeshSocket"
     bl_label = "New Mesh"
-    PcgNewNodeSocket.color = (1.0, 1.0, 1.0, 1.0)
+    color = (1.0, 1.0, 1.0, 1.0)
 class NewComponentSocket(NodeSocket, PcgNewNodeSocket):
     bl_idname = "NewComponentSocket"
     bl_label = "New Component"
-    PcgNewNodeSocket.color = (0.0, 0.0, 0.0, 1.0)
+    color = (0.0, 0.0, 0.0, 1.0)
 class NewFloatSocket(NodeSocket, PcgNewNodeSocket):
     bl_idname = "NewFloatSocket"
     bl_label = "New Float"
-    PcgNewNodeSocket.color = (0.0, 1.0, 0.0, 1.0)
+    color = (0.0, 1.0, 0.0, 1.0)
 class NewVectorSocket(NodeSocket, PcgNewNodeSocket):
     bl_idname = "NewVectorSocket"
     bl_label = "New Vector"
-    PcgNewNodeSocket.color = (1.0, 1.0, 0.0, 1.0)
+    color = (1.0, 1.0, 0.0, 1.0)
+class NewBoolSocket(NodeSocket, PcgNewNodeSocket):
+    bl_idname = "NewBoolSocket"
+    bl_label = "New Boolean"
+    color = (1.0, 0.0, 0.0, 1.0)
 ##############################################################
 
 
@@ -3210,6 +3262,31 @@ class NewPrintNode(Node, PcgNewNode):
         temp = self.inputs["Print"].execute()
         print(str(temp))
         return temp
+class NewCubeNode(Node, PcgNewInputNode):
+    bl_idname = "NewCubeNode"
+    bl_label = "New Cube Node"
+    
+    prop_radius = FloatProperty(name="Radius", default=1.0, min=0.0, update=PcgNode.update_value)
+
+    PcgNewInputNode.input_props.insert(0, ("Radius", "NewFloatSocket", "prop_radius"))
+
+    def functionality(self):
+        bpy.ops.mesh.primitive_cube_add(radius=self.inputs["Radius"].execute(), location=self.inputs["Location"].execute(), rotation=self.inputs["Rotation"].execute())
+class NewToComponentNode(Node, PcgNewConversionNode):
+    bl_idname = "NewToComponentNode"
+    bl_label = "New To Component"
+
+    prop_selection_type = EnumProperty(name="Component", items=[("FACE", "Faces", ""), ("VERT", "Vertices", ""), ("EDGE", "Edges", "")], default="FACE", update=PcgNode.update_value)
+    prop_deselect = BoolProperty(name="Deselect All", default=True, update=PcgNode.update_value)
+
+    PcgNewConversionNode.input_props = [("Mesh", "NewMeshSocket", "prop_mesh"), ("Deselect All", "NewBoolSocket", "prop_deselect")]
+    PcgNewConversionNode.output_prop = ("Component", "NewComponentSocket")
+
+    def functionality(self):
+        bpy.ops.object.mode_set(mode="EDIT")
+        bpy.ops.mesh.select_mode(type=self.prop_selection_type)
+        if (self.inputs["Deselect All"].execute()):
+            bpy.ops.mesh.select_all(action="DESELECT")
 ##############################################################
 
 
@@ -3225,7 +3302,7 @@ settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
 control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode]
 maths = [FloatNode, FloatVectorNode]
 outputs = [MeshNode, DrawModeNode]
-testing = [NewAddNode, NewPrintNode]
+testing = [NewAddNode, NewPrintNode, NewCubeNode, NewToComponentNode]
 
 node_categories = [PcgNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
                    PcgNodeCategory("transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
