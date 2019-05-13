@@ -426,8 +426,11 @@ class RefreshMeshOp(Operator):
         if (not node == None):
             for group in bpy.data.node_groups:
                 for node in group.nodes:
-                    node.first_time = True
-                    node.last_time = False
+                    try:
+                        node.first_time = True
+                        node.last_time = False
+                    except:
+                        print("Debug: " + node.name + ": Not a Loop node")
             node.execute()
             return {'FINISHED'}
         print("Debug: RefreshMeshOp: No active node")
@@ -634,12 +637,17 @@ class LocationNode(Node, PcgTransformNode):
     bl_label = "Set Location"
     
     prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
-    
-    def draw_buttons(self, context, layout):
-        layout.column().prop(self, "prop_location")
+
+    def init(self, context):
+        super().init(context)
+        self.inputs.new("FloatVectorSocket", "Location").prop_prop = "prop_location"
     
     def functionality(self):
-        bpy.data.objects[self.mesh].location = self.prop_location
+        if (self.inputs["Location"].is_linked):
+            prop_location = self.inputs["Location"].links[0].from_node.execute()
+        else:
+            prop_location = self.prop_location
+        bpy.data.objects[self.mesh].location = prop_location
 class RotationNode(Node, PcgTransformNode):
     bl_idname = "RotationNode"
     bl_label = "Set Rotation"
@@ -656,12 +664,17 @@ class ScaleNode(Node, PcgTransformNode):
     bl_label = "Set Scale"
     
     prop_scale = FloatVectorProperty(name="Scale", default=(1.0, 1.0, 1.0), update=PcgNode.update_value)
-    
-    def draw_buttons(self, context, layout):
-        layout.column().prop(self, "prop_scale")
+
+    def init(self, context):
+        super().init(context)
+        self.inputs.new("FloatVectorSocket", "Scale").prop_prop = "prop_scale"
     
     def functionality(self):
-        bpy.data.objects[self.mesh].scale = self.prop_scale
+        if (self.inputs["Scale"].is_linked):
+            prop_scale = self.inputs["Scale"].links[0].from_node.execute()
+        else:
+            prop_scale = self.prop_scale
+        bpy.data.objects[self.mesh].scale = prop_scale
 class TranslateNode(Node, PcgTransformNode):
     bl_idname = "TranslateNode"
     bl_label = "Translate"
@@ -670,13 +683,19 @@ class TranslateNode(Node, PcgTransformNode):
     prop_constraint_axis = BoolVectorProperty(name="Constraint Axis", update=PcgNode.update_value)
     prop_mirror = BoolProperty(name="Mirror", update=PcgNode.update_value)
 
+    def init(self, context):
+        super().init(context)
+        self.inputs.new("FloatVectorSocket", "Value").prop_prop = "prop_value"
+
     def draw_buttons(self, context, layout):
-        col = layout.column()
-        col.prop(self, "prop_value")
         layout.prop(self, "prop_constraint_axis")
         layout.prop(self, "prop_mirror")
-    
+
     def functionality(self):
+        if (self.inputs["Value"].is_linked):
+            prop_value = self.inputs["Value"].links[0].from_node.execute()
+        else:
+            prop_value = self.prop_value
         window = bpy.data.window_managers['WinMan'].windows[0]
         screen = window.screen
         area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
@@ -684,7 +703,7 @@ class TranslateNode(Node, PcgTransformNode):
         scene = bpy.data.scenes[0]
         region = [i for i in area.regions if i.type == 'WINDOW'][0]
         override = {'window':window, 'screen':screen, 'area':area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'gpencil_data':bpy.context.gpencil_data}
-        bpy.ops.transform.translate(override, value=self.prop_value, constraint_axis=self.prop_constraint_axis, constraint_orientation=space.transform_orientation, mirror=self.prop_mirror, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1.0, snap=False, snap_target='CLOSEST', snap_point=(0.0, 0.0, 0.0), snap_align=False, snap_normal=(0.0, 0.0, 0.0), gpencil_strokes=False, texture_space=False, remove_on_cancel=False, release_confirm=False, use_accurate=False)
+        bpy.ops.transform.translate(override, value=prop_value, constraint_axis=self.prop_constraint_axis, constraint_orientation=space.transform_orientation, mirror=self.prop_mirror, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1.0, snap=False, snap_target='CLOSEST', snap_point=(0.0, 0.0, 0.0), snap_align=False, snap_normal=(0.0, 0.0, 0.0), gpencil_strokes=False, texture_space=False, remove_on_cancel=False, release_confirm=False, use_accurate=False)
 class RotateNode(Node, PcgTransformNode):
     bl_idname = "RotateNode"
     bl_label = "Rotate"
@@ -726,13 +745,19 @@ class ResizeNode(Node, PcgTransformNode):
     prop_constraint_axis = BoolVectorProperty(name="Constraint Axis", update=PcgNode.update_value)
     prop_mirror = BoolProperty(name="Mirror", update=PcgNode.update_value)
 
+    def init(self, context):
+        super().init(context)
+        self.inputs.new("FloatVectorSocket", "Value").prop_prop = "prop_value"
+
     def draw_buttons(self, context, layout):
-        col = layout.column()
-        col.prop(self, "prop_value")
         layout.prop(self, "prop_constraint_axis")
         layout.prop(self, "prop_mirror")
     
     def functionality(self):
+        if (self.inputs["Value"].is_linked):
+            prop_value = self.inputs["Value"].links[0].from_node.execute()
+        else:
+            prop_value = self.prop_value
         window = bpy.data.window_managers['WinMan'].windows[0]
         screen = window.screen
         area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
@@ -740,7 +765,7 @@ class ResizeNode(Node, PcgTransformNode):
         scene = bpy.data.scenes[0]
         region = [i for i in area.regions if i.type == 'WINDOW'][0]
         override = {'window':window, 'screen':screen, 'area':area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'gpencil_data':bpy.context.gpencil_data}
-        bpy.ops.transform.resize(override, value=self.prop_value, constraint_axis=self.prop_constraint_axis, constraint_orientation=space.transform_orientation, mirror=self.prop_mirror, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1.0, snap=False, snap_target='CLOSEST', snap_point=(0.0, 0.0, 0.0), snap_align=False, snap_normal=(0.0, 0.0, 0.0), gpencil_strokes=False, texture_space=False, remove_on_cancel=False, release_confirm=False, use_accurate=False)
+        bpy.ops.transform.resize(override, value=prop_value, constraint_axis=self.prop_constraint_axis, constraint_orientation=space.transform_orientation, mirror=self.prop_mirror, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1.0, snap=False, snap_target='CLOSEST', snap_point=(0.0, 0.0, 0.0), snap_align=False, snap_normal=(0.0, 0.0, 0.0), gpencil_strokes=False, texture_space=False, remove_on_cancel=False, release_confirm=False, use_accurate=False)
 
 class ToComponentNode(Node, PcgNode):
     bl_idname = "ToComponentNode"
