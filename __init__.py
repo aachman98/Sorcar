@@ -425,13 +425,16 @@ class RefreshMeshOp(Operator):
         node = context.active_node
         if (not node == None):
             for group in bpy.data.node_groups:
-                for node in group.nodes:
+                for n in group.nodes:
                     try:
-                        node.first_time = True
-                        node.last_time = False
+                        n.first_time = True
+                        n.last_time = False
                     except:
                         print("Debug: " + node.name + ": Not a Loop node")
-            node.execute()
+            try:
+                node.execute()
+            except:
+                print("Debug: " + node.name + ": Node not executable")
             return {'FINISHED'}
         print("Debug: RefreshMeshOp: No active node")
         return {'CANCELLED'}
