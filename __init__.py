@@ -36,11 +36,9 @@ class PcgNode:
     def update_value(self, context):
         bpy.ops.pcg.refresh_mesh_op()
         return None
-class PcgNewNode:
-    input_props = [("Name", "SocketType", "prop_to_mirror"),]
-    output_prop = ("Name", "SocketType")
+class PcgNewNode():
+    first_time = BoolProperty(default=True)
     node_color = (1, 1, 1)
-    exec_data = dict()
     @classmethod
     def poll(cls, ntree):
         return ntree.bl_idname == 'PcgNodeTree'
@@ -48,9 +46,6 @@ class PcgNewNode:
         bpy.ops.pcg.refresh_mesh_op()
         return None
     def init(self, context):
-        for inp in self.input_props:
-            self.inputs.new(inp[1], inp[0]).prop_prop = inp[2]
-        self.outputs.new(self.output_prop[1], self.output_prop[0])
         self.hide = True
         self.use_custom_color = True
         self.color = self.node_color
@@ -61,50 +56,106 @@ class PcgNewNode:
         space = area.spaces[0]
         scene = bpy.data.scenes[0]
         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-        return {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':self.prop_mesh, 'region':region, 'edit_object':self.prop_mesh, 'gpencil_data':bpy.context.gpencil_data}
+        return {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':self.mesh.name, 'region':region, 'edit_object':self.mesh.name, 'gpencil_data':bpy.context.gpencil_data}
+    def draw_buttons(self, context, layout):
+        print("Debug: " + self.name + ": Draw non-socket attributes")
+    def pre_execute(self):
+        print("Debug: " + self.name + ": Condition check, setting up environment, overrides, ...")
+        return True
+    def post_execute(self):
+        print("Debug: " + self.name + ": Reset environment, change active object, ...")
     def execute(self):
-        print("Debug: " + self.name + ": Condition check, setting up environment, and overrides before execution")
+        if not self.pre_execute():
+            return None
         self.functionality()
-        return ""
+        ret_data = self.post_execute()
+        if (self.first_time):
+            self.first_time = False
+        return ret_data
     def functionality(self):
         print("Debug: " + self.name + ": Main functionality of the node using props_ & self.inputs[]")
 
 class PcgNewInputNode(PcgNewNode):
     node_color = (0.5, 0.0, 0.0)
 
-    prop_mesh = PointerProperty(type=bpy.types.Object)
-    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
-    prop_rotation = FloatVectorProperty(name="Rotation", subtype="EULER", unit="ROTATION", update=PcgNode.update_value)
+    mesh = PointerProperty(type=bpy.types.Object)
 
-    input_props = [("Location", "NewVectorSocket", "prop_location"), ("Rotation", "NewVectorSocket", "prop_rotation")]
-    output_prop = ("Mesh", "NewMeshSocket")
+    def init(self, context):
+        self.outputs.new("NewMeshSocket", "Mesh")
+        super().init(context)
 
-    def execute(self):
-        if (not self.prop_mesh == None):
+    def pre_execute(self):
+        if (not self.mesh == None):
             try:
-                bpy.data.objects.remove(self.prop_mesh)
-                bpy.data.meshes.remove(bpy.data.meshes[self.prop_mesh.name])
+                bpy.data.meshes.remove(bpy.data.meshes[self.mesh.name])
+                bpy.data.objects.remove(self.mesh)
             except:
                 print("Debug: " + self.name + ": Mesh object non-existant")
         if ((not bpy.context.active_object == None) and (not bpy.context.active_object.mode == "OBJECT")):
             bpy.ops.object.mode_set(mode="OBJECT")
-        self.functionality()
-        self.prop_mesh = bpy.context.active_object
-        return self.prop_mesh
-class PcgNewConversionNode(PcgNewNode):
+        return True
+    
+    def post_execute(self):
+        self.mesh = bpy.context.active_object
+        return self.mesh
+class PcgNewTransformNode(PcgNewNode):
     node_color = (0.0, 0.5, 0.0)
 
-    prop_mesh = PointerProperty(type=bpy.types.Object)
+    mesh = PointerProperty(type=bpy.types.Object)
 
-    def execute(self):
-        self.prop_mesh = self.inputs["Mesh"].execute()
-        if (self.prop_mesh == None):
+    def init(self, context):
+        self.inputs.new("NewObjectSocket", "Object").prop_prop = "mesh"
+        self.outputs.new("NewObjectSocket", "Object")
+        self.inputs.move(len(self.inputs)-1, 0)
+        super().init(context)
+
+    def pre_execute(self):
+        self.mesh = self.inputs["Object"].execute()
+        if (self.mesh == None):
             print("Debug: " + self.name + ": Empty object recieved")
-            return None
-        bpy.context.scene.objects.active = self.prop_mesh
-        self.functionality()
-        return self.prop_mesh
+            return False
+        bpy.context.scene.objects.active = self.mesh
+        return True
+    
+    def post_execute(self):
+        return self.mesh
+class PcgNewModifierNode(PcgNewNode):
+    node_color = (0.0, 0.0, 0.5)
 
+    mesh = PointerProperty(type=bpy.types.Object)
+
+    def init(self, context):
+        self.inputs.new("NewMeshSocket", "Mesh").prop_prop = "mesh"
+        self.outputs.new("NewMeshSocket", "Mesh")
+        self.inputs.move(len(self.inputs)-1, 0)
+        super().init(context)
+
+    def pre_execute(self):
+        self.mesh = self.inputs["Mesh"].execute()
+        if (self.mesh == None):
+            print("Debug: " + self.name + ": Empty object recieved")
+            return False
+        bpy.context.scene.objects.active = self.mesh
+        return True
+    
+    def post_execute(self):
+        bpy.ops.object.modifier_apply(modifier=self.mesh.modifiers[0].name)
+        return self.mesh
+class PcgNewConversionNode(PcgNewNode):
+    node_color = (0.0, 0.5, 0.5)
+
+    mesh = PointerProperty(type=bpy.types.Object)
+
+    def pre_execute(self):
+        self.mesh = self.inputs[0].execute()
+        if (self.mesh == None):
+            print("Debug: " + self.name + ": Empty object recieved")
+            return False
+        bpy.context.scene.objects.active = self.mesh
+        return True
+    
+    def post_execute(self):
+        return self.mesh
 
 class PcgInputNode(PcgNode):
     prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
@@ -268,26 +319,25 @@ class PcgNodeSocket:
             if (not self.is_linked):
                 layout.prop(node, self.prop_prop)
 class PcgNewNodeSocket:
-    prop_prop = StringProperty(name="Node Property", default="prop_dummy")
-    color = (1, 1, 1, 1)
+    prop_prop = StringProperty(default="prop_dummy")
+    color = (1.0, 1.0, 1.0, 1.0)
+    mirror_prop = True
     def draw_color(self, context, node):
         return self.color
     def draw(self, context, layout, node, text):
-        if (not self.is_output):
-            if (not self.is_linked):
-                layout.prop(node, self.prop_prop, text=self.name)
-            else:
-                layout.label(self.name)
+        if (not self.is_output) and (not self.is_linked) and (self.mirror_prop):
+            layout.prop(node, self.prop_prop, text=self.name)
         else:
             layout.label(self.name)
     def execute(self):
         if (self.is_output):
             return self.node.execute()
+        elif (self.is_linked):
+            return self.links[0].from_socket.execute()
+        elif (self.mirror_prop):
+            return eval("self.node." + self.prop_prop)
         else:
-            if (self.is_linked):
-                return self.links[0].from_socket.execute()
-            else:
-                return eval("self.node." + self.prop_prop)
+            return None
 
 class MeshSocket(NodeSocket):
     bl_idname = "MeshSocket"
@@ -345,22 +395,45 @@ class NewMeshSocket(NodeSocket, PcgNewNodeSocket):
     bl_idname = "NewMeshSocket"
     bl_label = "New Mesh"
     color = (1.0, 1.0, 1.0, 1.0)
+    mirror_prop = False
 class NewComponentSocket(NodeSocket, PcgNewNodeSocket):
     bl_idname = "NewComponentSocket"
     bl_label = "New Component"
     color = (0.0, 0.0, 0.0, 1.0)
-class NewFloatSocket(NodeSocket, PcgNewNodeSocket):
-    bl_idname = "NewFloatSocket"
-    bl_label = "New Float"
-    color = (0.0, 1.0, 0.0, 1.0)
-class NewVectorSocket(NodeSocket, PcgNewNodeSocket):
-    bl_idname = "NewVectorSocket"
-    bl_label = "New Vector"
-    color = (1.0, 1.0, 0.0, 1.0)
+    mirror_prop = False
+class NewObjectSocket(NodeSocket, PcgNewNodeSocket):
+    bl_idname = "NewObjectSocket"
+    bl_label = "New Object"
+    color = (1.0, 0.0, 0.0, 1.0)
+    mirror_prop = False
 class NewBoolSocket(NodeSocket, PcgNewNodeSocket):
     bl_idname = "NewBoolSocket"
     bl_label = "New Boolean"
     color = (1.0, 0.0, 0.0, 1.0)
+class NewIntSocket(NodeSocket, PcgNewNodeSocket):
+    bl_idname = "NewIntSocket"
+    bl_label = "New Integer"
+    color = (0.0, 0.7, 1.0, 1.0)
+class NewFloatSocket(NodeSocket, PcgNewNodeSocket):
+    bl_idname = "NewFloatSocket"
+    bl_label = "New Float"
+    color = (0.0, 1.0, 0.0, 1.0)
+class NewFloatVectorSocket(NodeSocket, PcgNewNodeSocket):
+    bl_idname = "NewFloatVectorSocket"
+    bl_label = "New Float Vector"
+    color = (1.0, 1.0, 0.0, 1.0)
+class NewAngleSocket(NodeSocket, PcgNewNodeSocket):
+    bl_idname = "NewAngleSocket"
+    bl_label = "New Angle"
+    color = (0.0, 0.0, 0.8, 1.0)
+class NewAngleVectorSocket(NodeSocket, PcgNewNodeSocket):
+    bl_idname = "NewAngleVectorSocket"
+    bl_label = "New Angle Vector"
+    color = (0.0, 0.0, 1.0, 1.0)
+class NewStringSocket(NodeSocket, PcgNewNodeSocket):
+    bl_idname = "NewStringSocket"
+    bl_label = "New String"
+    color = (1.0, 0.0, 1.0, 1.0)
 ##############################################################
 
 
@@ -425,16 +498,13 @@ class RefreshMeshOp(Operator):
         node = context.active_node
         if (not node == None):
             for group in bpy.data.node_groups:
-                for n in group.nodes:
+                for node in group.nodes:
                     try:
-                        n.first_time = True
-                        n.last_time = False
+                        node.first_time = True
+                        node.last_time = False
                     except:
                         print("Debug: " + node.name + ": Not a Loop node")
-            try:
-                node.execute()
-            except:
-                print("Debug: " + node.name + ": Node not executable")
+            node.execute()
             return {'FINISHED'}
         print("Debug: RefreshMeshOp: No active node")
         return {'CANCELLED'}
@@ -3263,58 +3333,224 @@ class DrawModeNode(Node, PcgSettingNode):
         bpy.data.objects[self.mesh].show_transparent = self.prop_transparency
         bpy.data.objects[self.mesh].draw_type = self.prop_max_draw_type
 
-class NewAddNode(Node, PcgNewNode):
-    bl_idname = "NewAddNode"
-    bl_label = "New Addition"
-    node_color = (0.6, 0.6, 0.6)
+class NewMathOpNode(Node, PcgNewNode):
+    bl_idname = "NewMathOpNode"
+    bl_label = "New Math Operation"
 
+    prop_op = EnumProperty(name="Opertion", items=[("ADD", "+", ""), ("SUB", "-", ""), ("MULT", "*", "")], default="ADD", update=PcgNewNode.update_value)
     prop_x = FloatProperty(name="X", update=PcgNewNode.update_value)
     prop_y = FloatProperty(name="Y", update=PcgNewNode.update_value)
 
-    input_props = [("X", "NewFloatSocket", "prop_x"), ("Y", "NewFloatSocket", "prop_y")]
-    output_prop = ("Sum", "NewFloatSocket")
-
+    def init(self, context):
+        self.inputs.new("NewFloatSocket", "X").prop_prop = "prop_x"
+        self.inputs.new("NewFloatSocket", "Y").prop_prop = "prop_y"
+        self.outputs.new("NewFloatSocket", "Sum")
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_op")
+    
     def execute(self):
-        return self.inputs["X"].execute() + self.inputs["Y"].execute()
+        if (self.prop_op == "ADD"):
+            return self.inputs["X"].execute() + self.inputs["Y"].execute()
+        elif(self.prop_op == "SUB"):
+            return self.inputs["X"].execute() - self.inputs["Y"].execute()
+        elif(self.prop_op == "MULT"):
+            return self.inputs["X"].execute() * self.inputs["Y"].execute()
 class NewPrintNode(Node, PcgNewNode):
     bl_idname = "NewPrintNode"
     bl_label = "New Print"
-    node_color = (0.6, 0.6, 0.0)
 
-    prop_x = BoolProperty(name="", update=PcgNewNode.update_value)
+    prop_value = FloatProperty(name="Value", update=PcgNewNode.update_value)
 
-    input_props = [("Print", "NewFloatSocket", "prop_x")]
-    output_prop = ("Output", "NewFloatSocket")
+    def init(self, context):
+        self.inputs.new("NewFloatSocket", "Value").prop_prop = "prop_value"
+        self.outputs.new("NewFloatSocket", "Value")
+    
+    def draw_buttons(self, context, layout):
+        if (self == self.id_data.nodes.active):
+            layout.operator("pcg.refresh_mesh_op", "Print")
 
     def execute(self):
-        temp = self.inputs["Print"].execute()
+        temp = self.inputs["Value"].execute()
         print(str(temp))
         return temp
 class NewCubeNode(Node, PcgNewInputNode):
     bl_idname = "NewCubeNode"
-    bl_label = "New Cube Node"
+    bl_label = "New Cube"
     
-    prop_radius = FloatProperty(name="Radius", default=1.0, min=0.0, update=PcgNode.update_value)
+    prop_radius = FloatProperty(name="Radius", default=1.0, min=0.0, update=PcgNewNode.update_value)
 
-    PcgNewInputNode.input_props.insert(0, ("Radius", "NewFloatSocket", "prop_radius"))
+    def init(self, context):
+        self.inputs.new("NewFloatSocket", "Radius").prop_prop = "prop_radius"
+        super().init(context)
 
     def functionality(self):
-        bpy.ops.mesh.primitive_cube_add(radius=self.inputs["Radius"].execute(), location=self.inputs["Location"].execute(), rotation=self.inputs["Rotation"].execute())
+        bpy.ops.mesh.primitive_cube_add(radius=self.inputs["Radius"].execute())
+class NewCylinderNode(Node, PcgNewInputNode):
+    bl_idname = "NewCylinderNode"
+    bl_label = "New Cylinder"
+    
+    prop_vertices = IntProperty(name="Vertices", default=32, min=3, max=1000000, update=PcgNode.update_value)
+    prop_radius = FloatProperty(name="Radius", default=1.0, min=0, update=PcgNode.update_value)
+    prop_depth = FloatProperty(name="Depth", default=2.0, min=0, update=PcgNode.update_value)
+    prop_end = EnumProperty(name="End Fill Type", items=[("NOTHING", "Nothing", "Don’t fill at all."), ("NGON", "Ngon", "Use ngons"), ("TRIFAN", "Triangle Fan", "Use triangle fans.")], default="NGON", update=PcgNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("NewFloatSocket", "Radius").prop_prop = "prop_radius"
+        self.inputs.new("NewFloatSocket", "Depth").prop_prop = "prop_depth"
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.column().prop(self, "prop_vertices")
+        layout.column().prop(self, "prop_end")
+
+    def functionality(self):
+        bpy.ops.mesh.primitive_cylinder_add(vertices=self.prop_vertices, radius=self.inputs["Radius"].execute(), depth=self.inputs["Depth"].execute(), end_fill_type=self.prop_end)
 class NewToComponentNode(Node, PcgNewConversionNode):
     bl_idname = "NewToComponentNode"
     bl_label = "New To Component"
-
+    
     prop_selection_type = EnumProperty(name="Component", items=[("FACE", "Faces", ""), ("VERT", "Vertices", ""), ("EDGE", "Edges", "")], default="FACE", update=PcgNode.update_value)
     prop_deselect = BoolProperty(name="Deselect All", default=True, update=PcgNode.update_value)
 
-    PcgNewConversionNode.input_props = [("Mesh", "NewMeshSocket", "prop_mesh"), ("Deselect All", "NewBoolSocket", "prop_deselect")]
-    PcgNewConversionNode.output_prop = ("Component", "NewComponentSocket")
+    def init(self, context):
+        self.inputs.new("NewMeshSocket", "Mesh").prop_prop = "mesh"
+        self.inputs.new("NewBoolSocket", "Deselect").prop_prop = "prop_deselect"
+        self.outputs.new("NewComponentSocket", "Component")
+        super().init(context)
 
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_selection_type", expand=True)
+    
     def functionality(self):
         bpy.ops.object.mode_set(mode="EDIT")
         bpy.ops.mesh.select_mode(type=self.prop_selection_type)
-        if (self.inputs["Deselect All"].execute()):
+        if (self.inputs["Deselect"].execute()):
             bpy.ops.mesh.select_all(action="DESELECT")
+class NewToMeshNode(Node, PcgNewConversionNode):
+    bl_idname = "NewToMeshNode"
+    bl_label = "New To Mesh"
+
+    def init(self, context):
+        self.inputs.new("NewComponentSocket", "Component").prop_prop = "mesh"
+        self.outputs.new("NewMeshSocket", "Mesh")
+        super().init(context)
+    
+    def functionality(self):
+        bpy.ops.object.mode_set(mode="OBJECT")
+class NewLocationNode(Node, PcgNewTransformNode):
+    bl_idname = "NewLocationNode"
+    bl_label = "New Set Location"
+    
+    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("NewFloatVectorSocket", "Location").prop_prop = "prop_location"
+        super().init(context)
+    
+    def functionality(self):
+        self.mesh.location = self.inputs["Location"].execute()
+class NewRotateNode(Node, PcgNewTransformNode):
+    bl_idname = "NewRotateNode"
+    bl_label = "New Rotate"
+
+    prop_value = FloatProperty(name="Value", subtype="ANGLE", unit="ROTATION", update=PcgNode.update_value)
+    prop_constraint_axis = EnumProperty(name="Constraint Axis", items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="X", update=PcgNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("NewAngleSocket", "Value").prop_prop = "prop_value"
+        super().init(context)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_constraint_axis", expand=True)
+    
+    def functionality(self):
+        bpy.ops.transform.rotate(self.override(), value=self.inputs["Value"].execute(), axis=(1.0, 1.0, 1.0), constraint_axis=(self.prop_constraint_axis=="X", self.prop_constraint_axis=="Y", self.prop_constraint_axis=="Z"))
+class NewBevelModNode(Node, PcgNewModifierNode):
+    bl_idname = "NewBevelModNode"
+    bl_label = "New Bevel Modifier"
+    
+    width = FloatProperty(name="Width", default=0.1, min=0.0, update=PcgNode.update_value)
+    segments = IntProperty(name="Segments", default=1, min=0, max=100, update=PcgNode.update_value)
+    profile = FloatProperty(name="Profile", default=0.5, min=0.0, max=1.0, update=PcgNode.update_value)
+    material = IntProperty(name="Material", default=-1, min=0, max=32767, update=PcgNode.update_value)
+    use_only_vertices = BoolProperty(name="Only Vertices", update=PcgNode.update_value)
+    use_clamp_overlap = BoolProperty(name="Clamp Overlap", default=True, update=PcgNode.update_value)
+    loop_slide = BoolProperty(name="Loop Slide", default=True, update=PcgNode.update_value)
+    limit_method = EnumProperty(name="Limit Method", items=[("NONE", "None", ""), ("ANGLE", "Angle", ""), ("WEIGHT", "Weight", "")], default="NONE", update=PcgNode.update_value)
+    angle_limit = FloatProperty(name="Angle", default=0.523599, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION", update=PcgNode.update_value)
+    offset_type = EnumProperty(name="Limit Method", items=[("OFFSET", "Offset", ""), ("WIDTH", "Width", ""), ("DEPTH", "Depth", ""), ("PERCENT", "Percent", "")], default="OFFSET", update=PcgNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("NewFloatSocket", "Width").prop_prop = "width"
+        self.inputs.new("NewIntSocket", "Segments").prop_prop = "segments"
+        self.inputs.new("NewFloatSocket", "Profile").prop_prop = "profile"
+        super().init(context)
+
+    def draw_buttons(self, context, layout):
+        col = layout.column()
+        col.prop(self, "material")
+        col.prop(self, "use_only_vertices")
+        col.prop(self, "use_clamp_overlap")
+        col.prop(self, "loop_slide")
+        layout.label(text="Limit Method:")
+        layout.row().prop(self, "limit_method", expand=True)
+        if self.limit_method == 'ANGLE':
+            layout.prop(self, "angle_limit")
+        layout.label(text="Width Method:")
+        layout.row().prop(self, "offset_type", expand=True)
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="BEVEL")
+        self.mesh.modifiers[0].width = self.inputs["Width"].execute()
+        self.mesh.modifiers[0].segments = self.inputs["Segments"].execute()
+        self.mesh.modifiers[0].profile = self.inputs["Profile"].execute()
+        self.mesh.modifiers[0].material = self.material
+        self.mesh.modifiers[0].use_only_vertices = self.use_only_vertices
+        self.mesh.modifiers[0].use_clamp_overlap = self.use_clamp_overlap
+        self.mesh.modifiers[0].loop_slide = self.loop_slide
+        self.mesh.modifiers[0].limit_method = self.limit_method
+        self.mesh.modifiers[0].angle_limit = self.angle_limit
+        self.mesh.modifiers[0].offset_type = self.offset_type
+class NewBooleanModNode(Node, PcgNewModifierNode):
+    bl_idname = "NewBooleanModNode"
+    bl_label = "New Boolean Modifier"
+    
+    prop_op = EnumProperty(name="Operation", items=[("DIFFERENCE", "Difference", ""), ("UNION", "Union", ""), ("INTERSECT", "Intersect", "")], default="INTERSECT", update=PcgNode.update_value)
+    prop_obj = PointerProperty(name="Object", type=bpy.types.Object)
+    prop_overlap = FloatProperty(name="Overlap Threshold", default=0.000001, min=0.0, max=1.0, precision=6, update=PcgNode.update_value)
+    prop_draw_mode = EnumProperty(items=[("SOLID", "Solid", ""), ("WIRE", "Wire", ""), ("BOUNDS", "Bounds", "")], default="WIRE", update=PcgNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("NewMeshSocket", "Object").prop_prop = "prop_obj"
+        self.inputs.new("NewFloatSocket", "Overlap").prop_prop = "prop_overlap"
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_op")
+        layout.label("Set Secondary Object Display Mode:")
+        layout.prop(self, "prop_draw_mode", expand=True)
+    
+    def pre_execute(self):
+        self.mesh = self.inputs["Mesh"].execute()
+        if (self.mesh == None):
+            print("Debug: " + self.name + ": Empty object recieved")
+            return False
+        self.prop_obj = self.inputs["Object"].execute()
+        if (self.prop_obj == None):
+            print("Debug: " + self.name + ": Empty secondary object recieved")
+            return False
+        bpy.context.scene.objects.active = self.mesh
+        self.mesh.select = True
+        self.prop_obj.select = False
+        return True
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="BOOLEAN")
+        self.mesh.modifiers[0].operation = self.prop_op
+        self.mesh.modifiers[0].object = self.prop_obj
+        self.mesh.modifiers[0].double_threshold = self.inputs["Overlap"].execute()
+        self.prop_obj.draw_type = self.prop_draw_mode
 ##############################################################
 
 
@@ -3330,7 +3566,7 @@ settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
 control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode]
 maths = [FloatNode, FloatVectorNode]
 outputs = [MeshNode, DrawModeNode]
-testing = [NewAddNode, NewPrintNode, NewCubeNode, NewToComponentNode]
+testing = [NewMathOpNode, NewPrintNode, NewCubeNode, NewCylinderNode, NewToComponentNode, NewToMeshNode, NewLocationNode, NewRotateNode, NewBevelModNode, NewBooleanModNode]
 
 node_categories = [PcgNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
                    PcgNodeCategory("transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
