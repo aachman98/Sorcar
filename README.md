@@ -4,7 +4,11 @@ Procedural modeling in Blender using Node Editor
 ![alt text](https://raw.githubusercontent.com/aachman98/ProcGenMod/master/img.PNG)
 (outdated image)
 
-*(NEW)* Video: https://www.youtube.com/watch?v=nKEeGVtGdlk (updated)
+NEW SYSTEM (Experimental):
+![alt text](https://raw.githubusercontent.com/aachman98/ProcGenMod/master/new.PNG)
+
+Introduction Video: https://www.youtube.com/watch?v=nKEeGVtGdlk
+Tutorials & Feature showcase: https://www.youtube.com/playlist?list=PLZiIC3gdS_O4bXF1cN6T68coTcOUzZOjW
 
 BlenderArtist thread: https://blenderartists.org/t/procgenmod-procedural-modeling-in-blender-using-node-editor/1156769
 Progress tracker (Trello): https://trello.com/b/aKIFRoTh
