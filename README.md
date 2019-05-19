@@ -12,6 +12,7 @@ Introduction Video: https://www.youtube.com/watch?v=nKEeGVtGdlk
 Tutorials & Feature showcase: https://www.youtube.com/playlist?list=PLZiIC3gdS_O4bXF1cN6T68coTcOUzZOjW
 
 BlenderArtist thread: https://blenderartists.org/t/procgenmod-procedural-modeling-in-blender-using-node-editor/1156769
+
 Progress tracker (Trello): https://trello.com/b/aKIFRoTh
 
 ## About
