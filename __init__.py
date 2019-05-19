@@ -12,10 +12,40 @@ import bpy
 import bmesh
 import nodeitems_utils
 import random
+import requests
 
 from bpy.types import NodeTree, Node, NodeSocket, Operator
 from bpy.props import IntProperty, FloatProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, PointerProperty, BoolVectorProperty
 from nodeitems_utils import NodeCategory, NodeItem
+from os import getenv
+
+######################### ADDON UPDATER ######################
+class PcgPreferences(bpy.types.AddonPreferences):
+    bl_idname = __name__
+
+    prop_addon_location = StringProperty(name="Addon Location", default=getenv("APPDATA")+"/Blender Foundation/Blender/2.79/scripts/addons/procgenmod/__init__.py", description="DO NOT change unless the addon is installed in a different location")
+
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, "prop_addon_location")
+        layout.operator("pcg.addon_updater")
+class PcgAddonUpdater(Operator):
+    bl_idname = "pcg.addon_updater"
+    bl_label = "Update ProcGenMod"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        user_prefs = context.user_preferences
+        addon_prefs = user_prefs.addons[__name__].preferences
+        print("Debug: ProcGenMod: Fetching data...")
+        r = requests.get("https://raw.githubusercontent.com/aachman98/procgenmod/master/__init__.py")
+        print("Debug: ProcGenMod: Data Fetched! Writing data...")
+        f = open(addon_prefs.prop_addon_location, 'w')
+        f.write(r.text)
+        print("Debug: ProcGenMod: Data Written! Addon successfully updated.")
+        return {'FINISHED'}
+##############################################################
+
 
 class PcgNodeTree(NodeTree):
     bl_idname = 'PcgNodeTree'
@@ -28,6 +58,7 @@ class PcgNodeCategory(NodeCategory):
 
 
 ########################## CATEGORIES ########################
+# Node base classes
 class PcgNode:
     mesh = StringProperty()
     @classmethod
@@ -74,7 +105,7 @@ class PcgNewNode():
         return ret_data
     def functionality(self):
         print("Debug: " + self.name + ": Main functionality of the node using props_ & self.inputs[]")
-
+# New node system categories
 class PcgNewInputNode(PcgNewNode):
     node_color = (0.5, 0.0, 0.0)
 
@@ -156,7 +187,87 @@ class PcgNewConversionNode(PcgNewNode):
     
     def post_execute(self):
         return self.mesh
+class PcgNewSelectionNode(PcgNewNode):
+    node_color = (0.5, 0.0, 0.5)
 
+    mesh = PointerProperty(type=bpy.types.Object)
+
+    def init(self, context):
+        self.inputs.new("NewComponentSocket", "Component").prop_prop = "mesh"
+        self.outputs.new("NewComponentSocket", "Component")
+        self.inputs.move(len(self.inputs)-1, 0)
+        super().init(context)
+    
+    def pre_execute(self):
+        self.mesh = self.inputs["Component"].execute()
+        if (self.mesh == None):
+            print("Debug: " + self.name + ": Empty object recieved")
+            return False
+        return True
+    
+    def post_execute(self):
+        return self.mesh
+class PcgNewDeletionNode(PcgNewNode):
+    node_color = (0.5, 0.5, 0.0)
+
+    mesh = PointerProperty(type=bpy.types.Object)
+
+    def init(self, context):
+        self.inputs.new("NewComponentSocket", "Component").prop_prop = "mesh"
+        self.outputs.new("NewComponentSocket", "Component")
+        self.inputs.move(len(self.inputs)-1, 0)
+        super().init(context)
+    
+    def pre_execute(self):
+        self.mesh = self.inputs["Component"].execute()
+        if (self.mesh == None):
+            print("Debug: " + self.name + ": Empty object recieved")
+            return False
+        return True
+    
+    def post_execute(self):
+        return self.mesh
+class PcgNewEditOperatorNode(PcgNewNode):
+    node_color = (0.5, 0.5, 0.5)
+
+    mesh = PointerProperty(type=bpy.types.Object)
+
+    def init(self, context):
+        self.inputs.new("NewComponentSocket", "Component").prop_prop = "mesh"
+        self.outputs.new("NewComponentSocket", "Component")
+        self.inputs.move(len(self.inputs)-1, 0)
+        super().init(context)
+    
+    def pre_execute(self):
+        self.mesh = self.inputs["Component"].execute()
+        if (self.mesh == None):
+            print("Debug: " + self.name + ": Empty object recieved")
+            return False
+        return True
+    
+    def post_execute(self):
+        return self.mesh
+class PcgNewObjectOperatorNode(PcgNewNode):
+    node_color = (0.3, 0.7, 0.0)
+
+    mesh = PointerProperty(type=bpy.types.Object)
+
+    def init(self, context):
+        self.inputs.new("NewMeshSocket", "Mesh").prop_prop = "mesh"
+        self.outputs.new("NewMeshSocket", "Mesh")
+        self.inputs.move(len(self.inputs)-1, 0)
+        super().init(context)
+    
+    def pre_execute(self):
+        self.mesh = self.inputs["Mesh"].execute()
+        if (self.mesh == None):
+            print("Debug: " + self.name + ": Empty object recieved")
+            return False
+        return True
+    
+    def post_execute(self):
+        return self.mesh
+# Old system categories
 class PcgInputNode(PcgNode):
     prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
     prop_rotation = FloatVectorProperty(name="Rotation", subtype="EULER", unit="ROTATION", update=PcgNode.update_value)
@@ -268,7 +379,7 @@ class PcgEditOperatorNode(PcgNode):
         self.functionality()
         return self.mesh
     def functionality(self):
-        print("Debug: PcgOperationNode: Main functionality of the node")
+        print("Debug: PcgEditOperationNode: Main functionality of the node")
 class PcgObjectOperatorNode(PcgNode):
     def init(self, context):
         self.inputs.new("MeshSocket", "Mesh")
@@ -311,6 +422,7 @@ class PcgSettingNode(PcgNode):
 
 
 ########################### SOCKETS ##########################
+# Socket base classes
 class PcgNodeSocket:
     prop_prop = StringProperty(name="Node Property", default="prop_dummy")
     def draw(self, context, layout, node, text):
@@ -338,7 +450,7 @@ class PcgNewNodeSocket:
             return eval("self.node." + self.prop_prop)
         else:
             return None
-
+# Old socket types
 class MeshSocket(NodeSocket):
     bl_idname = "MeshSocket"
     bl_label = "Mesh"
@@ -390,7 +502,7 @@ class FloatVectorSocket(NodeSocket, PcgNodeSocket):
 
     def draw_color(self, context, node):
         return 1, 1, 0, 1
-
+# New socket types
 class NewMeshSocket(NodeSocket, PcgNewNodeSocket):
     bl_idname = "NewMeshSocket"
     bl_label = "New Mesh"
@@ -512,6 +624,7 @@ class RefreshMeshOp(Operator):
 
 
 ########################### NODES ############################
+# Input
 class PlaneNode(Node, PcgInputNode):
     bl_idname = "PlaneNode"
     bl_label = "Plane"
@@ -704,7 +817,7 @@ class CustomMeshNode(Node, PcgInputNode):
         self.mesh = bpy.context.active_object.name
         bpy.data.objects[self.mesh].location = prop_location
         bpy.data.objects[self.mesh].rotation_euler = prop_rotation
-
+# Transform
 class LocationNode(Node, PcgTransformNode):
     bl_idname = "LocationNode"
     bl_label = "Set Location"
@@ -839,7 +952,7 @@ class ResizeNode(Node, PcgTransformNode):
         region = [i for i in area.regions if i.type == 'WINDOW'][0]
         override = {'window':window, 'screen':screen, 'area':area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'gpencil_data':bpy.context.gpencil_data}
         bpy.ops.transform.resize(override, value=prop_value, constraint_axis=self.prop_constraint_axis, constraint_orientation=space.transform_orientation, mirror=self.prop_mirror, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1.0, snap=False, snap_target='CLOSEST', snap_point=(0.0, 0.0, 0.0), snap_align=False, snap_normal=(0.0, 0.0, 0.0), gpencil_strokes=False, texture_space=False, remove_on_cancel=False, release_confirm=False, use_accurate=False)
-
+# Conversion
 class ToComponentNode(Node, PcgNode):
     bl_idname = "ToComponentNode"
     bl_label = "To Component Mode"
@@ -911,7 +1024,7 @@ class ChangeModeNode(Node, PcgNode):
             return ""
         bpy.ops.mesh.select_mode(type=self.prop_selection_type)
         return self.mesh
-
+# Selection
 class SelectComponentsManuallyNode(Node, PcgSelectionNode):
     bl_idname = "SelectComponentsManuallyNode"
     bl_label = "Select Mesh Manually Components"
@@ -1316,7 +1429,7 @@ class SelectFacesLinkedFlatNode(Node, PcgSelectionNode):
     
     def functionality(self):
         bpy.ops.mesh.faces_select_linked_flat(sharpness=self.prop_sharpness)
-
+# Deletion
 class DeleteNode(Node, PcgEditOperatorNode):
     bl_idname = "DeleteNode"
     bl_label = "Delete"
@@ -1393,7 +1506,7 @@ class EdgeCollapseNode(Node, PcgEditOperatorNode):
     
     def functionality(self):
         bpy.ops.mesh.edge_collapse()
-
+# Component Operator
 class AddEdgeFaceNode(Node, PcgEditOperatorNode):
     bl_idname = "AddEdgeFaceNode"
     bl_label = "Add Edge/Face"
@@ -1793,6 +1906,28 @@ class LoopCutNode(Node, PcgEditOperatorNode):
                 prop_index = self.prop_index
         bpy.ops.object.mode_set(mode="EDIT")
         bpy.ops.mesh.loopcut_slide(override, MESH_OT_loopcut={"number_cuts":self.prop_number, "smoothness":self.prop_smoothness, "falloff":'INVERSE_SQUARE', "edge_index":prop_index}, TRANSFORM_OT_edge_slide={"value":self.prop_factor, "single_side":self.prop_single, "use_even":self.prop_even, "flipped":self.prop_flipped, "use_clamp":self.prop_clamp})
+class MaterialNode(Node, PcgEditOperatorNode):
+    bl_idname = "MaterialNode"
+    bl_label = "Material"
+
+    prop_mat = PointerProperty(name="Material", type=bpy.types.Material, update=PcgNode.update_value)
+    prop_type = EnumProperty(name="Type", items=[("GEOMETRY_ORIGIN", "Geometry to Origin", ""), ("ORIGIN_GEOMETRY", "Origin to Geometry", ""), ("ORIGIN_CURSOR", "Origin to 3D Cursor", ""), ("ORIGIN_CENTER_OF_MASS", "Origin to Center of Mass (Surface)", ""), ("ORIGIN_CENTER_OF_VOLUME", "Origin to Center of Mass (Volume)", "")], default="GEOMETRY_ORIGIN", update=PcgNode.update_value)
+    prop_center = EnumProperty(name="Center", items=[("MEDIAN", "Median", ""), ("BOUNDS", "Bounds", "")], default="MEDIAN", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_mat")
+
+    def functionality(self):
+        if (self.prop_mat == None):
+            print("Debug: " + self.name + ": No material selected")
+            return
+        i = bpy.data.objects[self.mesh].material_slots.find(self.prop_mat.name)
+        if (i == -1):
+            bpy.ops.object.material_slot_add()
+            bpy.data.objects[self.mesh].active_material = self.prop_mat
+        else:
+            bpy.data.objects[self.mesh].active_material_index = i
+        bpy.ops.object.material_slot_assign()
 class MergeComponentsNode(Node, PcgEditOperatorNode):
     bl_idname = "MergeComponentsNode"
     bl_label = "Merge Components"
@@ -1994,7 +2129,7 @@ class UnSubdivideNode(Node, PcgEditOperatorNode):
 
     def functionality(self):
         bpy.ops.mesh.unsubdivide(iterations=self.prop_iterations)
-
+# Mesh Operator
 class ApplyTransformNode(Node, PcgObjectOperatorNode):
     bl_idname = "ApplyTransformNode"
     bl_label = "Apply Transform"
@@ -2080,9 +2215,9 @@ class MergeMeshesNode(Node, PcgNode):
     
     def functionality(self):
         bpy.ops.object.join()
-class SetOriginNode(Node, PcgObjectOperatorNode):
-    bl_idname = "SetOriginNode"
-    bl_label = "Set Origin"
+class OriginNode(Node, PcgObjectOperatorNode):
+    bl_idname = "OriginNode"
+    bl_label = "Origin"
 
     prop_type = EnumProperty(name="Type", items=[("GEOMETRY_ORIGIN", "Geometry to Origin", ""), ("ORIGIN_GEOMETRY", "Origin to Geometry", ""), ("ORIGIN_CURSOR", "Origin to 3D Cursor", ""), ("ORIGIN_CENTER_OF_MASS", "Origin to Center of Mass (Surface)", ""), ("ORIGIN_CENTER_OF_VOLUME", "Origin to Center of Mass (Volume)", "")], default="GEOMETRY_ORIGIN", update=PcgNode.update_value)
     prop_center = EnumProperty(name="Center", items=[("MEDIAN", "Median", ""), ("BOUNDS", "Bounds", "")], default="MEDIAN", update=PcgNode.update_value)
@@ -2093,9 +2228,9 @@ class SetOriginNode(Node, PcgObjectOperatorNode):
     
     def functionality(self):
         bpy.ops.object.origin_set(type=self.prop_type, center=self.prop_center)
-class SetShadingNode(Node, PcgObjectOperatorNode):
-    bl_idname = "SetShadingNode"
-    bl_label = "Set Shading"
+class ShadingNode(Node, PcgObjectOperatorNode):
+    bl_idname = "ShadingNode"
+    bl_label = "Shading"
 
     prop_shading = EnumProperty(name="Shading", items=[("SMOOTH", "Smooth", ""), ("FLAT", "Flat", "")], default="FLAT", update=PcgNode.update_value)
     prop_auto = BoolProperty(name="Auto Smooth", update=PcgNode.update_value)
@@ -2114,7 +2249,7 @@ class SetShadingNode(Node, PcgObjectOperatorNode):
             bpy.ops.object.shade_smooth()
             bpy.data.meshes[self.mesh].use_auto_smooth = self.prop_auto
             bpy.data.meshes[self.mesh].auto_smooth_angle = self.prop_angle
-
+# Modifiers
 class ArrayModNode(Node, PcgModifierNode):
     bl_idname = "ArrayModNode"
     bl_label = "Array Modifier"
@@ -3020,7 +3155,7 @@ class WireframeModNode(Node, PcgModifierNode):
         bpy.data.objects[self.mesh].modifiers[0].use_replace = self.use_replace
         bpy.data.objects[self.mesh].modifiers[0].material_offset = self.material_offset
         return True
-
+# Settings
 class CursorLocationNode(Node, PcgSettingNode):
     bl_idname = "CursorLocationNode"
     bl_label = "Cursor Location"
@@ -3098,7 +3233,7 @@ class CustomPythonNode(Node, PcgSettingNode):
             except:
                 print("Debug: " + self.name + ": Invalid script")
                 break
-
+# Control
 class BeginForLoopNode(Node, PcgEditOperatorNode):
     bl_idname = "BeginForLoopNode"
     bl_label = "Begin For Loop"
@@ -3225,7 +3360,7 @@ class EndForEachLoopNode(Node, PcgEditOperatorNode):
         #     bpy.data.objects[self.mesh].data.polygons[i].select = True            
         # bpy.ops.object.mode_set(mode="EDIT")
         return self.mesh
-
+# Math
 class FloatNode(Node, PcgNode):
     bl_idname = "FloatNode"
     bl_label = "Float"
@@ -3287,7 +3422,7 @@ class FloatVectorNode(Node, PcgNode):
         else:
             prop_z = self.prop_z
         return (prop_x, prop_y, prop_z)
-
+# Output
 class MeshNode(Node, PcgSettingNode):
     bl_idname = "MeshNode"
     bl_label = "Mesh Output"
@@ -3332,7 +3467,7 @@ class DrawModeNode(Node, PcgSettingNode):
         bpy.data.objects[self.mesh].show_x_ray = self.prop_xray
         bpy.data.objects[self.mesh].show_transparent = self.prop_transparency
         bpy.data.objects[self.mesh].draw_type = self.prop_max_draw_type
-
+# New system nodes
 class NewMathOpNode(Node, PcgNewNode):
     bl_idname = "NewMathOpNode"
     bl_label = "New Math Operation"
@@ -3485,12 +3620,12 @@ class NewBevelModNode(Node, PcgNewModifierNode):
         self.inputs.new("NewFloatSocket", "Width").prop_prop = "width"
         self.inputs.new("NewIntSocket", "Segments").prop_prop = "segments"
         self.inputs.new("NewFloatSocket", "Profile").prop_prop = "profile"
+        self.inputs.new("NewBoolSocket", "Only Vertices").prop_prop = "use_only_vertices"
         super().init(context)
 
     def draw_buttons(self, context, layout):
         col = layout.column()
         col.prop(self, "material")
-        col.prop(self, "use_only_vertices")
         col.prop(self, "use_clamp_overlap")
         col.prop(self, "loop_slide")
         layout.label(text="Limit Method:")
@@ -3506,7 +3641,7 @@ class NewBevelModNode(Node, PcgNewModifierNode):
         self.mesh.modifiers[0].segments = self.inputs["Segments"].execute()
         self.mesh.modifiers[0].profile = self.inputs["Profile"].execute()
         self.mesh.modifiers[0].material = self.material
-        self.mesh.modifiers[0].use_only_vertices = self.use_only_vertices
+        self.mesh.modifiers[0].use_only_vertices = self.inputs["Only Vertices"].execute()
         self.mesh.modifiers[0].use_clamp_overlap = self.use_clamp_overlap
         self.mesh.modifiers[0].loop_slide = self.loop_slide
         self.mesh.modifiers[0].limit_method = self.limit_method
@@ -3551,7 +3686,201 @@ class NewBooleanModNode(Node, PcgNewModifierNode):
         self.mesh.modifiers[0].object = self.prop_obj
         self.mesh.modifiers[0].double_threshold = self.inputs["Overlap"].execute()
         self.prop_obj.draw_type = self.prop_draw_mode
+class NewSelectAllNode(Node, PcgNewSelectionNode):
+    bl_idname = "NewSelectAllNode"
+    bl_label = "New Select All"
+
+    prop_action = EnumProperty(name="Action", items=[("TOGGLE", "Toggle", ""), ("SELECT", "Select", ""), ("DESELECT", "Deselect", ""), ("INVERT", "Invert", "")], default="TOGGLE", update=PcgNode.update_value)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_action")
+    
+    def functionality(self):
+        bpy.ops.mesh.select_all(action=self.prop_action)
+class NewSelectComponentsManuallyNode(Node, PcgNewSelectionNode):
+    bl_idname = "NewSelectComponentsManuallyNode"
+    bl_label = "New Select Mesh Manually Components"
+    
+    selection_face = StringProperty()
+    selection_vert = StringProperty()
+    selection_edge = StringProperty()
+
+    def toList(self, string):
+        string = string.replace("[", "")
+        string = string.replace("]", "")
+        list_string = string.rsplit(", ")
+        if (not list_string == [""]):
+            return [int(i) for i in list_string]
+        return []
+
+    def save_selection(self):
+        bpy.ops.object.mode_set(mode="OBJECT")
+        self.selection_face = str([i.index for i in self.mesh.data.polygons if i.select])
+        self.selection_vert = str([i.index for i in self.mesh.data.vertices if i.select])
+        self.selection_edge = str([i.index for i in self.mesh.data.edges if i.select])
+        bpy.ops.object.mode_set(mode="EDIT")
+        print("Debug: " + self.name + ": Saved components selection")
+
+    def draw_buttons(self, context, layout):
+        if (self.mesh):
+            if (self == self.id_data.nodes.active):
+                layout.operator("pcg.save_selection_op", "Save Selection")
+            layout.label(text="Faces: " + str(len([i for i in self.mesh.data.polygons if i.select])) + "/" + str(len(self.mesh.data.polygons)))
+            layout.label(text="Vertices: " + str(len([i for i in self.mesh.data.vertices if i.select])) + "/" + str(len(self.mesh.data.vertices)))
+            layout.label(text="Edges: " + str(len([i for i in self.mesh.data.edges if i.select])) + "/" + str(len(self.mesh.data.edges)))
+    
+    def functionality(self):
+        bpy.ops.mesh.select_all(action="DESELECT")
+        bpy.ops.object.mode_set(mode="OBJECT")
+        list_face = self.toList(self.selection_face)
+        list_vert = self.toList(self.selection_vert)
+        list_edge = self.toList(self.selection_edge)
+        for i in list_face:
+            if i >= len(self.mesh.data.polygons):
+                break
+            self.mesh.data.polygons[i].select = True
+        for i in list_vert:
+            if i >= len(self.mesh.data.vertices):
+                break
+            self.mesh.data.vertices[i].select = True
+        for i in list_edge:
+            if i >= len(self.mesh.data.edges):
+                break
+            self.mesh.data.edges[i].select = True
+        bpy.ops.object.mode_set(mode="EDIT")
+class NewDeleteNode(Node, PcgNewDeletionNode):
+    bl_idname = "NewDeleteNode"
+    bl_label = "New Delete"
+
+    prop_type = EnumProperty(name="Type", items=[("VERT", "Vertices", ""), ("EDGE", "Edges", ""), ("FACE", "Faces", ""), ("EDGE_FACE", "Edges And Faces", ""), ("ONLY_FACE", "Only Faces", "")], default="VERT", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_type")
+    
+    def functionality(self):
+        bpy.ops.mesh.delete(type=self.prop_type)
+class NewDissolveDegenerateNode(Node, PcgNewDeletionNode):
+    bl_idname = "NewDissolveDegenerateNode"
+    bl_label = "New Dissolve Degenerate"
+
+    prop_threshold = FloatProperty(name="Threshold", default=0.0001, min=0.000001, max=50.0, update=PcgNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("NewFloatSocket", "Threshold").prop_prop = "prop_threshold"
+        super().init(context)
+    
+    def functionality(self):
+        bpy.ops.mesh.dissolve_degenerate(threshold=self.inputs["Threshold"].execute())
+class NewBevelNode(Node, PcgNewEditOperatorNode):
+    bl_idname = "NewBevelNode"
+    bl_label = "New Bevel"
+
+    prop_offset_type = EnumProperty(name="Offset Type", items=[("OFFSET", "Offset", ""), ("WIDTH", "Width", ""), ("PERCENT", "Percent", ""), ("DEPTH", "Depth", "")], default="OFFSET", update=PcgNode.update_value)
+    prop_offset = FloatProperty(name="Offset", default=0.0, min=-1000000.0, max=1000000.0, update=PcgNode.update_value)
+    prop_segments = IntProperty(name="Segments", default=1, min=1, max=1000, update=PcgNode.update_value)
+    prop_profile = FloatProperty(name="Profile", default=0.5, min=0.15, max=1.0, update=PcgNode.update_value)
+    prop_vertex_only = BoolProperty(name="Vertex Only", update=PcgNode.update_value)
+    prop_clamp_overlap = BoolProperty(name="Clamp Overlap", update=PcgNode.update_value)
+    prop_loop_slide = BoolProperty(name="Loop Slide", default=True, update=PcgNode.update_value)
+    prop_material = IntProperty(name="Material", default=-1, min=-1, update=PcgNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("NewFloatSocket", "Offset").prop_prop = "prop_offset"
+        self.inputs.new("NewIntSocket", "Segments").prop_prop = "prop_segments"
+        self.inputs.new("NewFloatSocket", "Profile").prop_prop = "prop_profile"
+        self.inputs.new("NewBoolSocket", "Vertex Only").prop_prop = "prop_vertex_only"
+        super().init(context)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_offset_type")
+        layout.prop(self, "prop_clamp_overlap")
+        layout.prop(self, "prop_loop_slide")
+        layout.prop(self, "prop_material")
+    
+    def functionality(self):
+        bpy.ops.mesh.bevel(offset_type=self.prop_offset_type, offset=self.inputs["Offset"].execute(), segments=self.inputs["Segments"].execute(), profile=self.inputs["Profile"].execute(), vertex_only=self.inputs["Vertex Only"].execute(), clamp_overlap=self.prop_clamp_overlap, loop_slide=self.prop_loop_slide, material=self.prop_material)
+class NewInsetNode(Node, PcgNewEditOperatorNode):
+    bl_idname = "NewInsetNode"
+    bl_label = "New Inset"
+    
+    prop_thickness = FloatProperty(name="Thickness", default=0.01, min=0.0, update=PcgNode.update_value)
+    prop_depth = FloatProperty(name="Depth", update=PcgNode.update_value)
+    prop_boundary = BoolProperty(name="Boundary", default=True, update=PcgNode.update_value)
+    prop_even_offset = BoolProperty(name="Even Offset", default=True, update=PcgNode.update_value)
+    prop_relative_offset = BoolProperty(name="Relative Offset", update=PcgNode.update_value)
+    prop_edge_rail = BoolProperty(name="Edge Rail", update=PcgNode.update_value)
+    prop_outset = BoolProperty(name="Outset", update=PcgNode.update_value)
+    prop_select_inset = BoolProperty(name="Select Inset", update=PcgNode.update_value)
+    prop_individual = BoolProperty(name="Individual", update=PcgNode.update_value)
+    prop_interpolate = BoolProperty(name="Interpolate", default=True, update=PcgNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("NewFloatSocket", "Thickness").prop_prop = "prop_thickness"
+        self.inputs.new("NewFloatSocket", "Depth").prop_prop = "prop_depth"
+        self.inputs.new("NewBoolSocket", "Individual").prop_prop = "prop_individual"
+        self.inputs.new("NewBoolSocket", "Select Inset").prop_prop = "prop_select_inset"
+        super().init(context)
+
+    def draw_buttons(self, context, layout):
+        split = layout.split()
+        col=split.column()
+        col.prop(self, "prop_boundary")
+        col.prop(self, "prop_even_offset")
+        col.prop(self, "prop_edge_rail")
+        col=split.column()
+        col.prop(self, "prop_outset")
+        col.prop(self, "prop_relative_offset")
+        col.prop(self, "prop_interpolate")
+
+    def functionality(self):
+        bpy.ops.mesh.inset(use_boundary=self.prop_boundary, use_even_offset=self.prop_even_offset, use_relative_offset=self.prop_relative_offset, use_edge_rail=self.prop_edge_rail, thickness=self.inputs["Thickness"].execute(), depth=self.inputs["Depth"].execute(), use_outset=self.prop_outset, use_select_inset=self.inputs["Select Inset"].execute(), use_individual=self.inputs["Individual"].execute(), use_interpolate=self.prop_interpolate)
+class NewOriginNode(Node, PcgNewObjectOperatorNode):
+    bl_idname = "NewOriginNode"
+    bl_label = "New Origin"
+
+    prop_type = EnumProperty(name="Type", items=[("GEOMETRY_ORIGIN", "Geometry to Origin", ""), ("ORIGIN_GEOMETRY", "Origin to Geometry", ""), ("ORIGIN_CURSOR", "Origin to 3D Cursor", ""), ("ORIGIN_CENTER_OF_MASS", "Origin to Center of Mass (Surface)", ""), ("ORIGIN_CENTER_OF_VOLUME", "Origin to Center of Mass (Volume)", "")], default="GEOMETRY_ORIGIN", update=PcgNode.update_value)
+    prop_center = EnumProperty(name="Center", items=[("MEDIAN", "Median", ""), ("BOUNDS", "Bounds", "")], default="MEDIAN", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_type")
+        layout.prop(self, "prop_center", expand=True)
+    
+    def functionality(self):
+        bpy.ops.object.origin_set(type=self.prop_type, center=self.prop_center)
+class NewShadingNode(Node, PcgNewObjectOperatorNode):
+    bl_idname = "NewShadingNode"
+    bl_label = "New Shading"
+
+    prop_shading = EnumProperty(name="Shading", items=[("SMOOTH", "Smooth", ""), ("FLAT", "Flat", "")], default="FLAT", update=PcgNode.update_value)
+    prop_auto = BoolProperty(name="Auto Smooth", update=PcgNode.update_value)
+    prop_angle = FloatProperty(name="Angle", default=0.523599, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION", update=PcgNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("NewBoolSocket", "Auto Smooth").prop_prop = "prop_auto"
+        self.inputs.new("NewFloatSocket", "Angle").prop_prop = "prop_angle"
+        super().init(context)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_shading", expand=True)
+    
+    def functionality(self):
+        if (self.prop_shading == "FLAT"):
+            bpy.ops.object.shade_flat()
+        else:
+            bpy.ops.object.shade_smooth()
+            self.mesh.use_auto_smooth = self.inputs["Auto Smooth"].execute()
+            self.mesh.auto_smooth_angle = self.inputs["Angle"].execute()
 ##############################################################
+
+##### EASY COPY-PASTE #####
+'''
+def init(self, context):
+    self.inputs.new("New.Socket", ".").prop_prop = "prop_"
+    super().init(context)
+
+inputs[""].execute()
+'''
+###########################
 
 
 inputs = [PlaneNode, CubeNode, CircleNode, UVSphereNode, IcoSphereNode, CylinderNode, ConeNode, GridNode, SuzanneNode, CustomMeshNode] # TorusNode
@@ -3560,13 +3889,13 @@ modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, Corrective
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
 selection = [SelectComponentsManuallyNode, SelectFaceByIndexNode, SelectAlternateFacesNode, SelectFacesByNormalNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLoopNode, SelectLoopRegionNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectRegionBoundaryNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectShortestPathNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
 deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode, DissolveVerticesNode, DissolveDegenerateNode, EdgeCollapseNode]
-edit_operators = [AddEdgeFaceNode, BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, ConvexHullNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, ExtrudeRepeatNode, FlipNormalsNode, MakeNormalsConsistentNode, FlattenNode, FillEdgeLoopNode, FillGridNode, FillHolesBySidesNode, InsetNode, LoopCutNode, MergeComponentsNode, OffsetEdgeLoopNode, PokeNode, RemoveDoublesNode, RotateEdgeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode, TriangulateFacesNode, UnSubdivideNode]
-object_operators = [ApplyTransformNode, CopyTransformNode, MakeLinksNode, MergeMeshesNode, SetOriginNode, SetShadingNode]
+edit_operators = [AddEdgeFaceNode, BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, ConvexHullNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, ExtrudeRepeatNode, FlipNormalsNode, MakeNormalsConsistentNode, FlattenNode, FillEdgeLoopNode, FillGridNode, FillHolesBySidesNode, InsetNode, LoopCutNode, MaterialNode, MergeComponentsNode, OffsetEdgeLoopNode, PokeNode, RemoveDoublesNode, RotateEdgeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode, TriangulateFacesNode, UnSubdivideNode]
+object_operators = [ApplyTransformNode, CopyTransformNode, MakeLinksNode, MergeMeshesNode, OriginNode, ShadingNode]
 settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
 control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode]
 maths = [FloatNode, FloatVectorNode]
 outputs = [MeshNode, DrawModeNode]
-testing = [NewMathOpNode, NewPrintNode, NewCubeNode, NewCylinderNode, NewToComponentNode, NewToMeshNode, NewLocationNode, NewRotateNode, NewBevelModNode, NewBooleanModNode]
+testing = [NewMathOpNode, NewPrintNode, NewCubeNode, NewCylinderNode, NewToComponentNode, NewToMeshNode, NewLocationNode, NewRotateNode, NewBevelModNode, NewBooleanModNode, NewSelectAllNode, NewSelectComponentsManuallyNode, NewDeleteNode, NewDissolveDegenerateNode, NewBevelNode, NewInsetNode, NewOriginNode, NewShadingNode]
 
 node_categories = [PcgNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
                    PcgNodeCategory("transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
