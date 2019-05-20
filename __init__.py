@@ -23,7 +23,7 @@ from os import getenv
 class PcgPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
-    prop_addon_location = StringProperty(name="Addon Location", default=getenv("APPDATA")+"/Blender Foundation/Blender/2.79/scripts/addons/procgenmod/__init__.py", description="DO NOT change unless the addon is installed in a different location")
+    prop_addon_location = StringProperty(name="Addon Location", default=getenv("APPDATA")+"/Blender Foundation/Blender/2.79/scripts/addons/ProcGenMod-master/__init__.py", description="DO NOT change unless the addon is installed in a different location")
 
     def draw(self, context):
         layout = self.layout
@@ -40,9 +40,10 @@ class PcgAddonUpdater(Operator):
         print("Debug: ProcGenMod: Fetching data...")
         r = requests.get("https://raw.githubusercontent.com/aachman98/procgenmod/master/__init__.py")
         print("Debug: ProcGenMod: Data Fetched! Writing data...")
-        f = open(addon_prefs.prop_addon_location, 'w')
+        f = open(addon_prefs.prop_addon_location, 'w', encoding="utf8")
         f.write(r.text)
         print("Debug: ProcGenMod: Data Written! Addon successfully updated.")
+        f.close()
         return {'FINISHED'}
 ##############################################################
 
@@ -516,7 +517,7 @@ class NewComponentSocket(NodeSocket, PcgNewNodeSocket):
 class NewObjectSocket(NodeSocket, PcgNewNodeSocket):
     bl_idname = "NewObjectSocket"
     bl_label = "New Object"
-    color = (1.0, 0.0, 0.0, 1.0)
+    color = (0.5, 0.5, 0.5, 1.0)
     mirror_prop = False
 class NewBoolSocket(NodeSocket, PcgNewNodeSocket):
     bl_idname = "NewBoolSocket"
@@ -537,7 +538,7 @@ class NewFloatVectorSocket(NodeSocket, PcgNewNodeSocket):
 class NewAngleSocket(NodeSocket, PcgNewNodeSocket):
     bl_idname = "NewAngleSocket"
     bl_label = "New Angle"
-    color = (0.0, 0.0, 0.8, 1.0)
+    color = (0.0, 0.0, 0.5, 1.0)
 class NewAngleVectorSocket(NodeSocket, PcgNewNodeSocket):
     bl_idname = "NewAngleVectorSocket"
     bl_label = "New Angle Vector"
@@ -3868,8 +3869,8 @@ class NewShadingNode(Node, PcgNewObjectOperatorNode):
             bpy.ops.object.shade_flat()
         else:
             bpy.ops.object.shade_smooth()
-            self.mesh.use_auto_smooth = self.inputs["Auto Smooth"].execute()
-            self.mesh.auto_smooth_angle = self.inputs["Angle"].execute()
+        self.mesh.data.use_auto_smooth = self.inputs["Auto Smooth"].execute()
+        self.mesh.data.auto_smooth_angle = self.inputs["Angle"].execute()
 ##############################################################
 
 ##### EASY COPY-PASTE #####
