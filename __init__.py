@@ -68,7 +68,7 @@ class PcgNode:
     def update_value(self, context):
         bpy.ops.pcg.refresh_mesh_op()
         return None
-class PcgNewNode():
+class PcgNewNode:
     first_time = BoolProperty(default=True)
     node_color = (1, 1, 1)
     @classmethod
@@ -268,6 +268,15 @@ class PcgNewObjectOperatorNode(PcgNewNode):
     
     def post_execute(self):
         return self.mesh
+class PcgNewConstantNode(PcgNewNode):
+    node_color = (0.3, 0.0, 0.7)
+
+    def init(self, context):
+        self.use_custom_color = True
+        self.color = self.node_color
+class PcgNewMathsNode(PcgNewNode):
+    node_color = (0.7, 0.3, 0.0)
+
 # Old system categories
 class PcgInputNode(PcgNode):
     prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
@@ -3327,7 +3336,7 @@ class EndForEachLoopNode(Node, PcgEditOperatorNode):
 
     def toList(self, string):
         list = []
-        if (string == ""):
+        if (string == "[]"):
             return list
         string = string.replace("[", "")
         string = string.replace("]", "")
@@ -3337,7 +3346,7 @@ class EndForEachLoopNode(Node, PcgEditOperatorNode):
         return list
     
     def execute(self):
-        self.prop_selection = ""
+        self.prop_selection = "[]"
         while(not self.last_time):
             if (not self.inputs[0].is_linked):
                 print("Debug: " + self.name + ": Not linked")
@@ -3346,7 +3355,7 @@ class EndForEachLoopNode(Node, PcgEditOperatorNode):
             if (self.mesh == ""):
                 print("Debug: " + self.name + ": Empty object recieved")
                 return ""
-            # bpy.ops.object.mode_set(mode="OBJECT")
+        #     bpy.ops.object.mode_set(mode="OBJECT")
         #     try:
         #         temp_index = [i.index for i in bpy.data.objects[self.mesh].data.polygons if i.select][0]
         #         temp_list = self.toList(self.prop_selection)
@@ -3355,10 +3364,8 @@ class EndForEachLoopNode(Node, PcgEditOperatorNode):
         #         print(temp_index)
         #     except:
         #         print("Debug: " + self.name + ": No face selected")
-        #     bpy.ops.object.mode_set(mode="EDIT")
-        # bpy.ops.object.mode_set(mode="OBJECT")
         # for i in self.toList(self.prop_selection):
-        #     bpy.data.objects[self.mesh].data.polygons[i].select = True            
+        #     bpy.data.objects[self.mesh].data.polygons[i].select = True
         # bpy.ops.object.mode_set(mode="EDIT")
         return self.mesh
 # Math
@@ -3469,6 +3476,100 @@ class DrawModeNode(Node, PcgSettingNode):
         bpy.data.objects[self.mesh].show_transparent = self.prop_transparency
         bpy.data.objects[self.mesh].draw_type = self.prop_max_draw_type
 # New system nodes
+class NewFloat(Node, PcgNewConstantNode):
+    bl_idname = "NewFloat"
+    bl_label = "New Float"
+
+    prop_float = FloatProperty(name="Float", update=PcgNode.update_value)
+
+    def init(self, context):
+        self.outputs.new("NewFloatSocket", "Float")
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_float")
+    
+    def post_execute(self):
+        return self.prop_float
+class NewInt(Node, PcgNewConstantNode):
+    bl_idname = "NewInt"
+    bl_label = "New Integer"
+
+    prop_int = IntProperty(name="Integer", update=PcgNode.update_value)
+
+    def init(self, context):
+        self.outputs.new("NewIntSocket", "Integer")
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_int")
+    
+    def post_execute(self):
+        return self.prop_int
+class NewBool(Node, PcgNewConstantNode):
+    bl_idname = "NewBool"
+    bl_label = "New Boolean"
+
+    prop_bool = BoolProperty(name="Boolean", update=PcgNode.update_value)
+
+    def init(self, context):
+        self.outputs.new("NewBoolSocket", "Boolean")
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_bool")
+    
+    def post_execute(self):
+        return self.prop_bool
+class NewAngle(Node, PcgNewConstantNode):
+    bl_idname = "NewAngle"
+    bl_label = "New Angle"
+
+    prop_angle = FloatProperty(name="Angle", subtype="ANGLE", unit="ROTATION", update=PcgNode.update_value)
+
+    def init(self, context):
+        self.outputs.new("NewAngleSocket", "Angle")
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_angle")
+    
+    def post_execute(self):
+        return self.prop_angle
+class NewFloatVector(Node, PcgNewConstantNode):
+    bl_idname = "NewFloatVector"
+    bl_label = "New Float Vector"
+
+    prop_x = FloatProperty(name="X", update=PcgNode.update_value)
+    prop_y = FloatProperty(name="Y", update=PcgNode.update_value)
+    prop_z = FloatProperty(name="Z", update=PcgNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("NewFloatSocket", "X").prop_prop = "prop_x"
+        self.inputs.new("NewFloatSocket", "Y").prop_prop = "prop_y"
+        self.inputs.new("NewFloatSocket", "Z").prop_prop = "prop_z"
+        self.outputs.new("NewFloatVectorSocket", "Float Vector")
+        super().init(context)
+    
+    def post_execute(self):
+        return (self.inputs["X"].execute(), self.inputs["Y"].execute(), self.inputs["Z"].execute())
+class NewAngleVector(Node, PcgNewConstantNode):
+    bl_idname = "NewAngleVector"
+    bl_label = "New Angle Vector"
+
+    prop_x = FloatProperty(name="X", subtype="ANGLE", unit="ROTATION", update=PcgNode.update_value)
+    prop_y = FloatProperty(name="Y", subtype="ANGLE", unit="ROTATION", update=PcgNode.update_value)
+    prop_z = FloatProperty(name="Z", subtype="ANGLE", unit="ROTATION", update=PcgNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("NewAngleSocket", "X").prop_prop = "prop_x"
+        self.inputs.new("NewAngleSocket", "Y").prop_prop = "prop_y"
+        self.inputs.new("NewAngleSocket", "Z").prop_prop = "prop_z"
+        self.outputs.new("NewAngleVectorSocket", "Angle Vector")
+        super().init(context)
+    
+    def post_execute(self):
+        return (self.inputs["X"].execute(), self.inputs["Y"].execute(), self.inputs["Z"].execute())
 class NewMathOpNode(Node, PcgNewNode):
     bl_idname = "NewMathOpNode"
     bl_label = "New Math Operation"
@@ -3492,24 +3593,6 @@ class NewMathOpNode(Node, PcgNewNode):
             return self.inputs["X"].execute() - self.inputs["Y"].execute()
         elif(self.prop_op == "MULT"):
             return self.inputs["X"].execute() * self.inputs["Y"].execute()
-class NewPrintNode(Node, PcgNewNode):
-    bl_idname = "NewPrintNode"
-    bl_label = "New Print"
-
-    prop_value = FloatProperty(name="Value", update=PcgNewNode.update_value)
-
-    def init(self, context):
-        self.inputs.new("NewFloatSocket", "Value").prop_prop = "prop_value"
-        self.outputs.new("NewFloatSocket", "Value")
-    
-    def draw_buttons(self, context, layout):
-        if (self == self.id_data.nodes.active):
-            layout.operator("pcg.refresh_mesh_op", "Print")
-
-    def execute(self):
-        temp = self.inputs["Value"].execute()
-        print(str(temp))
-        return temp
 class NewCubeNode(Node, PcgNewInputNode):
     bl_idname = "NewCubeNode"
     bl_label = "New Cube"
@@ -3871,6 +3954,25 @@ class NewShadingNode(Node, PcgNewObjectOperatorNode):
             bpy.ops.object.shade_smooth()
         self.mesh.data.use_auto_smooth = self.inputs["Auto Smooth"].execute()
         self.mesh.data.auto_smooth_angle = self.inputs["Angle"].execute()
+class NewPrintNode(Node, PcgNewNode):
+    bl_idname = "NewPrintNode"
+    bl_label = "New Print"
+
+    prop_value = FloatProperty(name="Value", update=PcgNewNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("NewFloatSocket", "Value").prop_prop = "prop_value"
+        self.outputs.new("NewFloatSocket", "Value")
+    
+    def draw_buttons(self, context, layout):
+        if (self == self.id_data.nodes.active):
+            layout.operator("pcg.refresh_mesh_op", "Print")
+
+    def execute(self):
+        temp = self.inputs["Value"].execute()
+        print(str(temp))
+        return temp
+
 ##############################################################
 
 ##### EASY COPY-PASTE #####
@@ -3896,7 +3998,7 @@ settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
 control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode]
 maths = [FloatNode, FloatVectorNode]
 outputs = [MeshNode, DrawModeNode]
-testing = [NewMathOpNode, NewPrintNode, NewCubeNode, NewCylinderNode, NewToComponentNode, NewToMeshNode, NewLocationNode, NewRotateNode, NewBevelModNode, NewBooleanModNode, NewSelectAllNode, NewSelectComponentsManuallyNode, NewDeleteNode, NewDissolveDegenerateNode, NewBevelNode, NewInsetNode, NewOriginNode, NewShadingNode]
+testing = [NewFloat, NewInt, NewBool, NewAngle, NewFloatVector, NewAngleVector, NewMathOpNode, NewPrintNode, NewCubeNode, NewCylinderNode, NewToComponentNode, NewToMeshNode, NewLocationNode, NewRotateNode, NewBevelModNode, NewBooleanModNode, NewSelectAllNode, NewSelectComponentsManuallyNode, NewDeleteNode, NewDissolveDegenerateNode, NewBevelNode, NewInsetNode, NewOriginNode, NewShadingNode]
 
 node_categories = [PcgNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
                    PcgNodeCategory("transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
