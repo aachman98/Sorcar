@@ -23,7 +23,7 @@ from os import getenv
 class PcgPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
-    prop_addon_location = StringProperty(name="Addon Location", default=getenv("APPDATA")+"/Blender Foundation/Blender/2.79/scripts/addons/ProcGenMod-master/__init__.py", description="DO NOT change unless the addon is installed in a different location")
+    prop_addon_location = StringProperty(name="Addon Location", default=bpy.utils.user_resource('SCRIPTS', "addons\\") + __name__ + "\init.py") # Contributed by @kabu
 
     def draw(self, context):
         layout = self.layout
@@ -51,7 +51,7 @@ class PcgAddonUpdater(Operator):
 class PcgNodeTree(NodeTree):
     bl_idname = 'PcgNodeTree'
     bl_label = 'PCG node tree'
-    bl_icon = 'NODETREE'
+    bl_icon = 'MESH_CUBE'
 class PcgNodeCategory(NodeCategory):
     @classmethod
     def poll(cls, context):
@@ -3570,7 +3570,7 @@ class NewAngleVector(Node, PcgNewConstantNode):
     
     def post_execute(self):
         return (self.inputs["X"].execute(), self.inputs["Y"].execute(), self.inputs["Z"].execute())
-class NewMathOpNode(Node, PcgNewNode):
+class NewMathOpNode(Node, PcgNewMathsNode):
     bl_idname = "NewMathOpNode"
     bl_label = "New Math Operation"
 
@@ -3582,6 +3582,7 @@ class NewMathOpNode(Node, PcgNewNode):
         self.inputs.new("NewFloatSocket", "X").prop_prop = "prop_x"
         self.inputs.new("NewFloatSocket", "Y").prop_prop = "prop_y"
         self.outputs.new("NewFloatSocket", "Sum")
+        super().init(context)
     
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_op")
@@ -3615,16 +3616,16 @@ class NewCylinderNode(Node, PcgNewInputNode):
     prop_end = EnumProperty(name="End Fill Type", items=[("NOTHING", "Nothing", "Don’t fill at all."), ("NGON", "Ngon", "Use ngons"), ("TRIFAN", "Triangle Fan", "Use triangle fans.")], default="NGON", update=PcgNode.update_value)
 
     def init(self, context):
+        self.inputs.new("NewIntSocket", "Vertices").prop_prop = "prop_vertices"
         self.inputs.new("NewFloatSocket", "Radius").prop_prop = "prop_radius"
         self.inputs.new("NewFloatSocket", "Depth").prop_prop = "prop_depth"
         super().init(context)
     
     def draw_buttons(self, context, layout):
-        layout.column().prop(self, "prop_vertices")
         layout.column().prop(self, "prop_end")
 
     def functionality(self):
-        bpy.ops.mesh.primitive_cylinder_add(vertices=self.prop_vertices, radius=self.inputs["Radius"].execute(), depth=self.inputs["Depth"].execute(), end_fill_type=self.prop_end)
+        bpy.ops.mesh.primitive_cylinder_add(vertices=self.inputs["Vertices"].execute(), radius=self.inputs["Radius"].execute(), depth=self.inputs["Depth"].execute(), end_fill_type=self.prop_end)
 class NewToComponentNode(Node, PcgNewConversionNode):
     bl_idname = "NewToComponentNode"
     bl_label = "New To Component"
@@ -3972,7 +3973,6 @@ class NewPrintNode(Node, PcgNewNode):
         temp = self.inputs["Value"].execute()
         print(str(temp))
         return temp
-
 ##############################################################
 
 ##### EASY COPY-PASTE #####
