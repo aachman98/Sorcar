@@ -23,7 +23,7 @@ from os import getenv
 class PcgPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
-    prop_addon_location = StringProperty(name="Addon Location", default=bpy.utils.user_resource('SCRIPTS', "addons\\") + __name__ + "\init.py") # Contributed by @kabu
+    prop_addon_location = StringProperty(name="Addon Location", default=bpy.utils.user_resource('SCRIPTS', "addons\\") + __name__ + "\__init__.py") # Contributed by @kabu
 
     def draw(self, context):
         layout = self.layout
