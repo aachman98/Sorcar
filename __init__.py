@@ -52,6 +52,11 @@ class PcgNodeTree(NodeTree):
     bl_idname = 'PcgNodeTree'
     bl_label = 'PCG node tree'
     bl_icon = 'MESH_CUBE'
+
+    def update(self):
+        for link in self.links:
+            if not (link.from_socket.rna_type == link.to_socket.rna_type or link.from_socket.rna_type.name in link.to_socket.friends or link.to_socket.rna_type.name in link.from_socket.friends):
+                self.links.remove(link)
 class PcgNodeCategory(NodeCategory):
     @classmethod
     def poll(cls, context):
@@ -88,7 +93,13 @@ class PcgNewNode:
         space = area.spaces[0]
         scene = bpy.data.scenes[0]
         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-        return {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':self.mesh.name, 'region':region, 'edit_object':self.mesh.name, 'gpencil_data':bpy.context.gpencil_data}
+        ret = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'region':region, 'gpencil_data':bpy.context.gpencil_data}
+        try:
+            ret['active_object'] = self.mesh.name
+            ret['edit_object'] = self.mesh.name
+        except:
+            print("Debug: " + self.name + ": Override: No mesh input")
+        return ret
     def draw_buttons(self, context, layout):
         print("Debug: " + self.name + ": Draw non-socket attributes")
     def pre_execute(self):
@@ -276,8 +287,19 @@ class PcgNewConstantNode(PcgNewNode):
         self.color = self.node_color
 class PcgNewMathsNode(PcgNewNode):
     node_color = (0.7, 0.3, 0.0)
-class PcgNewOutputNode(PcgNewNode):
+class PcgNewSettingNode(PcgNewNode):
     node_color = (0.0, 0.3, 0.7)
+
+    def init(self, context):
+        self.inputs.new("NewUniversalSocket", "")
+        self.outputs.new("NewUniversalSocket", "")
+        self.inputs.move(len(self.inputs)-1, 0)
+        super().init(context)
+    
+    def post_execute(self):
+        return self.inputs[0].execute()
+class PcgNewOutputNode(PcgNewNode):
+    node_color = (0.7, 0.0, 0.3)
 
     mesh = PointerProperty(type=bpy.types.Object)
 
@@ -293,6 +315,9 @@ class PcgNewOutputNode(PcgNewNode):
             print("Debug: " + self.name + ": Empty object recieved")
             return False
         return True
+    
+    def post_execute(self):
+        return self.mesh
 
 # Old system categories
 class PcgInputNode(PcgNode):
@@ -451,6 +476,7 @@ class PcgSettingNode(PcgNode):
 ########################### SOCKETS ##########################
 # Socket base classes
 class PcgNodeSocket:
+    friends = []
     prop_prop = StringProperty(name="Node Property", default="prop_dummy")
     def draw(self, context, layout, node, text):
         layout.label(self.name)
@@ -461,6 +487,7 @@ class PcgNewNodeSocket:
     prop_prop = StringProperty(default="prop_dummy")
     color = (1.0, 1.0, 1.0, 1.0)
     mirror_prop = True
+    friends = []
     def draw_color(self, context, node):
         return self.color
     def draw(self, context, layout, node, text):
@@ -482,6 +509,8 @@ class MeshSocket(NodeSocket):
     bl_idname = "MeshSocket"
     bl_label = "Mesh"
 
+    friends = []
+
     def draw(self, context, layout, node, text):
         if (node.mesh == ""):
             layout.label(self.name)
@@ -494,6 +523,8 @@ class ComponentSocket(NodeSocket):
     bl_idname = "ComponentSocket"
     bl_label = "Component"
 
+    friends = []
+
     def draw(self, context, layout, node, text):
         layout.label(self.name)
 
@@ -503,6 +534,8 @@ class UniversalSocket(NodeSocket):
     bl_idname = "UniversalSocket"
     bl_label = "Universal"
 
+    friends = ["MeshSocket", "ComponentSocket", "MeshArraySocket"]
+
     def draw(self, context, layout, node, text):
         layout.label("")
 
@@ -511,6 +544,8 @@ class UniversalSocket(NodeSocket):
 class MeshArraySocket(NodeSocket):
     bl_idname = "MeshArraySocket"
     bl_label = "Mesh Array"
+
+    friends = ["MeshSocket"]
 
     def draw(self, context, layout, node, text):
         layout.label(str(len(self.links)))
@@ -545,6 +580,7 @@ class NewObjectSocket(NodeSocket, PcgNewNodeSocket):
     bl_label = "New Object"
     color = (0.5, 0.5, 0.5, 1.0)
     mirror_prop = False
+    friends = ["NewMeshSocket", "NewComponentSocket"]
 class NewBoolSocket(NodeSocket, PcgNewNodeSocket):
     bl_idname = "NewBoolSocket"
     bl_label = "New Boolean"
@@ -565,14 +601,22 @@ class NewAngleSocket(NodeSocket, PcgNewNodeSocket):
     bl_idname = "NewAngleSocket"
     bl_label = "New Angle"
     color = (0.0, 0.0, 0.5, 1.0)
+    friends = ["NewFloatSocket"]
 class NewAngleVectorSocket(NodeSocket, PcgNewNodeSocket):
     bl_idname = "NewAngleVectorSocket"
     bl_label = "New Angle Vector"
     color = (0.0, 0.0, 1.0, 1.0)
+    friends = ["NewFloatVectorSocket"]
 class NewStringSocket(NodeSocket, PcgNewNodeSocket):
     bl_idname = "NewStringSocket"
     bl_label = "New String"
     color = (1.0, 0.0, 1.0, 1.0)
+class NewUniversalSocket(NodeSocket, PcgNewNodeSocket):
+    bl_idname = "NewUniversalSocket"
+    bl_label = "New Universal"
+    color = (1.0, 1.0, 1.0, 0.0)
+    mirror_prop = False
+    friends = ["NewMeshSocket", "NewComponentSocket", "NewObjectSocket", "NewBoolSocket", "NewIntSocket", "NewFloatSocket", "NewFloatVectorSocket", "NewAngleSocket", "NewAngleVectorSocket", "NewStringSocket"]
 ##############################################################
 
 
@@ -4014,6 +4058,7 @@ class NewExportMeshFBX(Node, PcgNewOutputNode):
     def init(self, context):
         self.inputs.new("NewStringSocket", "File Path").prop_prop = "prop_filepath"
         self.inputs.new("NewStringSocket", "File Name").prop_prop = "prop_filename"
+        self.outputs.new("NewMeshSocket", "Mesh")
         super().init(context)
     
     def draw_buttons(self, context, layout):
@@ -4022,6 +4067,29 @@ class NewExportMeshFBX(Node, PcgNewOutputNode):
 
     def functionality(self):
         bpy.ops.export_scene.fbx(filepath=self.inputs["File Path"].execute()+self.inputs["File Name"].execute()+".fbx", use_selection=True, use_tspace=True)
+class NewCursorLocationNode(Node, PcgNewSettingNode):
+    bl_idname = "NewCursorLocationNode"
+    bl_label = "New Cursor Location"
+
+    prop_location = FloatVectorProperty(name="Location", update=PcgNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("NewFloatVectorSocket", "Location").prop_prop = "prop_location"
+        super().init(context)
+    
+    def functionality(self):
+        self.override()['space'].cursor_location = self.inputs["Location"].execute()
+class NewPivotNode(Node, PcgNewSettingNode):
+    bl_idname = "NewPivotNode"
+    bl_label = "New Pivot Center"
+
+    prop_pivot = EnumProperty(name="Pivot Point", items=[("BOUNDING_BOX_CENTER", "Bound Box Center", ""), ("CURSOR", "Cursor", ""), ("INDIVIDUAL_ORIGINS", "Individual Origins", ""), ("MEDIAN_POINT", "Median Point", ""), ("ACTIVE_ELEMENT", "Active Element", "")], default="MEDIAN_POINT", update=PcgNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.column().prop(self, "prop_pivot", expand=True)
+    
+    def functionality(self):
+        self.override()['space'].pivot_point = self.prop_pivot
 ##############################################################
 
 ##### EASY COPY-PASTE #####
@@ -4047,7 +4115,7 @@ settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
 control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode]
 maths = [FloatNode, FloatVectorNode]
 outputs = [MeshNode, DrawModeNode]
-testing = [NewFloat, NewInt, NewBool, NewAngle, NewFloatVector, NewAngleVector, NewMathOpNode, NewPrintNode, NewCubeNode, NewCylinderNode, NewToComponentNode, NewToMeshNode, NewLocationNode, NewRotateNode, NewBevelModNode, NewBooleanModNode, NewSelectAllNode, NewSelectComponentsManuallyNode, NewDeleteNode, NewDissolveDegenerateNode, NewBevelNode, NewInsetNode, NewOriginNode, NewShadingNode, NewRefreshMeshNode, NewExportMeshFBX]
+testing = [NewFloat, NewInt, NewBool, NewAngle, NewFloatVector, NewAngleVector, NewMathOpNode, NewPrintNode, NewCubeNode, NewCylinderNode, NewToComponentNode, NewToMeshNode, NewLocationNode, NewRotateNode, NewBevelModNode, NewBooleanModNode, NewSelectAllNode, NewSelectComponentsManuallyNode, NewDeleteNode, NewDissolveDegenerateNode, NewBevelNode, NewInsetNode, NewOriginNode, NewShadingNode, NewCursorLocationNode, NewPivotNode, NewRefreshMeshNode, NewExportMeshFBX]
 
 node_categories = [PcgNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
                    PcgNodeCategory("transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
