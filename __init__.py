@@ -66,7 +66,7 @@ class PcgNode:
     def poll(cls, ntree):
         return ntree.bl_idname == 'PcgNodeTree'
     def update_value(self, context):
-        bpy.ops.pcg.refresh_mesh_op()
+        bpy.ops.pcg.execute_node_op()
         return None
 class PcgNewNode:
     first_time = BoolProperty(default=True)
@@ -75,7 +75,7 @@ class PcgNewNode:
     def poll(cls, ntree):
         return ntree.bl_idname == 'PcgNodeTree'
     def update_value(self, context):
-        bpy.ops.pcg.refresh_mesh_op()
+        bpy.ops.pcg.execute_node_op()
         return None
     def init(self, context):
         self.hide = True
@@ -276,6 +276,23 @@ class PcgNewConstantNode(PcgNewNode):
         self.color = self.node_color
 class PcgNewMathsNode(PcgNewNode):
     node_color = (0.7, 0.3, 0.0)
+class PcgNewOutputNode(PcgNewNode):
+    node_color = (0.0, 0.3, 0.7)
+
+    mesh = PointerProperty(type=bpy.types.Object)
+
+    def init(self, context):
+        self.inputs.new("NewMeshSocket", "Mesh")
+        self.inputs.move(len(self.inputs)-1, 0)
+        self.use_custom_color = True
+        self.color = self.node_color
+
+    def pre_execute(self):
+        self.mesh = self.inputs["Mesh"].execute()
+        if (self.mesh == None):
+            print("Debug: " + self.name + ": Empty object recieved")
+            return False
+        return True
 
 # Old system categories
 class PcgInputNode(PcgNode):
@@ -572,7 +589,7 @@ class RealtimeMeshOp(Operator):
         return context.space_data.type == "NODE_EDITOR"
 
     def execute(self, context):
-        bpy.ops.pcg.refresh_mesh_op()
+        bpy.ops.pcg.execute_node_op()
         return {'FINISHED'}
 
     def modal(self, context, event):
@@ -607,9 +624,9 @@ class SaveSelectionOp(Operator):
             return {'CANCELLED'}
         node.save_selection()
         return {'FINISHED'}
-class RefreshMeshOp(Operator):
-    bl_idname = "pcg.refresh_mesh_op"
-    bl_label = "Refresh Mesh Update"
+class ExecuteNodeOp(Operator):
+    bl_idname = "pcg.execute_node_op"
+    bl_label = "Execute Node"
     bl_options = {"REGISTER", "UNDO"}
 
     @classmethod
@@ -628,7 +645,7 @@ class RefreshMeshOp(Operator):
                         print("Debug: " + node.name + ": Not a Loop node")
             node.execute()
             return {'FINISHED'}
-        print("Debug: RefreshMeshOp: No active node")
+        print("Debug: ExecuteNodeOp: No active node")
         return {'CANCELLED'}
 ##############################################################
 
@@ -3442,7 +3459,7 @@ class MeshNode(Node, PcgSettingNode):
     
     def draw_buttons(self, context, layout):
         if (self == self.id_data.nodes.active):
-            layout.operator("pcg.refresh_mesh_op", "Refresh Mesh")
+            layout.operator("pcg.execute_node_op", "Refresh Mesh")
         layout.column().prop(self, "print_output")
     
     def functionality(self):
@@ -3476,6 +3493,24 @@ class DrawModeNode(Node, PcgSettingNode):
         bpy.data.objects[self.mesh].show_transparent = self.prop_transparency
         bpy.data.objects[self.mesh].draw_type = self.prop_max_draw_type
 # New system nodes
+class NewPrintNode(Node, PcgNewNode):
+    bl_idname = "NewPrintNode"
+    bl_label = "New Print"
+
+    prop_value = FloatProperty(name="Value", update=PcgNewNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("NewFloatSocket", "Value").prop_prop = "prop_value"
+        self.outputs.new("NewFloatSocket", "Value")
+    
+    def draw_buttons(self, context, layout):
+        if (self == self.id_data.nodes.active):
+            layout.operator("pcg.execute_node_op", "Print")
+
+    def execute(self):
+        temp = self.inputs["Value"].execute()
+        print(str(temp))
+        return temp
 class NewFloat(Node, PcgNewConstantNode):
     bl_idname = "NewFloat"
     bl_label = "New Float"
@@ -3955,30 +3990,44 @@ class NewShadingNode(Node, PcgNewObjectOperatorNode):
             bpy.ops.object.shade_smooth()
         self.mesh.data.use_auto_smooth = self.inputs["Auto Smooth"].execute()
         self.mesh.data.auto_smooth_angle = self.inputs["Angle"].execute()
-class NewPrintNode(Node, PcgNewNode):
-    bl_idname = "NewPrintNode"
-    bl_label = "New Print"
-
-    prop_value = FloatProperty(name="Value", update=PcgNewNode.update_value)
-
-    def init(self, context):
-        self.inputs.new("NewFloatSocket", "Value").prop_prop = "prop_value"
-        self.outputs.new("NewFloatSocket", "Value")
+class NewRefreshMeshNode(Node, PcgNewOutputNode):
+    bl_idname = "NewRefreshMeshNode"
+    bl_label = "New Refresh Mesh Output"
+    
+    print_output = BoolProperty(name="Print Output (Debug)", default=False)
     
     def draw_buttons(self, context, layout):
         if (self == self.id_data.nodes.active):
-            layout.operator("pcg.refresh_mesh_op", "Print")
+            layout.operator("pcg.execute_node_op", "Refresh Mesh")
+        layout.column().prop(self, "print_output")
+    
+    def functionality(self):
+        if (self.print_output):
+            print(self.name + ": " + self.mesh.name)
+class NewExportMeshFBX(Node, PcgNewOutputNode):
+    bl_idname = "NewExportMeshFBX"
+    bl_label = "New Export Mesh (FBX)"
 
-    def execute(self):
-        temp = self.inputs["Value"].execute()
-        print(str(temp))
-        return temp
+    prop_filepath = StringProperty(name="File Path", default="/path/to/dir/")
+    prop_filename = StringProperty(name=" File Name", default="untitled")
+
+    def init(self, context):
+        self.inputs.new("NewStringSocket", "File Path").prop_prop = "prop_filepath"
+        self.inputs.new("NewStringSocket", "File Name").prop_prop = "prop_filename"
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        if (self == self.id_data.nodes.active):
+            layout.operator("pcg.execute_node_op", "Export Mesh")
+
+    def functionality(self):
+        bpy.ops.export_scene.fbx(filepath=self.inputs["File Path"].execute()+self.inputs["File Name"].execute()+".fbx", use_selection=True, use_tspace=True)
 ##############################################################
 
 ##### EASY COPY-PASTE #####
 '''
 def init(self, context):
-    self.inputs.new("New.Socket", ".").prop_prop = "prop_"
+    self.inputs.new("New.Socket", "M").prop_prop = "prop_"
     super().init(context)
 
 inputs[""].execute()
@@ -3998,7 +4047,7 @@ settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
 control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode]
 maths = [FloatNode, FloatVectorNode]
 outputs = [MeshNode, DrawModeNode]
-testing = [NewFloat, NewInt, NewBool, NewAngle, NewFloatVector, NewAngleVector, NewMathOpNode, NewPrintNode, NewCubeNode, NewCylinderNode, NewToComponentNode, NewToMeshNode, NewLocationNode, NewRotateNode, NewBevelModNode, NewBooleanModNode, NewSelectAllNode, NewSelectComponentsManuallyNode, NewDeleteNode, NewDissolveDegenerateNode, NewBevelNode, NewInsetNode, NewOriginNode, NewShadingNode]
+testing = [NewFloat, NewInt, NewBool, NewAngle, NewFloatVector, NewAngleVector, NewMathOpNode, NewPrintNode, NewCubeNode, NewCylinderNode, NewToComponentNode, NewToMeshNode, NewLocationNode, NewRotateNode, NewBevelModNode, NewBooleanModNode, NewSelectAllNode, NewSelectComponentsManuallyNode, NewDeleteNode, NewDissolveDegenerateNode, NewBevelNode, NewInsetNode, NewOriginNode, NewShadingNode, NewRefreshMeshNode, NewExportMeshFBX]
 
 node_categories = [PcgNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
                    PcgNodeCategory("transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
