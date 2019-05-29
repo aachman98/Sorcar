@@ -2,7 +2,7 @@ print("______________________________________________________")
 bl_info = {
     "name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (1, 2, 0),
+    "version": (1, 2, 1),
     "blender": (2, 79, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
@@ -174,8 +174,8 @@ class ScNode:
         region = [i for i in area.regions if i.type == 'WINDOW'][0]
         ret = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'region':region, 'gpencil_data':bpy.context.gpencil_data}
         try:
-            ret['active_object'] = self.mesh.name
-            ret['edit_object'] = self.mesh.name
+            ret['active_object'] = self.mesh
+            ret['edit_object'] = self.mesh
         except:
             print("Debug: " + self.name + ": Override: No mesh input")
         return ret
