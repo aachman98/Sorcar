@@ -2,7 +2,7 @@ print("______________________________________________________")
 bl_info = {
     "name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (1, 1, 1),
+    "version": (1, 2, 0),
     "blender": (2, 79, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
@@ -708,78 +708,46 @@ class LocationNode(Node, ScTransformNode):
     
     def functionality(self):
         self.mesh.location = self.inputs["Location"].execute()
-# class LocationNode(Node, ScTransformNode):
-#     bl_idname = "LocationNode"
-#     bl_label = "Set Location"
+class RotationNode(Node, ScTransformNode):
+    bl_idname = "RotationNode"
+    bl_label = "Set Rotation"
     
-#     prop_location = FloatVectorProperty(name="Location", update=ScNode.update_value)
+    prop_rotation = FloatVectorProperty(name="Rotation", subtype="EULER", unit="ROTATION", update=ScNode.update_value)
 
-#     def init(self, context):
-#         super().init(context)
-#         self.inputs.new("FloatVectorSocket", "Location").prop_prop = "prop_location"
+    def init(self, context):
+        self.inputs.new("ScAngleVectorSocket", "Rotation").prop_prop = "prop_rotation"
+        super().init(context)
     
-#     def functionality(self):
-#         if (self.inputs["Location"].is_linked):
-#             prop_location = self.inputs["Location"].links[0].from_node.execute()
-#         else:
-#             prop_location = self.prop_location
-#         bpy.data.objects[self.mesh].location = prop_location
-# class RotationNode(Node, ScTransformNode):
-#     bl_idname = "RotationNode"
-#     bl_label = "Set Rotation"
+    def functionality(self):
+        self.mesh.rotation_euler = self.inputs["Rotation"].execute()
+class ScaleNode(Node, ScTransformNode):
+    bl_idname = "ScaleNode"
+    bl_label = "Set Scale"
     
-#     prop_rotation = FloatVectorProperty(name="Rotation", subtype="EULER", unit="ROTATION", update=ScNode.update_value)
-    
-#     def draw_buttons(self, context, layout):
-#         layout.column().prop(self, "prop_rotation")
-    
-#     def functionality(self):
-#         bpy.data.objects[self.mesh].rotation_euler = self.prop_rotation
-# class ScaleNode(Node, ScTransformNode):
-#     bl_idname = "ScaleNode"
-#     bl_label = "Set Scale"
-    
-#     prop_scale = FloatVectorProperty(name="Scale", default=(1.0, 1.0, 1.0), update=ScNode.update_value)
+    prop_scale = FloatVectorProperty(name="Scale", default=(1.0, 1.0, 1.0), update=ScNode.update_value)
 
-#     def init(self, context):
-#         super().init(context)
-#         self.inputs.new("FloatVectorSocket", "Scale").prop_prop = "prop_scale"
+    def init(self, context):
+        self.inputs.new("ScFloatVectorSocket", "Scale").prop_prop = "prop_scale"
+        super().init(context)
     
-#     def functionality(self):
-#         if (self.inputs["Scale"].is_linked):
-#             prop_scale = self.inputs["Scale"].links[0].from_node.execute()
-#         else:
-#             prop_scale = self.prop_scale
-#         bpy.data.objects[self.mesh].scale = prop_scale
-# class TranslateNode(Node, ScTransformNode):
-#     bl_idname = "TranslateNode"
-#     bl_label = "Translate"
+    def functionality(self):
+        self.mesh.scale = self.inputs["Scale"].execute()
+class TranslateNode(Node, ScTransformNode):
+    bl_idname = "TranslateNode"
+    bl_label = "Translate"
 
-#     prop_value = FloatVectorProperty(name="Value", update=ScNode.update_value)
-#     prop_constraint_axis = BoolVectorProperty(name="Constraint Axis", update=ScNode.update_value)
-#     prop_mirror = BoolProperty(name="Mirror", update=ScNode.update_value)
+    prop_value = FloatVectorProperty(name="Value", update=ScNode.update_value)
+    prop_constraint_axis = BoolVectorProperty(name="Constraint Axis", update=ScNode.update_value)
 
-#     def init(self, context):
-#         super().init(context)
-#         self.inputs.new("FloatVectorSocket", "Value").prop_prop = "prop_value"
+    def init(self, context):
+        self.inputs.new("ScFloatVectorSocket", "Value").prop_prop = "prop_value"
+        super().init(context)
 
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_constraint_axis")
-#         layout.prop(self, "prop_mirror")
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_constraint_axis")
 
-#     def functionality(self):
-#         if (self.inputs["Value"].is_linked):
-#             prop_value = self.inputs["Value"].links[0].from_node.execute()
-#         else:
-#             prop_value = self.prop_value
-#         window = bpy.data.window_managers['WinMan'].windows[0]
-#         screen = window.screen
-#         area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
-#         space = area.spaces[0]
-#         scene = bpy.data.scenes[0]
-#         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-#         override = {'window':window, 'screen':screen, 'area':area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'gpencil_data':bpy.context.gpencil_data}
-#         bpy.ops.transform.translate(override, value=prop_value, constraint_axis=self.prop_constraint_axis, constraint_orientation=space.transform_orientation, mirror=self.prop_mirror, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1.0, snap=False, snap_target='CLOSEST', snap_point=(0.0, 0.0, 0.0), snap_align=False, snap_normal=(0.0, 0.0, 0.0), gpencil_strokes=False, texture_space=False, remove_on_cancel=False, release_confirm=False, use_accurate=False)
+    def functionality(self):
+        bpy.ops.transform.translate(self.override(), value=self.inputs["Value"].execute(), constraint_axis=self.prop_constraint_axis, constraint_orientation=self.override()["space"].transform_orientation)
 class RotateNode(Node, ScTransformNode):
     bl_idname = "RotateNode"
     bl_label = "Rotate"
@@ -796,68 +764,22 @@ class RotateNode(Node, ScTransformNode):
     
     def functionality(self):
         bpy.ops.transform.rotate(self.override(), value=self.inputs["Value"].execute(), axis=(1.0, 1.0, 1.0), constraint_axis=(self.prop_constraint_axis=="X", self.prop_constraint_axis=="Y", self.prop_constraint_axis=="Z"))
-# class RotateNode(Node, ScTransformNode):
-#     bl_idname = "RotateNode"
-#     bl_label = "Rotate"
+class ResizeNode(Node, ScTransformNode):
+    bl_idname = "ResizeNode"
+    bl_label = "Resize"
 
-#     prop_value = FloatProperty(name="Value", subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
-#     # prop_constraint_axis = EnumProperty(name="Constraint Axis", items=[("X", "X", "", 2), ("Y", "Y", "", 4), ("Z", "Z", "", 8)], default={"X"}, options={"ENUM_FLAG"}, update=ScNode.update_value)
-#     prop_constraint_axis = EnumProperty(name="Constraint Axis", items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="X", update=ScNode.update_value)
-#     prop_mirror = BoolProperty(name="Mirror", update=ScNode.update_value)
+    prop_value = FloatVectorProperty(name="Value", default=(1.0, 1.0, 1.0), update=ScNode.update_value)
+    prop_constraint_axis = BoolVectorProperty(name="Constraint Axis", update=ScNode.update_value)
 
-#     # def calculate_weight(self):
-#     #     axis = self.prop_value
-#     #     val = max(axis[0], axis[1], axis[2])
-#     #     if (val == 0):
-#     #         return 0, (0, 0, 0)
-#     #     axis = (axis[0]/val, axis[1]/val, axis[2]/val)
-#     #     return val, axis
+    def init(self, context):
+        self.inputs.new("ScFloatVectorSocket", "Value").prop_prop = "prop_value"
+        super().init(context)
 
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_value")
-#         layout.prop(self, "prop_constraint_axis", expand=True)
-#         layout.prop(self, "prop_mirror")
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_constraint_axis")
     
-#     def functionality(self):
-#         window = bpy.data.window_managers['WinMan'].windows[0]
-#         screen = window.screen
-#         area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
-#         space = area.spaces[0]
-#         scene = bpy.data.scenes[0]
-#         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-#         # val, axis = self.calculate_weight()
-#         override = {'window':window, 'screen':screen, 'area':area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'gpencil_data':bpy.context.gpencil_data}
-#         # bpy.ops.transform.rotate(override, value=self.prop_value, axis=(1.0, 1.0, 1.0), constraint_axis=("X" in self.prop_constraint_axis, "Y" in self.prop_constraint_axis, "Z" in self.prop_constraint_axis), constraint_orientation=space.transform_orientation, mirror=self.prop_mirror, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1.0, snap=False, snap_target='CLOSEST', snap_point=(0.0, 0.0, 0.0), snap_align=False, snap_normal=(0.0, 0.0, 0.0), gpencil_strokes=False, release_confirm=False, use_accurate=False)
-#         bpy.ops.transform.rotate(override, value=self.prop_value, axis=(1.0, 1.0, 1.0), constraint_axis=(self.prop_constraint_axis=="X", self.prop_constraint_axis=="Y", self.prop_constraint_axis=="Z"), constraint_orientation=space.transform_orientation, mirror=self.prop_mirror, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1.0, snap=False, snap_target='CLOSEST', snap_point=(0.0, 0.0, 0.0), snap_align=False, snap_normal=(0.0, 0.0, 0.0), gpencil_strokes=False, release_confirm=False, use_accurate=False)
-# class ResizeNode(Node, ScTransformNode):
-#     bl_idname = "ResizeNode"
-#     bl_label = "Resize"
-
-#     prop_value = FloatVectorProperty(name="Value", default=(1.0, 1.0, 1.0), update=ScNode.update_value)
-#     prop_constraint_axis = BoolVectorProperty(name="Constraint Axis", update=ScNode.update_value)
-#     prop_mirror = BoolProperty(name="Mirror", update=ScNode.update_value)
-
-#     def init(self, context):
-#         super().init(context)
-#         self.inputs.new("FloatVectorSocket", "Value").prop_prop = "prop_value"
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_constraint_axis")
-#         layout.prop(self, "prop_mirror")
-    
-#     def functionality(self):
-#         if (self.inputs["Value"].is_linked):
-#             prop_value = self.inputs["Value"].links[0].from_node.execute()
-#         else:
-#             prop_value = self.prop_value
-#         window = bpy.data.window_managers['WinMan'].windows[0]
-#         screen = window.screen
-#         area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
-#         space = area.spaces[0]
-#         scene = bpy.data.scenes[0]
-#         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-#         override = {'window':window, 'screen':screen, 'area':area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'gpencil_data':bpy.context.gpencil_data}
-#         bpy.ops.transform.resize(override, value=prop_value, constraint_axis=self.prop_constraint_axis, constraint_orientation=space.transform_orientation, mirror=self.prop_mirror, proportional='DISABLED', proportional_edit_falloff='SMOOTH', proportional_size=1.0, snap=False, snap_target='CLOSEST', snap_point=(0.0, 0.0, 0.0), snap_align=False, snap_normal=(0.0, 0.0, 0.0), gpencil_strokes=False, texture_space=False, remove_on_cancel=False, release_confirm=False, use_accurate=False)
+    def functionality(self):
+        bpy.ops.transform.resize(self.override(), value=self.inputs["Value"].execute(), constraint_axis=self.prop_constraint_axis, constraint_orientation=self.override()["space"].transform_orientation)
 # Modifiers
 # class ArrayModNode(Node, ScModifierNode):
 #     bl_idname = "ArrayModNode"
@@ -4084,7 +4006,7 @@ self.inputs[""].execute()
 
 
 inputs = [PlaneNode, CubeNode, CircleNode, UVSphereNode, IcoSphereNode, CylinderNode, ConeNode, GridNode, SuzanneNode, CustomMeshNode] # TorusNode
-# transform = [LocationNode, RotationNode, ScaleNode, TranslateNode, RotateNode, ResizeNode]
+transform = [LocationNode, RotationNode, ScaleNode, TranslateNode, RotateNode, ResizeNode]
 # modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CorrectiveSmoothModNode, CurveModNode, DecimateModNode, EdgeSplitModNode, LaplacianSmoothModNode, MirrorModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, TriangulateModNode, WireframeModNode]
 # conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
 # selection = [SelectComponentsManuallyNode, SelectFaceByIndexNode, SelectAlternateFacesNode, SelectFacesByNormalNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLoopNode, SelectLoopRegionNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectRegionBoundaryNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectShortestPathNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
@@ -4099,7 +4021,7 @@ inputs = [PlaneNode, CubeNode, CircleNode, UVSphereNode, IcoSphereNode, Cylinder
 testing = [Float, Int, Bool, Angle, FloatVector, AngleVector, RandomFloat, RandomInt, RandomBool, RandomAngle, MathOpNode, PrintNode, CubeNode, CylinderNode, CustomMeshNode, ToComponentNode, ToMeshNode, LocationNode, RotateNode, BevelModNode, BooleanModNode, SelectAllNode, SelectComponentsManuallyNode, DeleteNode, DissolveDegenerateNode, BevelNode, InsetNode, OriginNode, ShadingNode, BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode, IfElseNode, CursorLocationNode, PivotNode, RefreshMeshNode, ExportMeshFBX]
 
 node_categories = [ScNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
-#                    ScNodeCategory("transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
+                   ScNodeCategory("transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
 #                    ScNodeCategory("modifiers", "Modifiers", items=[NodeItem(i.bl_idname) for i in modifiers]),
 #                    ScNodeCategory("conversion", "Conversion", items=[NodeItem(i.bl_idname) for i in conversion]),
 #                    ScNodeCategory("selection", "Selection", items=[NodeItem(i.bl_idname) for i in selection]),
