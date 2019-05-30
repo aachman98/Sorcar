@@ -2,7 +2,7 @@ print("______________________________________________________")
 bl_info = {
     "name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (1, 3, 0),
+    "version": (1, 4, 0),
     "blender": (2, 79, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
@@ -1683,29 +1683,22 @@ class ToMeshNode(Node, ScConversionNode):
     
     def functionality(self):
         bpy.ops.object.mode_set(mode="OBJECT")
-# class ChangeModeNode(Node, ScNode):
-#     bl_idname = "ChangeModeNode"
-#     bl_label = "Change Component Mode"
+class ChangeModeNode(Node, ScConversionNode):
+    bl_idname = "ChangeModeNode"
+    bl_label = "Change Component Mode"
     
-#     prop_selection_type = EnumProperty(name="Component", items=[("FACE", "Faces", ""), ("VERT", "Vertices", ""), ("EDGE", "Edges", "")], default="FACE", update=ScNode.update_value)
+    prop_selection_type = EnumProperty(name="Component", items=[("FACE", "Faces", ""), ("VERT", "Vertices", ""), ("EDGE", "Edges", "")], default="FACE", update=ScNode.update_value)
 
-#     def init(self, context):
-#         self.inputs.new("ComponentSocket", "Component")
-#         self.outputs.new("ComponentSocket", "Component")
+    def init(self, context):
+        self.inputs.new("ScComponentSocket", "Component").prop_prop = "mesh"
+        self.outputs.new("ScComponentSocket", "Component")
+        super().init(context)
 
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_selection_type", expand=True)
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_selection_type", expand=True)
     
-#     def execute(self):
-#         if (not self.inputs[0].is_linked):
-#             print("DEBUG: " + self.name + ": Not linked")
-#             return ""
-#         self.mesh = self.inputs[0].links[0].from_node.execute()
-#         if (self.mesh == ""):
-#             print("DEBUG: " + self.name + ": Empty object recieved")
-#             return ""
-#         bpy.ops.mesh.select_mode(type=self.prop_selection_type)
-#         return self.mesh
+    def functionality(self):
+        bpy.ops.mesh.select_mode(type=self.prop_selection_type)
 # Selection
 class SelectComponentsManuallyNode(Node, ScSelectionNode):
     bl_idname = "SelectComponentsManuallyNode"
@@ -3481,7 +3474,7 @@ self.inputs[""].execute()
 inputs = [PlaneNode, CubeNode, CircleNode, UVSphereNode, IcoSphereNode, CylinderNode, ConeNode, GridNode, SuzanneNode, CustomMeshNode] # TorusNode
 transform = [LocationNode, RotationNode, ScaleNode, TranslateNode, RotateNode, ResizeNode]
 modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CorrectiveSmoothModNode, CurveModNode, DecimateModNode, EdgeSplitModNode, LaplacianSmoothModNode]#, MirrorModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, TriangulateModNode, WireframeModNode]
-# conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
+conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
 # selection = [SelectComponentsManuallyNode, SelectFaceByIndexNode, SelectAlternateFacesNode, SelectFacesByNormalNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLoopNode, SelectLoopRegionNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectRegionBoundaryNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectShortestPathNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
 # deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode, DissolveVerticesNode, DissolveDegenerateNode, EdgeCollapseNode]
 # edit_operators = [AddEdgeFaceNode, BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, ConvexHullNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, ExtrudeRepeatNode, FlipNormalsNode, MakeNormalsConsistentNode, FlattenNode, FillEdgeLoopNode, FillGridNode, FillHolesBySidesNode, InsetNode, LoopCutNode, MaterialNode, MergeComponentsNode, OffsetEdgeLoopNode, PokeNode, RemoveDoublesNode, RotateEdgeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode, TriangulateFacesNode, UnSubdivideNode]
@@ -3491,12 +3484,12 @@ utilities = [MathsOpNode]
 control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode, IfElseNode]
 # settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
 outputs = [RefreshMeshNode, ExportMeshFBX]
-testing = [PrintNode, ToComponentNode, ToMeshNode, SelectAllNode, SelectComponentsManuallyNode, DeleteNode, DissolveDegenerateNode, BevelNode, InsetNode, OriginNode, ShadingNode, CursorLocationNode, PivotNode]
+testing = [PrintNode, SelectAllNode, SelectComponentsManuallyNode, DeleteNode, DissolveDegenerateNode, BevelNode, InsetNode, OriginNode, ShadingNode, CursorLocationNode, PivotNode]
 
 node_categories = [ScNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
                    ScNodeCategory("transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
                    ScNodeCategory("modifiers", "Modifiers (WIP)", items=[NodeItem(i.bl_idname) for i in modifiers]),
-                #    ScNodeCategory("conversion", "Conversion", items=[NodeItem(i.bl_idname) for i in conversion]),
+                   ScNodeCategory("conversion", "Conversion", items=[NodeItem(i.bl_idname) for i in conversion]),
                 #    ScNodeCategory("selection", "Selection", items=[NodeItem(i.bl_idname) for i in selection]),
                 #    ScNodeCategory("deletion", "Deletion", items=[NodeItem(i.bl_idname) for i in deletion]),
                 #    ScNodeCategory("edit_operators", "Component Operators", items=[NodeItem(i.bl_idname) for i in edit_operators]),
