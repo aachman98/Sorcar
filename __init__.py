@@ -2,7 +2,7 @@ print("______________________________________________________")
 bl_info = {
     "name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (1, 4, 0),
+    "version": (1, 5, 0),
     "blender": (2, 79, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
@@ -1219,18 +1219,18 @@ class LaplacianSmoothModNode(Node, ScModifierNode):
     
 #     def functionality(self):
 #         bpy.ops.object.modifier_add(type="MIRROR")
-#         bpy.data.objects[self.mesh].modifiers[0].use_x = self.use_x
-#         bpy.data.objects[self.mesh].modifiers[0].use_y = self.use_y
-#         bpy.data.objects[self.mesh].modifiers[0].use_z = self.use_z
-#         bpy.data.objects[self.mesh].modifiers[0].use_mirror_merge = self.use_mirror_merge
-#         bpy.data.objects[self.mesh].modifiers[0].use_clip = self.use_clip
-#         bpy.data.objects[self.mesh].modifiers[0].use_mirror_vertex_groups = self.use_mirror_vertex_groups
-#         bpy.data.objects[self.mesh].modifiers[0].use_mirror_u = self.use_mirror_u
-#         bpy.data.objects[self.mesh].modifiers[0].use_mirror_v = self.use_mirror_v
-#         bpy.data.objects[self.mesh].modifiers[0].mirror_offset_u = self.mirror_offset_u
-#         bpy.data.objects[self.mesh].modifiers[0].mirror_offset_v = self.mirror_offset_v
-#         bpy.data.objects[self.mesh].modifiers[0].merge_threshold = self.merge_threshold
-#         bpy.data.objects[self.mesh].modifiers[0].mirror_object = self.mirror_object
+#         self.mesh.modifiers[0].use_x = self.use_x
+#         self.mesh.modifiers[0].use_y = self.use_y
+#         self.mesh.modifiers[0].use_z = self.use_z
+#         self.mesh.modifiers[0].use_mirror_merge = self.use_mirror_merge
+#         self.mesh.modifiers[0].use_clip = self.use_clip
+#         self.mesh.modifiers[0].use_mirror_vertex_groups = self.use_mirror_vertex_groups
+#         self.mesh.modifiers[0].use_mirror_u = self.use_mirror_u
+#         self.mesh.modifiers[0].use_mirror_v = self.use_mirror_v
+#         self.mesh.modifiers[0].mirror_offset_u = self.mirror_offset_u
+#         self.mesh.modifiers[0].mirror_offset_v = self.mirror_offset_v
+#         self.mesh.modifiers[0].merge_threshold = self.merge_threshold
+#         self.mesh.modifiers[0].mirror_object = self.mirror_object
 #         return True
 # class RemeshModNode(Node, ScModifierNode):
 #     bl_idname = "RemeshModNode"
@@ -1259,13 +1259,13 @@ class LaplacianSmoothModNode(Node, ScModifierNode):
     
 #     def functionality(self):
 #         bpy.ops.object.modifier_add(type="REMESH")
-#         bpy.data.objects[self.mesh].modifiers[0].mode = self.mode
-#         bpy.data.objects[self.mesh].modifiers[0].octree_depth = self.octree_depth
-#         bpy.data.objects[self.mesh].modifiers[0].scale = self.scale
-#         bpy.data.objects[self.mesh].modifiers[0].sharpness = self.sharpness
-#         bpy.data.objects[self.mesh].modifiers[0].use_smooth_shade = self.use_smooth_shade
-#         bpy.data.objects[self.mesh].modifiers[0].use_remove_disconnected = self.use_remove_disconnected
-#         bpy.data.objects[self.mesh].modifiers[0].threshold = self.threshold
+#         self.mesh.modifiers[0].mode = self.mode
+#         self.mesh.modifiers[0].octree_depth = self.octree_depth
+#         self.mesh.modifiers[0].scale = self.scale
+#         self.mesh.modifiers[0].sharpness = self.sharpness
+#         self.mesh.modifiers[0].use_smooth_shade = self.use_smooth_shade
+#         self.mesh.modifiers[0].use_remove_disconnected = self.use_remove_disconnected
+#         self.mesh.modifiers[0].threshold = self.threshold
 #         return True
 # class ScrewModNode(Node, ScModifierNode):
 #     bl_idname = "ScrewModNode"
@@ -1315,21 +1315,21 @@ class LaplacianSmoothModNode(Node, ScModifierNode):
     
 #     def functionality(self):
 #         bpy.ops.object.modifier_add(type="SCREW")
-#         bpy.data.objects[self.mesh].modifiers[0].axis = self.axis
-#         bpy.data.objects[self.mesh].modifiers[0].object = self.object
-#         bpy.data.objects[self.mesh].modifiers[0].angle = self.angle
-#         bpy.data.objects[self.mesh].modifiers[0].steps = self.steps
-#         bpy.data.objects[self.mesh].modifiers[0].render_steps = self.render_steps
-#         bpy.data.objects[self.mesh].modifiers[0].use_smooth_shade = self.use_smooth_shade
-#         bpy.data.objects[self.mesh].modifiers[0].use_merge_vertices = self.use_merge_vertices
-#         bpy.data.objects[self.mesh].modifiers[0].merge_threshold = self.merge_threshold
-#         bpy.data.objects[self.mesh].modifiers[0].screw_offset = self.screw_offset
-#         bpy.data.objects[self.mesh].modifiers[0].use_object_screw_offset = self.use_object_screw_offset
-#         bpy.data.objects[self.mesh].modifiers[0].use_normal_calculate = self.use_normal_calculate
-#         bpy.data.objects[self.mesh].modifiers[0].use_normal_flip = self.use_normal_flip
-#         bpy.data.objects[self.mesh].modifiers[0].iterations = self.iterations
-#         bpy.data.objects[self.mesh].modifiers[0].use_stretch_u = self.use_stretch_u
-#         bpy.data.objects[self.mesh].modifiers[0].use_stretch_v = self.use_stretch_v
+#         self.mesh.modifiers[0].axis = self.axis
+#         self.mesh.modifiers[0].object = self.object
+#         self.mesh.modifiers[0].angle = self.angle
+#         self.mesh.modifiers[0].steps = self.steps
+#         self.mesh.modifiers[0].render_steps = self.render_steps
+#         self.mesh.modifiers[0].use_smooth_shade = self.use_smooth_shade
+#         self.mesh.modifiers[0].use_merge_vertices = self.use_merge_vertices
+#         self.mesh.modifiers[0].merge_threshold = self.merge_threshold
+#         self.mesh.modifiers[0].screw_offset = self.screw_offset
+#         self.mesh.modifiers[0].use_object_screw_offset = self.use_object_screw_offset
+#         self.mesh.modifiers[0].use_normal_calculate = self.use_normal_calculate
+#         self.mesh.modifiers[0].use_normal_flip = self.use_normal_flip
+#         self.mesh.modifiers[0].iterations = self.iterations
+#         self.mesh.modifiers[0].use_stretch_u = self.use_stretch_u
+#         self.mesh.modifiers[0].use_stretch_v = self.use_stretch_v
 #         return True
 # class SimpleDeformModNode(Node, ScModifierNode):
 #     bl_idname = "SimpleDeformModNode"
@@ -1352,7 +1352,7 @@ class LaplacianSmoothModNode(Node, ScModifierNode):
 #         col.label(text="Vertex Group:")
 #         row = col.row(align=True)
 #         if (not self.mesh == ""):
-#             row.prop_search(self, "vertex_group", bpy.data.objects[self.mesh], "vertex_groups", text="")
+#             row.prop_search(self, "vertex_group", self.mesh, "vertex_groups", text="")
 #         row.prop(self, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
 #         split = layout.split()
 #         col = split.column()
@@ -1372,17 +1372,17 @@ class LaplacianSmoothModNode(Node, ScModifierNode):
     
 #     def functionality(self):
 #         bpy.ops.object.modifier_add(type="SIMPLE_DEFORM")
-#         bpy.data.objects[self.mesh].modifiers[0].deform_method = self.deform_method
-#         bpy.data.objects[self.mesh].modifiers[0].vertex_group = self.vertex_group
-#         bpy.data.objects[self.mesh].modifiers[0].invert_vertex_group = self.invert_vertex_group
-#         bpy.data.objects[self.mesh].modifiers[0].origin = self.origin
-#         bpy.data.objects[self.mesh].modifiers[0].lock_x = self.lock_x
-#         bpy.data.objects[self.mesh].modifiers[0].lock_y = self.lock_y
+#         self.mesh.modifiers[0].deform_method = self.deform_method
+#         self.mesh.modifiers[0].vertex_group = self.vertex_group
+#         self.mesh.modifiers[0].invert_vertex_group = self.invert_vertex_group
+#         self.mesh.modifiers[0].origin = self.origin
+#         self.mesh.modifiers[0].lock_x = self.lock_x
+#         self.mesh.modifiers[0].lock_y = self.lock_y
 #         if self.deform_method in {'TAPER', 'STRETCH'}:
-#             bpy.data.objects[self.mesh].modifiers[0].factor = self.factor
+#             self.mesh.modifiers[0].factor = self.factor
 #         else:
-#             bpy.data.objects[self.mesh].modifiers[0].angle = self.angle
-#         bpy.data.objects[self.mesh].modifiers[0].limits = self.limits
+#             self.mesh.modifiers[0].angle = self.angle
+#         self.mesh.modifiers[0].limits = self.limits
 #         return True
 # class SkinModNode(Node, ScModifierNode):
 #     bl_idname = "SkinModNode"
@@ -1421,11 +1421,11 @@ class LaplacianSmoothModNode(Node, ScModifierNode):
     
 #     def functionality(self):
 #         bpy.ops.object.modifier_add(type="SKIN")
-#         bpy.data.objects[self.mesh].modifiers[0].branch_smoothing = self.branch_smoothing
-#         bpy.data.objects[self.mesh].modifiers[0].use_smooth_shade = self.use_smooth_shade
-#         bpy.data.objects[self.mesh].modifiers[0].use_x_symmetry = self.use_x_symmetry
-#         bpy.data.objects[self.mesh].modifiers[0].use_y_symmetry = self.use_y_symmetry
-#         bpy.data.objects[self.mesh].modifiers[0].use_z_symmetry = self.use_z_symmetry
+#         self.mesh.modifiers[0].branch_smoothing = self.branch_smoothing
+#         self.mesh.modifiers[0].use_smooth_shade = self.use_smooth_shade
+#         self.mesh.modifiers[0].use_x_symmetry = self.use_x_symmetry
+#         self.mesh.modifiers[0].use_y_symmetry = self.use_y_symmetry
+#         self.mesh.modifiers[0].use_z_symmetry = self.use_z_symmetry
 #         return True
 # class SmoothModNode(Node, ScModifierNode):
 #     bl_idname = "SmoothModNode"
@@ -1450,16 +1450,16 @@ class LaplacianSmoothModNode(Node, ScModifierNode):
 #         col.prop(self, "iterations")
 #         col.label(text="Vertex Group:")
 #         if (not self.mesh == ""):
-#             col.prop_search(self, "vertex_group", bpy.data.objects[self.mesh], "vertex_groups", text="")
+#             col.prop_search(self, "vertex_group", self.mesh, "vertex_groups", text="")
     
 #     def functionality(self):
 #         bpy.ops.object.modifier_add(type="SMOOTH")
-#         bpy.data.objects[self.mesh].modifiers[0].use_x = self.use_x
-#         bpy.data.objects[self.mesh].modifiers[0].use_y = self.use_y
-#         bpy.data.objects[self.mesh].modifiers[0].use_z = self.use_z
-#         bpy.data.objects[self.mesh].modifiers[0].factor = self.factor
-#         bpy.data.objects[self.mesh].modifiers[0].iterations = self.iterations
-#         bpy.data.objects[self.mesh].modifiers[0].vertex_group = self.vertex_group
+#         self.mesh.modifiers[0].use_x = self.use_x
+#         self.mesh.modifiers[0].use_y = self.use_y
+#         self.mesh.modifiers[0].use_z = self.use_z
+#         self.mesh.modifiers[0].factor = self.factor
+#         self.mesh.modifiers[0].iterations = self.iterations
+#         self.mesh.modifiers[0].vertex_group = self.vertex_group
 #         return True
 # class SolidifyModNode(Node, ScModifierNode):
 #     bl_idname = "SolidifyModNode"
@@ -1490,7 +1490,7 @@ class LaplacianSmoothModNode(Node, ScModifierNode):
 #         col.separator()
 #         row = col.row(align=True)
 #         if (not self.mesh == ""):
-#             row.prop_search(self, "vertex_group", bpy.data.objects[self.mesh], "vertex_groups", text="")
+#             row.prop_search(self, "vertex_group", self.mesh, "vertex_groups", text="")
 #         sub = row.row(align=True)
 #         sub.active = bool(self.vertex_group)
 #         sub.prop(self, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
@@ -1521,22 +1521,22 @@ class LaplacianSmoothModNode(Node, ScModifierNode):
     
 #     def functionality(self):
 #         bpy.ops.object.modifier_add(type="SOLIDIFY")
-#         bpy.data.objects[self.mesh].modifiers[0].thickness = self.thickness
-#         bpy.data.objects[self.mesh].modifiers[0].thickness_clamp = self.thickness_clamp
-#         bpy.data.objects[self.mesh].modifiers[0].vertex_group = self.vertex_group
-#         bpy.data.objects[self.mesh].modifiers[0].invert_vertex_group = self.invert_vertex_group
-#         bpy.data.objects[self.mesh].modifiers[0].thickness_vertex_group = self.thickness_vertex_group
-#         bpy.data.objects[self.mesh].modifiers[0].edge_crease_inner = self.edge_crease_inner
-#         bpy.data.objects[self.mesh].modifiers[0].edge_crease_outer = self.edge_crease_outer
-#         bpy.data.objects[self.mesh].modifiers[0].edge_crease_rim = self.edge_crease_rim
-#         bpy.data.objects[self.mesh].modifiers[0].offset = self.offset
-#         bpy.data.objects[self.mesh].modifiers[0].use_flip_normals = self.use_flip_normals
-#         bpy.data.objects[self.mesh].modifiers[0].use_even_offset = self.use_even_offset
-#         bpy.data.objects[self.mesh].modifiers[0].use_quality_normals = self.use_quality_normals
-#         bpy.data.objects[self.mesh].modifiers[0].use_rim = self.use_rim
-#         bpy.data.objects[self.mesh].modifiers[0].use_rim_only = self.use_rim_only
-#         bpy.data.objects[self.mesh].modifiers[0].material_offset = self.material_offset
-#         bpy.data.objects[self.mesh].modifiers[0].material_offset_rim = self.material_offset_rim
+#         self.mesh.modifiers[0].thickness = self.thickness
+#         self.mesh.modifiers[0].thickness_clamp = self.thickness_clamp
+#         self.mesh.modifiers[0].vertex_group = self.vertex_group
+#         self.mesh.modifiers[0].invert_vertex_group = self.invert_vertex_group
+#         self.mesh.modifiers[0].thickness_vertex_group = self.thickness_vertex_group
+#         self.mesh.modifiers[0].edge_crease_inner = self.edge_crease_inner
+#         self.mesh.modifiers[0].edge_crease_outer = self.edge_crease_outer
+#         self.mesh.modifiers[0].edge_crease_rim = self.edge_crease_rim
+#         self.mesh.modifiers[0].offset = self.offset
+#         self.mesh.modifiers[0].use_flip_normals = self.use_flip_normals
+#         self.mesh.modifiers[0].use_even_offset = self.use_even_offset
+#         self.mesh.modifiers[0].use_quality_normals = self.use_quality_normals
+#         self.mesh.modifiers[0].use_rim = self.use_rim
+#         self.mesh.modifiers[0].use_rim_only = self.use_rim_only
+#         self.mesh.modifiers[0].material_offset = self.material_offset
+#         self.mesh.modifiers[0].material_offset_rim = self.material_offset_rim
 #         return True
 # class SubdivideModNode(Node, ScModifierNode):
 #     bl_idname = "SubdivideModNode"
@@ -1565,11 +1565,11 @@ class LaplacianSmoothModNode(Node, ScModifierNode):
 #         if (self.levels == 0):
 #             return False
 #         bpy.ops.object.modifier_add(type="SUBSURF")
-#         bpy.data.objects[self.mesh].modifiers[0].subdivision_type = self.subdivision_type
-#         bpy.data.objects[self.mesh].modifiers[0].levels = self.levels
-#         bpy.data.objects[self.mesh].modifiers[0].render_levels = self.render_levels
-#         bpy.data.objects[self.mesh].modifiers[0].use_subsurf_uv = self.use_subsurf_uv
-#         bpy.data.objects[self.mesh].modifiers[0].show_only_control_edges = self.show_only_control_edges
+#         self.mesh.modifiers[0].subdivision_type = self.subdivision_type
+#         self.mesh.modifiers[0].levels = self.levels
+#         self.mesh.modifiers[0].render_levels = self.render_levels
+#         self.mesh.modifiers[0].use_subsurf_uv = self.use_subsurf_uv
+#         self.mesh.modifiers[0].show_only_control_edges = self.show_only_control_edges
 #         return True
 # class TriangulateModNode(Node, ScModifierNode):
 #     bl_idname = "TriangulateModNode"
@@ -1589,8 +1589,8 @@ class LaplacianSmoothModNode(Node, ScModifierNode):
     
 #     def functionality(self):
 #         bpy.ops.object.modifier_add(type="TRIANGULATE")
-#         bpy.data.objects[self.mesh].modifiers[0].quad_method = self.quad_method
-#         bpy.data.objects[self.mesh].modifiers[0].ngon_method = self.ngon_method
+#         self.mesh.modifiers[0].quad_method = self.quad_method
+#         self.mesh.modifiers[0].ngon_method = self.ngon_method
 #         return True
 # class WireframeModNode(Node, ScModifierNode):
 #     bl_idname = "WireframeModNode"
@@ -1616,7 +1616,7 @@ class LaplacianSmoothModNode(Node, ScModifierNode):
 #         col.prop(self, "thickness", text="Thickness")
 #         row = col.row(align=True)
 #         if (not self.mesh == ""):
-#             row.prop_search(self, "vertex_group", bpy.data.objects[self.mesh], "vertex_groups", text="")
+#             row.prop_search(self, "vertex_group", self.mesh, "vertex_groups", text="")
 #         sub = row.row(align=True)
 #         sub.active = has_vgroup
 #         sub.prop(self, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
@@ -1637,18 +1637,18 @@ class LaplacianSmoothModNode(Node, ScModifierNode):
     
 #     def functionality(self):
 #         bpy.ops.object.modifier_add(type="WIREFRAME")
-#         bpy.data.objects[self.mesh].modifiers[0].thickness = self.thickness
-#         bpy.data.objects[self.mesh].modifiers[0].vertex_group = self.vertex_group
-#         bpy.data.objects[self.mesh].modifiers[0].invert_vertex_group = self.invert_vertex_group
-#         bpy.data.objects[self.mesh].modifiers[0].thickness_vertex_group = self.thickness_vertex_group
-#         bpy.data.objects[self.mesh].modifiers[0].use_crease = self.use_crease
-#         bpy.data.objects[self.mesh].modifiers[0].crease_weight = self.crease_weight
-#         bpy.data.objects[self.mesh].modifiers[0].offset = self.offset
-#         bpy.data.objects[self.mesh].modifiers[0].use_even_offset = self.use_even_offset
-#         bpy.data.objects[self.mesh].modifiers[0].use_relative_offset = self.use_relative_offset
-#         bpy.data.objects[self.mesh].modifiers[0].use_boundary = self.use_boundary
-#         bpy.data.objects[self.mesh].modifiers[0].use_replace = self.use_replace
-#         bpy.data.objects[self.mesh].modifiers[0].material_offset = self.material_offset
+#         self.mesh.modifiers[0].thickness = self.thickness
+#         self.mesh.modifiers[0].vertex_group = self.vertex_group
+#         self.mesh.modifiers[0].invert_vertex_group = self.invert_vertex_group
+#         self.mesh.modifiers[0].thickness_vertex_group = self.thickness_vertex_group
+#         self.mesh.modifiers[0].use_crease = self.use_crease
+#         self.mesh.modifiers[0].crease_weight = self.crease_weight
+#         self.mesh.modifiers[0].offset = self.offset
+#         self.mesh.modifiers[0].use_even_offset = self.use_even_offset
+#         self.mesh.modifiers[0].use_relative_offset = self.use_relative_offset
+#         self.mesh.modifiers[0].use_boundary = self.use_boundary
+#         self.mesh.modifiers[0].use_replace = self.use_replace
+#         self.mesh.modifiers[0].material_offset = self.material_offset
 #         return True
 # Conversion
 class ToComponentNode(Node, ScConversionNode):
@@ -1758,12 +1758,12 @@ class SelectComponentsManuallyNode(Node, ScSelectionNode):
 #         if (not self.prop_extend):
 #             bpy.ops.mesh.select_all(action="DESELECT")
 #         bpy.ops.object.mode_set(mode="OBJECT")
-#         total_faces = len(bpy.data.objects[self.mesh].data.polygons)
+#         total_faces = len(self.mesh.data.polygons)
 #         if (self.prop_index > total_faces - 1):
 #             prop_index = total_faces - 1
 #         else:
 #             prop_index = self.prop_index
-#         bpy.data.objects[self.mesh].data.polygons[prop_index].select = True
+#         self.mesh.data.polygons[prop_index].select = True
 #         bpy.ops.object.mode_set(mode="EDIT")
 # class SelectAlternateFacesNode(Node, ScSelectionNode):
 #     bl_idname = "SelectAlternateFacesNode"
@@ -1783,8 +1783,8 @@ class SelectComponentsManuallyNode(Node, ScSelectionNode):
 #             bpy.ops.mesh.select_all(action="DESELECT")
 #         bpy.ops.object.mode_set(mode="OBJECT")
 #         i = self.prop_offset
-#         while (i < len(bpy.data.objects[self.mesh].data.polygons)):
-#             bpy.data.objects[self.mesh].data.polygons[i].select = True
+#         while (i < len(self.mesh.data.polygons)):
+#             self.mesh.data.polygons[i].select = True
 #             i += self.prop_nth
 #         bpy.ops.object.mode_set(mode="EDIT")
 # class SelectFacesByNormalNode(Node, ScSelectionNode):
@@ -1804,7 +1804,7 @@ class SelectComponentsManuallyNode(Node, ScSelectionNode):
 #         if (not self.prop_extend):
 #             bpy.ops.mesh.select_all(action="DESELECT")
 #         bpy.ops.object.mode_set(mode="OBJECT")
-#         for face in bpy.data.objects[self.mesh].data.polygons:
+#         for face in self.mesh.data.polygons:
 #             if ((face.normal[0] >= self.prop_min[0] and face.normal[1] >= self.prop_min[1] and face.normal[2] >= self.prop_min[2]) and (face.normal[0] <= self.prop_max[0] and face.normal[1] <= self.prop_max[1] and face.normal[2] <= self.prop_max[2])):
 #                 face.select = True
 #         bpy.ops.object.mode_set(mode="EDIT")
@@ -2319,7 +2319,7 @@ class BevelNode(Node, ScEditOperatorNode):
 #         space = area.spaces[0]
 #         scene = bpy.data.scenes[0]
 #         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
+#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':self.mesh, 'region':region, 'edit_object':self.mesh, 'gpencil_data':bpy.context.gpencil_data}
 #         if (self.inputs["Value"].is_linked):
 #             prop_value = self.inputs["Value"].links[0].from_node.execute()
 #         else:
@@ -2343,7 +2343,7 @@ class BevelNode(Node, ScEditOperatorNode):
 #         space = area.spaces[0]
 #         scene = bpy.data.scenes[0]
 #         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
+#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':self.mesh, 'region':region, 'edit_object':self.mesh, 'gpencil_data':bpy.context.gpencil_data}
 #         bpy.ops.mesh.extrude_edges_move(override, MESH_OT_extrude_edges_indiv={"mirror":self.prop_mirror}, TRANSFORM_OT_translate={"value":self.prop_value})
 # class ExtrudeVerticesNode(Node, ScEditOperatorNode):
 #     bl_idname = "ExtrudeVerticesNode"
@@ -2363,7 +2363,7 @@ class BevelNode(Node, ScEditOperatorNode):
 #         space = area.spaces[0]
 #         scene = bpy.data.scenes[0]
 #         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
+#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':self.mesh, 'region':region, 'edit_object':self.mesh, 'gpencil_data':bpy.context.gpencil_data}
 #         bpy.ops.mesh.extrude_vertices_move(override, MESH_OT_extrude_verts_indiv={"mirror":self.prop_mirror}, TRANSFORM_OT_translate={"value":self.prop_value})
 # class ExtrudeRegionNode(Node, ScEditOperatorNode):
 #     bl_idname = "ExtrudeRegionNode"
@@ -2383,7 +2383,7 @@ class BevelNode(Node, ScEditOperatorNode):
 #         space = area.spaces[0]
 #         scene = bpy.data.scenes[0]
 #         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
+#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':self.mesh, 'region':region, 'edit_object':self.mesh, 'gpencil_data':bpy.context.gpencil_data}
 #         bpy.ops.mesh.extrude_region_shrink_fatten(override, MESH_OT_extrude_region={"mirror":self.prop_mirror}, TRANSFORM_OT_shrink_fatten={"value":self.prop_amount, "use_even_offset":False, "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "release_confirm":True, "use_accurate":False})
 # class ExtrudeRepeatNode(Node, ScEditOperatorNode):
 #     bl_idname = "ExtrudeRepeatNode"
@@ -2403,7 +2403,7 @@ class BevelNode(Node, ScEditOperatorNode):
 #         space = area.spaces[0]
 #         scene = bpy.data.scenes[0]
 #         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
+#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':self.mesh, 'region':region, 'edit_object':self.mesh, 'gpencil_data':bpy.context.gpencil_data}
 #         bpy.ops.mesh.extrude_repeat(override, offset=self.prop_offset, steps=self.prop_steps)
 # class FlipNormalsNode(Node, ScEditOperatorNode):
 #     bl_idname = "FlipNormalsNode"
@@ -2552,13 +2552,13 @@ class InsetNode(Node, ScEditOperatorNode):
 #         space = area.spaces[0]
 #         scene = bpy.data.scenes[0]
 #         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
+#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':self.mesh, 'region':region, 'edit_object':self.mesh, 'gpencil_data':bpy.context.gpencil_data}
 #         bpy.ops.object.mode_set(mode="OBJECT")
-#         total_edges = len(bpy.data.objects[self.mesh].data.edges)
+#         total_edges = len(self.mesh.data.edges)
 #         if (self.prop_use_selected_edge):
 #             prop_index = 0
 #             for i in range (0, total_edges):
-#                 if (bpy.data.objects[self.mesh].data.edges[i].select):
+#                 if (self.mesh.data.edges[i].select):
 #                     prop_index = i
 #                     break
 #         else:
@@ -2583,12 +2583,12 @@ class InsetNode(Node, ScEditOperatorNode):
 #         if (self.prop_mat == None):
 #             print("DEBUG: " + self.name + ": No material selected")
 #             return
-#         i = bpy.data.objects[self.mesh].material_slots.find(self.prop_mat.name)
+#         i = self.mesh.material_slots.find(self.prop_mat.name)
 #         if (i == -1):
 #             bpy.ops.object.material_slot_add()
-#             bpy.data.objects[self.mesh].active_material = self.prop_mat
+#             self.mesh.active_material = self.prop_mat
 #         else:
-#             bpy.data.objects[self.mesh].active_material_index = i
+#             self.mesh.active_material_index = i
 #         bpy.ops.object.material_slot_assign()
 # class MergeComponentsNode(Node, ScEditOperatorNode):
 #     bl_idname = "MergeComponentsNode"
@@ -2629,7 +2629,7 @@ class InsetNode(Node, ScEditOperatorNode):
 #         space = area.spaces[0]
 #         scene = bpy.data.scenes[0]
 #         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':bpy.data.objects[self.mesh], 'region':region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
+#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':self.mesh, 'region':region, 'edit_object':self.mesh, 'gpencil_data':bpy.context.gpencil_data}
 #         bpy.ops.mesh.offset_edge_loops_slide(override, MESH_OT_offset_edge_loops={"use_cap_endpoint":self.prop_cap}, TRANSFORM_OT_edge_slide={"value":self.prop_factor, "single_side":self.prop_single, "use_even":self.prop_even, "flipped":self.prop_flipped, "use_clamp":self.prop_clamp})
 # class PokeNode(Node, ScEditOperatorNode):
 #     bl_idname = "PokeNode"
@@ -2817,11 +2817,11 @@ class InsetNode(Node, ScEditOperatorNode):
 #     def functionality(self):
 #         if (not self.prop_object == None):
 #             if ("LOCATION" in self.prop_transform):
-#                 bpy.data.objects[self.mesh].location = self.prop_object.location
+#                 self.mesh.location = self.prop_object.location
 #             if ("ROTATION" in self.prop_transform):
-#                 bpy.data.objects[self.mesh].rotation_euler = self.prop_object.rotation_euler
+#                 self.mesh.rotation_euler = self.prop_object.rotation_euler
 #             if ("SCALE" in self.prop_transform):
-#                 bpy.data.objects[self.mesh].scale = self.prop_object.scale
+#                 self.mesh.scale = self.prop_object.scale
 # class DrawModeNode(Node, ScSettingNode):
 #     bl_idname = "DrawModeNode"
 #     bl_label = "Draw Mode"
@@ -2844,11 +2844,11 @@ class InsetNode(Node, ScEditOperatorNode):
 #         layout.prop(self, "prop_max_draw_type", expand=True)
     
 #     def functionality(self):
-#         bpy.data.objects[self.mesh].show_name = self.prop_name
-#         bpy.data.objects[self.mesh].show_wire = self.prop_wire
-#         bpy.data.objects[self.mesh].show_x_ray = self.prop_xray
-#         bpy.data.objects[self.mesh].show_transparent = self.prop_transparency
-#         bpy.data.objects[self.mesh].draw_type = self.prop_max_draw_type
+#         self.mesh.show_name = self.prop_name
+#         self.mesh.show_wire = self.prop_wire
+#         self.mesh.show_x_ray = self.prop_xray
+#         self.mesh.show_transparent = self.prop_transparency
+#         self.mesh.draw_type = self.prop_max_draw_type
 # class MakeLinksNode(Node, ScObjectOperatorNode):
 #     bl_idname = "MakeLinksNode"
 #     bl_label = "Make Links"
@@ -2867,8 +2867,8 @@ class InsetNode(Node, ScEditOperatorNode):
 #     def select_meshes(self, meshes, value=True):
 #         for mesh in meshes:
 #             bpy.data.objects[mesh].select = value
-#         bpy.data.objects[self.mesh].select = True
-#         bpy.context.scene.objects.active = bpy.data.objects[self.mesh]
+#         self.mesh.select = True
+#         bpy.context.scene.objects.active = self.mesh
 
 #     def init(self, context):
 #         self.inputs.new("MeshSocket", "Mesh")
@@ -3364,22 +3364,18 @@ class CursorLocationNode(Node, ScSettingNode):
         super().init(context)
     
     def functionality(self):
-        self.override()['space'].cursor_location = self.inputs["Location"].execute()
-# class OrientationNode(Node, ScSettingNode):
-#     bl_idname = "OrientationNode"
-#     bl_label = "Transform Orientation"
+        self.override()["space"].cursor_location = self.inputs["Location"].execute()
+class OrientationNode(Node, ScSettingNode):
+    bl_idname = "OrientationNode"
+    bl_label = "Transform Orientation"
 
-#     prop_orientation = EnumProperty(name="Pivot Point", items=[("GLOBAL", "Global", ""), ("LOCAL", "Local", ""), ("NORMAL", "Normal", ""), ("GIMBAL", "Gimbal", ""), ("VIEW", "View", "")], default="GLOBAL", update=ScNode.update_value)
+    prop_orientation = EnumProperty(name="Pivot Point", items=[("GLOBAL", "Global", ""), ("LOCAL", "Local", ""), ("NORMAL", "Normal", ""), ("GIMBAL", "Gimbal", ""), ("VIEW", "View", "")], default="GLOBAL", update=ScNode.update_value)
     
-#     def draw_buttons(self, context, layout):
-#         layout.column().prop(self, "prop_orientation", expand=True)
+    def draw_buttons(self, context, layout):
+        layout.column().prop(self, "prop_orientation", expand=True)
     
-#     def functionality(self):
-#         window = bpy.data.window_managers['WinMan'].windows[0]
-#         screen = window.screen
-#         area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
-#         space = area.spaces[0]
-#         space.transform_orientation = self.prop_orientation
+    def functionality(self):
+        self.override()["space"].transform_orientation = self.prop_orientation
 class PivotNode(Node, ScSettingNode):
     bl_idname = "PivotNode"
     bl_label = "Pivot Center"
@@ -3391,38 +3387,36 @@ class PivotNode(Node, ScSettingNode):
     
     def functionality(self):
         self.override()['space'].pivot_point = self.prop_pivot
-# class CustomPythonNode(Node, ScSettingNode):
-#     bl_idname = "CustomPythonNode"
-#     bl_label = "Custom Python Script"
+class CustomPythonNode(Node, ScSettingNode):
+    bl_idname = "CustomPythonNode"
+    bl_label = "Custom Python Script"
 
-#     prop_script = StringProperty(name="Script", description="Variables to use: _MESH (active object), _window, _screen, _area, _space, _scene, _region, _OVERRIDE, _M (bpy.ops.mesh), _O (bpy.ops.object), [;] - separator", update=ScNode.update_value)
-#     prop_iteration = IntProperty(name="Iterations", default=1, min=1, max=1000, update=ScNode.update_value)
-#     prop_print = BoolProperty(name="Print Script", default=True, update=ScNode.update_value)
+    prop_script = StringProperty(name="Script", description="Variables to use: _OBJ (active object), _OVERRIDE, _M (bpy.ops.mesh), _O (bpy.ops.object), [;] - separator", update=ScNode.update_value)
+    prop_iterations = IntProperty(name="Iterations", default=1, min=1, max=1000, update=ScNode.update_value)
+    prop_print = BoolProperty(name="Print Script", default=True, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScStringSocket", "Script").prop_prop = "prop_script"
+        self.inputs.new("ScIntSocket", "Iterations").prop_prop = "prop_iterations"
+        super().init(context)
     
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_script")
-#         layout.prop(self, "prop_iteration")
-#         layout.prop(self, "prop_print")
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_print")
     
-#     def functionality(self):
-#         _MESH = self.mesh
-#         _window = bpy.data.window_managers['WinMan'].windows[0]
-#         _screen = _window.screen
-#         _area = [i for i in _screen.areas if i.type == 'VIEW_3D'][0]
-#         _space = _area.spaces[0]
-#         _scene = bpy.data.scenes[0]
-#         _region = [i for i in _area.regions if i.type == 'WINDOW'][0]
-#         _OVERRIDE = {'window':_window, 'screen':_screen, 'area':_area, 'space':_space, 'scene':_scene, 'active_object':bpy.data.objects[self.mesh], 'region':_region, 'edit_object':bpy.data.objects[self.mesh], 'gpencil_data':bpy.context.gpencil_data}
-#         _M = bpy.ops.mesh
-#         _O = bpy.ops.object
-#         if (self.prop_print):
-#             print("SCRIPT: " + self.prop_script)
-#         for i in range (0, self.prop_iteration):
-#             try:
-#                 exec(self.prop_script)
-#             except:
-#                 print("DEBUG: " + self.name + ": Invalid script")
-#                 break
+    def functionality(self):
+        _OBJ = bpy.context.active_object
+        _OVERRIDE = self.override()
+        _M = bpy.ops.mesh
+        _O = bpy.ops.object
+        script = self.inputs["Script"].execute()
+        if (self.prop_print):
+            print("SCRIPT: " + script)
+        for i in range (0, self.inputs["Iterations"].execute()):
+            try:
+                exec(script)
+            except:
+                print("DEBUG: " + self.name + ": Invalid script")
+                break
 # Output
 class RefreshMeshNode(Node, ScOutputNode):
     bl_idname = "RefreshMeshNode"
@@ -3482,7 +3476,7 @@ conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
 constants = [Float, Int, Bool, Angle, FloatVector, AngleVector, RandomFloat, RandomInt, RandomBool, RandomAngle]
 utilities = [MathsOpNode]
 control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode, IfElseNode]
-# settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
+settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
 outputs = [RefreshMeshNode, ExportMeshFBX]
 testing = [PrintNode, SelectAllNode, SelectComponentsManuallyNode, DeleteNode, DissolveDegenerateNode, BevelNode, InsetNode, OriginNode, ShadingNode, CursorLocationNode, PivotNode]
 
@@ -3497,7 +3491,7 @@ node_categories = [ScNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idnam
                    ScNodeCategory("constants", "Constants", items=[NodeItem(i.bl_idname) for i in constants]),
                    ScNodeCategory("utilities", "Utilities", items=[NodeItem(i.bl_idname) for i in utilities]),
                    ScNodeCategory("control", "Flow Control", items=[NodeItem(i.bl_idname) for i in control]),
-                #    ScNodeCategory("settings", "Settings", items=[NodeItem(i.bl_idname) for i in settings]),
+                   ScNodeCategory("settings", "Settings", items=[NodeItem(i.bl_idname) for i in settings]),
                    ScNodeCategory("outputs", "Outputs", items=[NodeItem(i.bl_idname) for i in outputs]),
                    ScNodeCategory("testing", "_unsorted", items=[NodeItem(i.bl_idname) for i in testing])]
 
