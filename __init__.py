@@ -2,7 +2,7 @@ print("______________________________________________________")
 bl_info = {
     "name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (1, 7, 0),
+    "version": (1, 8, 0),
     "blender": (2, 79, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
@@ -22,7 +22,7 @@ from nodeitems_utils import NodeCategory, NodeItem
 class ScPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
-    prop_addon_location = StringProperty(name="Addon Location", default=bpy.utils.user_resource('SCRIPTS', "addons/") + __name__ + "/__init__.py") # Contributed by @kabu
+    prop_addon_location = StringProperty(name="Addon Location", default=bpy.utils.user_resource('SCRIPTS', "addons/") + __name__ + "/__init__.py") # Contributed by @kabu & @Poulpator
 
     def draw(self, context):
         layout = self.layout
@@ -912,20 +912,15 @@ class BooleanModNode(Node, ScModifierNode):
         layout.prop(self, "prop_draw_mode", expand=True)
     
     def pre_execute(self):
-        self.mesh = self.inputs["Mesh"].execute()
-        if (self.mesh == None):
-            print("DEBUG: " + self.name + ": Empty object recieved")
-            return False
         self.prop_obj = self.inputs["Object"].execute()
         if (self.prop_obj == None):
             print("DEBUG: " + self.name + ": Empty secondary object recieved")
             return False
-        bpy.context.scene.objects.active = self.mesh
-        self.mesh.select = True
-        self.prop_obj.select = False
-        return True
+        return super().pre_execute()
     
     def functionality(self):
+        self.mesh.select = True
+        self.prop_obj.select = False
         bpy.ops.object.modifier_add(type="BOOLEAN")
         self.mesh.modifiers[0].operation = self.prop_op
         self.mesh.modifiers[0].object = self.prop_obj
@@ -1035,15 +1030,10 @@ class CurveModNode(Node, ScModifierNode):
         layout.row().prop(self, "deform_axis", expand=True)
     
     def pre_execute(self):
-        self.mesh = self.inputs["Mesh"].execute()
-        if (self.mesh == None):
-            print("DEBUG: " + self.name + ": Empty object recieved")
-            return False
         if (self.object == None):
             print("DEBUG: " + self.name + ": Empty curve object recieved")
             return False
-        bpy.context.scene.objects.active = self.mesh
-        return True
+        return super().pre_execute()
     
     def functionality(self):
         bpy.ops.object.modifier_add(type="CURVE")
@@ -2039,23 +2029,23 @@ class SelectSharpEdgesNode(Node, ScSelectionNode):
 
     def functionality(self):
         bpy.ops.mesh.edges_select_sharp(sharpness=self.inputs["Sharpness"].execute())
-class SelectEdgeRingNode(Node, ScSelectionNode):
-    bl_idname = "SelectEdgeRingNode"
-    bl_label = "Select Edge Ring"
+# class SelectEdgeRingNode(Node, ScSelectionNode):
+#     bl_idname = "SelectEdgeRingNode"
+#     bl_label = "Select Edge Ring"
 
-    prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
-    prop_deselect = BoolProperty(name="Deselect", update=ScNode.update_value)
-    prop_toggle = BoolProperty(name="Toggle", update=ScNode.update_value)
-    prop_ring = BoolProperty(name="Ring", default=True, update=ScNode.update_value)
+#     prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
+#     prop_deselect = BoolProperty(name="Deselect", update=ScNode.update_value)
+#     prop_toggle = BoolProperty(name="Toggle", update=ScNode.update_value)
+#     prop_ring = BoolProperty(name="Ring", default=True, update=ScNode.update_value)
 
-    def init(self, context):
-        self.inputs.new("ScBoolSocket", "Extend").prop_prop = "prop_extend"
-        self.inputs.new("ScBoolSocket", "Deselect").prop_prop = "prop_deselect"
-        self.inputs.new("ScBoolSocket", "Toggle").prop_prop = "prop_toggle"
-        self.inputs.new("ScBoolSocket", "Ring").prop_prop = "prop_ring"
+#     def init(self, context):
+#         self.inputs.new("ScBoolSocket", "Extend").prop_prop = "prop_extend"
+#         self.inputs.new("ScBoolSocket", "Deselect").prop_prop = "prop_deselect"
+#         self.inputs.new("ScBoolSocket", "Toggle").prop_prop = "prop_toggle"
+#         self.inputs.new("ScBoolSocket", "Ring").prop_prop = "prop_ring"
 
-    def functionality(self):
-        bpy.ops.mesh.edgering_select(extend=self.inputs["Extend"].execute(), deselect=self.inputs["Deselect"].execute(), toggle=self.inputs["Toggle"].execute(), ring=self.inputs["Ring"].execute())
+#     def functionality(self):
+#         bpy.ops.mesh.edgering_select(extend=self.inputs["Extend"].execute(), deselect=self.inputs["Deselect"].execute(), toggle=self.inputs["Toggle"].execute(), ring=self.inputs["Ring"].execute())
 class SelectSimilarNode(Node, ScSelectionNode):
     bl_idname = "SelectSimilarNode"
     bl_label = "Select Similar"
@@ -2827,74 +2817,84 @@ class InsetNode(Node, ScEditOperatorNode):
 #     def functionality(self):
 #         bpy.ops.mesh.unsubdivide(iterations=self.prop_iterations)
 # Mesh Operator
-# class ApplyTransformNode(Node, ScObjectOperatorNode):
-#     bl_idname = "ApplyTransformNode"
-#     bl_label = "Apply Transform"
+class ApplyTransformNode(Node, ScObjectOperatorNode):
+    bl_idname = "ApplyTransformNode"
+    bl_label = "Apply Transform"
 
-#     prop_transform = EnumProperty(items=[("LOCATION", "Location", "", 2), ("ROTATION", "Rotation", "", 4), ("SCALE", "Scale", "", 8)], default={"LOCATION"}, options={"ENUM_FLAG"}, update=ScNode.update_value)
+    prop_transform = EnumProperty(items=[("LOCATION", "Location", "", 2), ("ROTATION", "Rotation", "", 4), ("SCALE", "Scale", "", 8)], default={"LOCATION"}, options={"ENUM_FLAG"}, update=ScNode.update_value)
 
-#     def draw_buttons(self, context, layout):
-#         layout.column().prop(self, "prop_transform", expand=True)
+    def draw_buttons(self, context, layout):
+        layout.column().prop(self, "prop_transform", expand=True)
     
-#     def functionality(self):
-#         bpy.ops.object.transform_apply(location="LOCATION" in self.prop_transform, rotation="ROTATION" in self.prop_transform, scale="SCALE" in self.prop_transform)
-# class CopyTransformNode(Node, ScObjectOperatorNode):
-#     bl_idname = "CopyTransformNode"
-#     bl_label = "Copy Transform"
+    def functionality(self):
+        bpy.ops.object.transform_apply(location="LOCATION" in self.prop_transform, rotation="ROTATION" in self.prop_transform, scale="SCALE" in self.prop_transform)
+class CopyTransformNode(Node, ScObjectOperatorNode):
+    bl_idname = "CopyTransformNode"
+    bl_label = "Copy Transform"
 
-#     prop_object = PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
-#     prop_transform = EnumProperty(items=[("LOCATION", "Location", "", 2), ("ROTATION", "Rotation", "", 4), ("SCALE", "Scale", "", 8)], default={"LOCATION"}, options={"ENUM_FLAG"}, update=ScNode.update_value)
+    prop_object = PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    prop_transform = EnumProperty(items=[("LOCATION", "Location", "", 2), ("ROTATION", "Rotation", "", 4), ("SCALE", "Scale", "", 8)], default={"LOCATION"}, options={"ENUM_FLAG"}, update=ScNode.update_value)
+    obj = PointerProperty(type=bpy.types.Object)
 
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_object")
-#         layout.column().prop(self, "prop_transform", expand=True)
+    def init(self, context):
+        self.inputs.new("ScMeshRefSocket", "Object").prop_prop = "prop_object"
+        super().init(context)
+
+    def draw_buttons(self, context, layout):
+        layout.column().prop(self, "prop_transform", expand=True)
     
-#     def functionality(self):
-#         if (not self.prop_object == None):
-#             if ("LOCATION" in self.prop_transform):
-#                 self.mesh.location = self.prop_object.location
-#             if ("ROTATION" in self.prop_transform):
-#                 self.mesh.rotation_euler = self.prop_object.rotation_euler
-#             if ("SCALE" in self.prop_transform):
-#                 self.mesh.scale = self.prop_object.scale
-# class DrawModeNode(Node, ScSettingNode):
-#     bl_idname = "DrawModeNode"
-#     bl_label = "Draw Mode"
-
-#     prop_name = BoolProperty(name="Name", update=ScNode.update_value)
-#     prop_wire = BoolProperty(name="Wire", update=ScNode.update_value)
-#     prop_xray = BoolProperty(name="X-Ray", update=ScNode.update_value)
-#     prop_transparency = BoolProperty(name="Transparency", update=ScNode.update_value)
-#     prop_max_draw_type = EnumProperty(name="Maximum Draw Type", items=[("SOLID", "Solid", ""), ("WIRE", "Wire", ""), ("BOUNDS", "Bounds", "")], default="SOLID", update=ScNode.update_value)
+    def pre_execute(self):
+        self.obj = self.inputs["Object"].execute()
+        if (self.obj == None):
+            print("DEBUG: " + self.name + ": Empty secondary object recieved")
+            return False
+        return super().pre_execute()
     
-#     def draw_buttons(self, context, layout):
-#         split = layout.split()
-#         col = split.column()
-#         col.prop(self, "prop_name")
-#         col.prop(self, "prop_wire")
-#         col = split.column()
-#         col.prop(self, "prop_xray")
-#         col.prop(self, "prop_transparency")
-#         layout.label("Maximum Draw Type:")
-#         layout.prop(self, "prop_max_draw_type", expand=True)
-    
-#     def functionality(self):
-#         self.mesh.show_name = self.prop_name
-#         self.mesh.show_wire = self.prop_wire
-#         self.mesh.show_x_ray = self.prop_xray
-#         self.mesh.show_transparent = self.prop_transparency
-#         self.mesh.draw_type = self.prop_max_draw_type
-# class MakeLinksNode(Node, ScObjectOperatorNode):
-#     bl_idname = "MakeLinksNode"
-#     bl_label = "Make Links"
+    def functionality(self):
+        if ("LOCATION" in self.prop_transform):
+            self.mesh.location = self.obj.location
+        if ("ROTATION" in self.prop_transform):
+            self.mesh.rotation_euler = self.obj.rotation_euler
+        if ("SCALE" in self.prop_transform):
+            self.mesh.scale = self.obj.scale
+class DrawModeNode(Node, ScObjectOperatorNode):
+    bl_idname = "DrawModeNode"
+    bl_label = "Draw Mode"
 
-#     prop_type = EnumProperty(items=[("OBDATA", "Object Data", ""), ("MATERIAL", "Material", ""), ("ANIMATION", "Animation", ""), ("GROUPS", "Groups", ""), ("DUPLIGROUP", "Dupligroup", ""), ("MODIFIERS", "Modifiers", ""), ("FONTS", "Fonts", "")], default="OBDATA", update=ScNode.update_value)
+    prop_name = BoolProperty(name="Name", update=ScNode.update_value)
+    prop_wire = BoolProperty(name="Wire", update=ScNode.update_value)
+    prop_xray = BoolProperty(name="X-Ray", update=ScNode.update_value)
+    prop_transparency = BoolProperty(name="Transparency", update=ScNode.update_value)
+    prop_max_draw_type = EnumProperty(name="Maximum Draw Type", items=[("SOLID", "Solid", ""), ("WIRE", "Wire", ""), ("BOUNDS", "Bounds", "")], default="SOLID", update=ScNode.update_value)
 
-#     def draw_buttons(self, context, layout):
-#         layout.column().prop(self, "prop_type", expand=True)
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Name").prop_prop = "prop_name"
+        self.inputs.new("ScBoolSocket", "Wire").prop_prop = "prop_wire"
+        self.inputs.new("ScBoolSocket", "X-Ray").prop_prop = "prop_xray"
+        self.inputs.new("ScBoolSocket", "Transparency").prop_prop = "prop_transparency"
+        super().init(context)
     
-#     def functionality(self):
-#         bpy.ops.object.make_links_data(type=self.prop_type)
+    def draw_buttons(self, context, layout):
+        layout.label("Maximum Draw Type:")
+        layout.prop(self, "prop_max_draw_type", expand=True)
+    
+    def functionality(self):
+        self.mesh.show_name = self.inputs["Name"].execute()
+        self.mesh.show_wire = self.inputs["Wire"].execute()
+        self.mesh.show_x_ray = self.inputs["X-Ray"].execute()
+        self.mesh.show_transparent = self.inputs["Transparency"].execute()
+        self.mesh.draw_type = self.prop_max_draw_type
+class MakeLinksNode(Node, ScObjectOperatorNode):
+    bl_idname = "MakeLinksNode"
+    bl_label = "Make Links"
+
+    prop_type = EnumProperty(items=[("OBDATA", "Object Data", ""), ("MATERIAL", "Material", ""), ("ANIMATION", "Animation", ""), ("GROUPS", "Groups", ""), ("DUPLIGROUP", "Dupligroup", ""), ("MODIFIERS", "Modifiers", ""), ("FONTS", "Fonts", "")], default="OBDATA", update=ScNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.column().prop(self, "prop_type", expand=True)
+    
+    def functionality(self):
+        bpy.ops.object.make_links_data(type=self.prop_type)
 # class MergeMeshesNode(Node, ScNode):
 #     bl_idname = "MergeMeshesNode"
 #     bl_label = "Merge Meshes"
@@ -3507,13 +3507,13 @@ conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
 selection = [SelectComponentsManuallyNode, SelectFaceByIndexNode, SelectAlternateFacesNode, SelectFacesByNormalNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLoopNode, SelectLoopRegionNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectRegionBoundaryNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectShortestPathNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
 deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode, DissolveVerticesNode, DissolveDegenerateNode, EdgeCollapseNode]
 # edit_operators = [AddEdgeFaceNode, BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, ConvexHullNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, ExtrudeRepeatNode, FlipNormalsNode, MakeNormalsConsistentNode, FlattenNode, FillEdgeLoopNode, FillGridNode, FillHolesBySidesNode, InsetNode, LoopCutNode, MaterialNode, MergeComponentsNode, OffsetEdgeLoopNode, PokeNode, RemoveDoublesNode, RotateEdgeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode, TriangulateFacesNode, UnSubdivideNode]
-# object_operators = [ApplyTransformNode, CopyTransformNode, MakeLinksNode, MergeMeshesNode, OriginNode, ShadingNode]
+object_operators = [ApplyTransformNode, CopyTransformNode, DrawModeNode, MakeLinksNode, OriginNode, ShadingNode] # MergeMeshesNode
 constants = [Float, Int, Bool, Angle, FloatVector, AngleVector, RandomFloat, RandomInt, RandomBool, RandomAngle]
 utilities = [MathsOpNode]
 control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode, IfElseNode]
 settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
 outputs = [RefreshMeshNode, ExportMeshFBX]
-testing = [PrintDataNode, BevelNode, InsetNode, OriginNode, ShadingNode]
+testing = [PrintDataNode, BevelNode, InsetNode]
 
 node_categories = [ScNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
                    ScNodeCategory("transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
@@ -3522,7 +3522,7 @@ node_categories = [ScNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idnam
                    ScNodeCategory("selection", "Selection", items=[NodeItem(i.bl_idname) for i in selection]),
                    ScNodeCategory("deletion", "Deletion", items=[NodeItem(i.bl_idname) for i in deletion]),
                 #    ScNodeCategory("edit_operators", "Component Operators", items=[NodeItem(i.bl_idname) for i in edit_operators]),
-                #    ScNodeCategory("object_operators", "Mesh Operators", items=[NodeItem(i.bl_idname) for i in object_operators]),
+                   ScNodeCategory("object_operators", "Mesh Operators", items=[NodeItem(i.bl_idname) for i in object_operators]),
                    ScNodeCategory("constants", "Constants", items=[NodeItem(i.bl_idname) for i in constants]),
                    ScNodeCategory("utilities", "Utilities", items=[NodeItem(i.bl_idname) for i in utilities]),
                    ScNodeCategory("control", "Flow Control", items=[NodeItem(i.bl_idname) for i in control]),
