@@ -2,7 +2,7 @@ print("______________________________________________________")
 bl_info = {
     "name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (1, 8, 0),
+    "version": (1, 9, 0),
     "blender": (2, 79, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
@@ -1163,483 +1163,431 @@ class LaplacianSmoothModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].use_volume_preserve = self.inputs["Preserve Volume"].execute()
         self.mesh.modifiers[0].use_normalized = self.inputs["Normalized"].execute()
         self.mesh.modifiers[0].vertex_group = self.vertex_group
-# class MirrorModNode(Node, ScModifierNode):
-#     bl_idname = "MirrorModNode"
-#     bl_label = "Mirror Modifier"
+class MirrorModNode(Node, ScModifierNode):
+    bl_idname = "MirrorModNode"
+    bl_label = "Mirror Modifier"
+    
+    use_x = BoolProperty(name="X", default=True, update=ScNode.update_value)
+    use_y = BoolProperty(name="Y", update=ScNode.update_value)
+    use_z = BoolProperty(name="Z", update=ScNode.update_value)
+    use_mirror_merge = BoolProperty(default=True, update=ScNode.update_value)
+    use_clip = BoolProperty(update=ScNode.update_value)
+    use_mirror_vertex_groups = BoolProperty(default=True, update=ScNode.update_value)
+    use_mirror_u = BoolProperty(update=ScNode.update_value)
+    use_mirror_v = BoolProperty(update=ScNode.update_value)
+    mirror_offset_u = FloatProperty(name="U Offset", default=0.0, min=-1.0, max=1.0, update=ScNode.update_value)
+    mirror_offset_v = FloatProperty(name="V Offset", default=0.0, min=-1.0, max=1.0, update=ScNode.update_value)
+    merge_threshold = FloatProperty(name="Merge Limit", default=0.001, min=0, soft_max=1, update=ScNode.update_value)
+    mirror_object = PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
 
-#     use_x = BoolProperty(name="X", default=True, update=ScNode.update_value)
-#     use_y = BoolProperty(name="Y", update=ScNode.update_value)
-#     use_z = BoolProperty(name="Z", update=ScNode.update_value)
-#     use_mirror_merge = BoolProperty(default=True, update=ScNode.update_value)
-#     use_clip = BoolProperty(update=ScNode.update_value)
-#     use_mirror_vertex_groups = BoolProperty(default=True, update=ScNode.update_value)
-#     use_mirror_u = BoolProperty(update=ScNode.update_value)
-#     use_mirror_v = BoolProperty(update=ScNode.update_value)
-#     mirror_offset_u = FloatProperty(name="U Offset", default=0.0, min=-1.0, max=1.0, update=ScNode.update_value)
-#     mirror_offset_v = FloatProperty(name="V Offset", default=0.0, min=-1.0, max=1.0, update=ScNode.update_value)
-#     merge_threshold = FloatProperty(name="Merge Limit", default=0.001, min=0, soft_max=1, update=ScNode.update_value)
-#     mirror_object = PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "X").prop_prop = "use_x"
+        self.inputs.new("ScBoolSocket", "Y").prop_prop = "use_y"
+        self.inputs.new("ScBoolSocket", "Z").prop_prop = "use_z"
+        self.inputs.new("ScBoolSocket", "Merge").prop_prop = "use_mirror_merge"
+        self.inputs.new("ScBoolSocket", "Clipping").prop_prop = "use_clip"
+        self.inputs.new("ScBoolSocket", "Vertex Groups").prop_prop = "use_mirror_vertex_groups"
+        self.inputs.new("ScBoolSocket", "U").prop_prop = "use_mirror_u"
+        self.inputs.new("ScBoolSocket", "V").prop_prop = "use_mirror_v"
+        self.inputs.new("ScFloatSocket", "U Offset").prop_prop = "mirror_offset_u"
+        self.inputs.new("ScFloatSocket", "V Offset").prop_prop = "mirror_offset_v"
+        self.inputs.new("ScFloatSocket", "Merge Limit").prop_prop = "merge_threshold"
+        super().init(context)
 
-#     def draw_buttons(self, context, layout):
-#         split = layout.split(percentage=0.25)
-#         col = split.column()
-#         col.label(text="Axis:")
-#         col.prop(self, "use_x")
-#         col.prop(self, "use_y")
-#         col.prop(self, "use_z")
-#         col = split.column()
-#         col.label(text="Options:")
-#         col.prop(self, "use_mirror_merge", text="Merge")
-#         col.prop(self, "use_clip", text="Clipping")
-#         col.prop(self, "use_mirror_vertex_groups", text="Vertex Groups")
-#         col = split.column()
-#         col.label(text="Textures:")
-#         col.prop(self, "use_mirror_u", text="U")
-#         col.prop(self, "use_mirror_v", text="V")
-#         col = layout.column(align=True)
-#         if self.use_mirror_u:
-#             col.prop(self, "mirror_offset_u")
-#         if self.use_mirror_v:
-#             col.prop(self, "mirror_offset_v")
-#         col = layout.column()
-#         if self.use_mirror_merge is True:
-#             col.prop(self, "merge_threshold")
-#         col.label(text="Mirror Object:")
-#         col.prop(self, "mirror_object", text="")
+    def draw_buttons(self, context, layout):
+        col = layout.column()
+        col.label(text="Mirror Object:")
+        col.prop(self, "mirror_object", text="")
     
-#     def functionality(self):
-#         bpy.ops.object.modifier_add(type="MIRROR")
-#         self.mesh.modifiers[0].use_x = self.use_x
-#         self.mesh.modifiers[0].use_y = self.use_y
-#         self.mesh.modifiers[0].use_z = self.use_z
-#         self.mesh.modifiers[0].use_mirror_merge = self.use_mirror_merge
-#         self.mesh.modifiers[0].use_clip = self.use_clip
-#         self.mesh.modifiers[0].use_mirror_vertex_groups = self.use_mirror_vertex_groups
-#         self.mesh.modifiers[0].use_mirror_u = self.use_mirror_u
-#         self.mesh.modifiers[0].use_mirror_v = self.use_mirror_v
-#         self.mesh.modifiers[0].mirror_offset_u = self.mirror_offset_u
-#         self.mesh.modifiers[0].mirror_offset_v = self.mirror_offset_v
-#         self.mesh.modifiers[0].merge_threshold = self.merge_threshold
-#         self.mesh.modifiers[0].mirror_object = self.mirror_object
-#         return True
-# class RemeshModNode(Node, ScModifierNode):
-#     bl_idname = "RemeshModNode"
-#     bl_label = "Remesh Modifier"
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="MIRROR")
+        self.mesh.modifiers[0].use_x = self.inputs["X"].execute()
+        self.mesh.modifiers[0].use_y = self.inputs["Y"].execute()
+        self.mesh.modifiers[0].use_z = self.inputs["Z"].execute()
+        self.mesh.modifiers[0].use_mirror_merge = self.inputs["Merge"].execute()
+        self.mesh.modifiers[0].use_clip = self.inputs["Clipping"].execute()
+        self.mesh.modifiers[0].use_mirror_vertex_groups = self.inputs["Vertex Groups"].execute()
+        self.mesh.modifiers[0].use_mirror_u = self.inputs["U"].execute()
+        self.mesh.modifiers[0].use_mirror_v = self.inputs["V"].execute()
+        self.mesh.modifiers[0].mirror_offset_u = self.inputs["U Offset"].execute()
+        self.mesh.modifiers[0].mirror_offset_v = self.inputs["V Offset"].execute()
+        self.mesh.modifiers[0].merge_threshold = self.inputs["Merge Limit"].execute()
+        self.mesh.modifiers[0].mirror_object = self.mirror_object
+class RemeshModNode(Node, ScModifierNode):
+    bl_idname = "RemeshModNode"
+    bl_label = "Remesh Modifier"
     
-#     mode = EnumProperty(name="Mode", items=[("BLOCKS", "Blocks", ""), ("SMOOTH", "Smooth", ""), ("SHARP", "Sharp", "")], default="SHARP", update=ScNode.update_value)
-#     octree_depth = IntProperty(name="Octree Depth", default=4, min=1, max=12, update=ScNode.update_value)
-#     scale = FloatProperty(name="Scale", default=0.9, min=0.0, max=0.99, update=ScNode.update_value)
-#     sharpness = FloatProperty(name="Sharpness", default=1.0, update=ScNode.update_value)
-#     use_smooth_shade = BoolProperty(name="Smooth Shading", update=ScNode.update_value)
-#     use_remove_disconnected = BoolProperty(name="Remove Disconnected Pieces", default=True, update=ScNode.update_value)
-#     threshold = FloatProperty(name="Threshold", default=1.0, min=0.0, max=1.0, update=ScNode.update_value)
-    
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "mode")
-#         row = layout.row()
-#         row.prop(self, "octree_depth")
-#         row.prop(self, "scale")
-#         if self.mode == 'SHARP':
-#             layout.prop(self, "sharpness")
-#         layout.prop(self, "use_smooth_shade")
-#         layout.prop(self, "use_remove_disconnected")
-#         row = layout.row()
-#         row.active = self.use_remove_disconnected
-#         row.prop(self, "threshold")
-    
-#     def functionality(self):
-#         bpy.ops.object.modifier_add(type="REMESH")
-#         self.mesh.modifiers[0].mode = self.mode
-#         self.mesh.modifiers[0].octree_depth = self.octree_depth
-#         self.mesh.modifiers[0].scale = self.scale
-#         self.mesh.modifiers[0].sharpness = self.sharpness
-#         self.mesh.modifiers[0].use_smooth_shade = self.use_smooth_shade
-#         self.mesh.modifiers[0].use_remove_disconnected = self.use_remove_disconnected
-#         self.mesh.modifiers[0].threshold = self.threshold
-#         return True
-# class ScrewModNode(Node, ScModifierNode):
-#     bl_idname = "ScrewModNode"
-#     bl_label = "Screw Modifier"
+    mode = EnumProperty(name="Mode", items=[("BLOCKS", "Blocks", ""), ("SMOOTH", "Smooth", ""), ("SHARP", "Sharp", "")], default="SHARP", update=ScNode.update_value)
+    octree_depth = IntProperty(name="Octree Depth", default=4, min=1, max=12, update=ScNode.update_value)
+    scale = FloatProperty(name="Scale", default=0.9, min=0.0, max=0.99, update=ScNode.update_value)
+    sharpness = FloatProperty(name="Sharpness", default=1.0, update=ScNode.update_value)
+    use_smooth_shade = BoolProperty(name="Smooth Shading", update=ScNode.update_value)
+    use_remove_disconnected = BoolProperty(name="Remove Disconnected Pieces", default=True, update=ScNode.update_value)
+    threshold = FloatProperty(name="Threshold", default=1.0, min=0.0, max=1.0, update=ScNode.update_value)
 
-#     axis = EnumProperty(name="Axis", items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="Z", update=ScNode.update_value)
-#     object = PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
-#     angle = FloatProperty(name="Angle", default=6.283185, subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
-#     steps = IntProperty(name="Steps", default=16, min=2, max=10000, soft_max=512, update=ScNode.update_value)
-#     render_steps = IntProperty(name="Render Steps", default=16, min=2, max=10000, soft_max=512, update=ScNode.update_value)
-#     use_smooth_shade = BoolProperty(name="Smooth Shading", default=True, update=ScNode.update_value)
-#     use_merge_vertices = BoolProperty(name="Merge Vertices", update=ScNode.update_value)
-#     merge_threshold = FloatProperty(name="Merge Distance", default=0.01, min=0, update=ScNode.update_value)
-#     screw_offset = FloatProperty(name="Screw", update=ScNode.update_value)
-#     use_object_screw_offset = BoolProperty(name="Object Screw", update=ScNode.update_value)
-#     use_normal_calculate = BoolProperty(name="Calc Order", update=ScNode.update_value)
-#     use_normal_flip = BoolProperty(name="Flip", update=ScNode.update_value)
-#     iterations = IntProperty(default=1, min=1, max=10000, name="Iterations", update=ScNode.update_value)
-#     use_stretch_u = BoolProperty(name="Stretch U", update=ScNode.update_value)
-#     use_stretch_v = BoolProperty(name="Stretch V", update=ScNode.update_value)
+    def init(self, context):
+        self.inputs.new("ScIntSocket", "Octree Depth").prop_prop = "octree_depth"
+        self.inputs.new("ScFloatSocket", "Scale").prop_prop = "scale"
+        self.inputs.new("ScFloatSocket", "Sharpness").prop_prop = "sharpness"
+        self.inputs.new("ScBoolSocket", "Smooth Shading").prop_prop = "use_smooth_shade"
+        self.inputs.new("ScBoolSocket", "Remove Disconnected Pieces").prop_prop = "use_remove_disconnected"
+        self.inputs.new("ScFloatSocket", "Threshold").prop_prop = "threshold"
+        super().init(context)
     
-#     def draw_buttons(self, context, layout):
-#         split = layout.split()
-#         col = split.column()
-#         col.prop(self, "axis")
-#         col.prop(self, "object", text="AxisOb")
-#         col.prop(self, "angle")
-#         col.prop(self, "steps")
-#         col.prop(self, "render_steps")
-#         col.prop(self, "use_smooth_shade")
-#         col.prop(self, "use_merge_vertices")
-#         sub = col.column()
-#         sub.active = self.use_merge_vertices
-#         sub.prop(self, "merge_threshold")
-#         col = split.column()
-#         row = col.row()
-#         row.active = (self.object is None or self.use_object_screw_offset is False)
-#         row.prop(self, "screw_offset")
-#         row = col.row()
-#         row.active = (self.object is not None)
-#         row.prop(self, "use_object_screw_offset")
-#         col.prop(self, "use_normal_calculate")
-#         col.prop(self, "use_normal_flip")
-#         col.prop(self, "iterations")
-#         col.prop(self, "use_stretch_u")
-#         col.prop(self, "use_stretch_v")
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "mode")
     
-#     def functionality(self):
-#         bpy.ops.object.modifier_add(type="SCREW")
-#         self.mesh.modifiers[0].axis = self.axis
-#         self.mesh.modifiers[0].object = self.object
-#         self.mesh.modifiers[0].angle = self.angle
-#         self.mesh.modifiers[0].steps = self.steps
-#         self.mesh.modifiers[0].render_steps = self.render_steps
-#         self.mesh.modifiers[0].use_smooth_shade = self.use_smooth_shade
-#         self.mesh.modifiers[0].use_merge_vertices = self.use_merge_vertices
-#         self.mesh.modifiers[0].merge_threshold = self.merge_threshold
-#         self.mesh.modifiers[0].screw_offset = self.screw_offset
-#         self.mesh.modifiers[0].use_object_screw_offset = self.use_object_screw_offset
-#         self.mesh.modifiers[0].use_normal_calculate = self.use_normal_calculate
-#         self.mesh.modifiers[0].use_normal_flip = self.use_normal_flip
-#         self.mesh.modifiers[0].iterations = self.iterations
-#         self.mesh.modifiers[0].use_stretch_u = self.use_stretch_u
-#         self.mesh.modifiers[0].use_stretch_v = self.use_stretch_v
-#         return True
-# class SimpleDeformModNode(Node, ScModifierNode):
-#     bl_idname = "SimpleDeformModNode"
-#     bl_label = "Simple Deform Modifier"
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="REMESH")
+        self.mesh.modifiers[0].mode = self.mode
+        self.mesh.modifiers[0].octree_depth = self.inputs["Octree Depth"].execute()
+        self.mesh.modifiers[0].scale = self.inputs["Scale"].execute()
+        self.mesh.modifiers[0].sharpness = self.inputs["Sharpness"].execute()
+        self.mesh.modifiers[0].use_smooth_shade = self.inputs["Smooth Shading"].execute()
+        self.mesh.modifiers[0].use_remove_disconnected = self.inputs["Remove Disconnected Pieces"].execute()
+        self.mesh.modifiers[0].threshold = self.inputs["Threshold"].execute()
+class ScrewModNode(Node, ScModifierNode):
+    bl_idname = "ScrewModNode"
+    bl_label = "Screw Modifier"
 
-#     vertex_group = StringProperty(name="Vertex Group", update=ScNode.update_value)
-#     deform_method = EnumProperty(items=[("TWIST", "Twist", ""), ("BEND", "Bend", ""), ("TAPER", "Taper", ""), ("STRETCH", "Stretch", "")], default="TWIST", update=ScNode.update_value)
-#     invert_vertex_group = BoolProperty(update=ScNode.update_value)
-#     origin = PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
-#     lock_x = BoolProperty(name="Lock X Axis", update=ScNode.update_value)
-#     lock_y = BoolProperty(name="Lock Y Axis", update=ScNode.update_value)
-#     factor = FloatProperty(name="Factor", default=0.785398, update=ScNode.update_value)
-#     angle = FloatProperty(name="Angle", default=0.785398, subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
-#     limits = FloatVectorProperty(size=2, default=(0.0, 1.0), min=0.0, max=1.0, update=ScNode.update_value)
-    
-#     def draw_buttons(self, context, layout):
-#         layout.row().prop(self, "deform_method", expand=True)
-#         split = layout.split()
-#         col = split.column()
-#         col.label(text="Vertex Group:")
-#         row = col.row(align=True)
-#         if (not self.mesh == ""):
-#             row.prop_search(self, "vertex_group", self.mesh, "vertex_groups", text="")
-#         row.prop(self, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
-#         split = layout.split()
-#         col = split.column()
-#         col.label(text="Axis, Origin:")
-#         col.prop(self, "origin", text="")
-#         if self.deform_method in {'TAPER', 'STRETCH', 'TWIST'}:
-#             col.label(text="Lock:")
-#             col.prop(self, "lock_x")
-#             col.prop(self, "lock_y")
-#         col = split.column()
-#         col.label(text="Deform:")
-#         if self.deform_method in {'TAPER', 'STRETCH'}:
-#             col.prop(self, "factor")
-#         else:
-#             col.prop(self, "angle")
-#         col.prop(self, "limits", slider=True)
-    
-#     def functionality(self):
-#         bpy.ops.object.modifier_add(type="SIMPLE_DEFORM")
-#         self.mesh.modifiers[0].deform_method = self.deform_method
-#         self.mesh.modifiers[0].vertex_group = self.vertex_group
-#         self.mesh.modifiers[0].invert_vertex_group = self.invert_vertex_group
-#         self.mesh.modifiers[0].origin = self.origin
-#         self.mesh.modifiers[0].lock_x = self.lock_x
-#         self.mesh.modifiers[0].lock_y = self.lock_y
-#         if self.deform_method in {'TAPER', 'STRETCH'}:
-#             self.mesh.modifiers[0].factor = self.factor
-#         else:
-#             self.mesh.modifiers[0].angle = self.angle
-#         self.mesh.modifiers[0].limits = self.limits
-#         return True
-# class SkinModNode(Node, ScModifierNode):
-#     bl_idname = "SkinModNode"
-#     bl_label = "Skin Modifier"
+    axis = EnumProperty(name="Axis", items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="Z", update=ScNode.update_value)
+    object = PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    angle = FloatProperty(name="Angle", default=6.283185, subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
+    steps = IntProperty(name="Steps", default=16, min=2, max=10000, soft_max=512, update=ScNode.update_value)
+    render_steps = IntProperty(name="Render Steps", default=16, min=2, max=10000, soft_max=512, update=ScNode.update_value)
+    use_smooth_shade = BoolProperty(name="Smooth Shading", default=True, update=ScNode.update_value)
+    use_merge_vertices = BoolProperty(name="Merge Vertices", update=ScNode.update_value)
+    merge_threshold = FloatProperty(name="Merge Distance", default=0.01, min=0, update=ScNode.update_value)
+    screw_offset = FloatProperty(name="Screw", update=ScNode.update_value)
+    use_object_screw_offset = BoolProperty(name="Object Screw", update=ScNode.update_value)
+    use_normal_calculate = BoolProperty(name="Calc Order", update=ScNode.update_value)
+    use_normal_flip = BoolProperty(name="Flip", update=ScNode.update_value)
+    iterations = IntProperty(default=1, min=1, max=10000, name="Iterations", update=ScNode.update_value)
+    use_stretch_u = BoolProperty(name="Stretch U", update=ScNode.update_value)
+    use_stretch_v = BoolProperty(name="Stretch V", update=ScNode.update_value)
 
-#     branch_smoothing = FloatProperty(name="Branch Smoothing", default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
-#     use_smooth_shade = BoolProperty(name="Smooth Shading", update=ScNode.update_value)
-#     use_x_symmetry = BoolProperty(name="X", default=True, update=ScNode.update_value)
-#     use_y_symmetry = BoolProperty(name="Y", update=ScNode.update_value)
-#     use_z_symmetry = BoolProperty(name="Z", update=ScNode.update_value)
+    def init(self, context):
+        self.inputs.new("ScMeshRefSocket", "AxisOb").prop_prop = "object"
+        self.inputs.new("ScAngleSocket", "Angle").prop_prop = "angle"
+        self.inputs.new("ScIntSocket", "Steps").prop_prop = "steps"
+        self.inputs.new("ScIntSocket", "Render Steps").prop_prop = "render_steps"
+        self.inputs.new("ScBoolSocket", "Smooth Shading").prop_prop = "use_smooth_shade"
+        self.inputs.new("ScBoolSocket", "Merge Vertices").prop_prop = "use_merge_vertices"
+        self.inputs.new("ScFloatSocket", "Merge Distance").prop_prop = "merge_threshold"
+        self.inputs.new("ScFloatSocket", "Screw").prop_prop = "screw_offset"
+        self.inputs.new("ScBoolSocket", "Object Screw").prop_prop = "use_object_screw_offset"
+        self.inputs.new("ScBoolSocket", "Calc Order").prop_prop = "use_normal_calculate"
+        self.inputs.new("ScBoolSocket", "Flip").prop_prop = "use_normal_flip"
+        self.inputs.new("ScIntSocket", "Iterations").prop_prop = "iterations"
+        self.inputs.new("ScBoolSocket", "Stretch U").prop_prop = "use_stretch_u"
+        self.inputs.new("ScBoolSocket", "Stretch V").prop_prop = "use_stretch_v"
+        super().init(context)
+        
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "axis")
     
-#     def draw_buttons(self, context, layout):
-#         row = layout.row()
-#         row.operator("object.skin_armature_create", text="Create Armature")
-#         row.operator("mesh.customdata_skin_add")
-#         layout.separator()
-#         row = layout.row(align=True)
-#         row.prop(self, "branch_smoothing")
-#         row.prop(self, "use_smooth_shade")
-#         split = layout.split()
-#         col = split.column()
-#         col.label(text="Selected Vertices:")
-#         sub = col.column(align=True)
-#         # None of the operators below will work as the mesh will be in object mode
-#         # Even if it is in the edit mode, the modifier will have already been applied
-#         sub.operator("object.skin_loose_mark_clear", text="Mark Loose").action = 'MARK'
-#         sub.operator("object.skin_loose_mark_clear", text="Clear Loose").action = 'CLEAR'
-#         sub = col.column()
-#         sub.operator("object.skin_root_mark", text="Mark Root")
-#         sub.operator("object.skin_radii_equalize", text="Equalize Radii")
-#         col = split.column()
-#         col.label(text="Symmetry Axes:")
-#         col.prop(self, "use_x_symmetry")
-#         col.prop(self, "use_y_symmetry")
-#         col.prop(self, "use_z_symmetry")
-    
-#     def functionality(self):
-#         bpy.ops.object.modifier_add(type="SKIN")
-#         self.mesh.modifiers[0].branch_smoothing = self.branch_smoothing
-#         self.mesh.modifiers[0].use_smooth_shade = self.use_smooth_shade
-#         self.mesh.modifiers[0].use_x_symmetry = self.use_x_symmetry
-#         self.mesh.modifiers[0].use_y_symmetry = self.use_y_symmetry
-#         self.mesh.modifiers[0].use_z_symmetry = self.use_z_symmetry
-#         return True
-# class SmoothModNode(Node, ScModifierNode):
-#     bl_idname = "SmoothModNode"
-#     bl_label = "Smooth Modifier"
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="SCREW")
+        self.mesh.modifiers[0].axis = self.axis
+        self.mesh.modifiers[0].object = self.inputs["AxisOb"].execute()
+        self.mesh.modifiers[0].angle = self.inputs["Angle"].execute()
+        self.mesh.modifiers[0].steps = self.inputs["Steps"].execute()
+        self.mesh.modifiers[0].render_steps = self.inputs["Render Steps"].execute()
+        self.mesh.modifiers[0].use_smooth_shade = self.inputs["Smooth Shading"].execute()
+        self.mesh.modifiers[0].use_merge_vertices = self.inputs["Merge Vertices"].execute()
+        self.mesh.modifiers[0].merge_threshold = self.inputs["Merge Distance"].execute()
+        self.mesh.modifiers[0].screw_offset = self.inputs["Screw"].execute()
+        self.mesh.modifiers[0].use_object_screw_offset = self.inputs["Object Screw"].execute()
+        self.mesh.modifiers[0].use_normal_calculate = self.inputs["Calc Order"].execute()
+        self.mesh.modifiers[0].use_normal_flip = self.inputs["Flip"].execute()
+        self.mesh.modifiers[0].iterations = self.inputs["Iterations"].execute()
+        self.mesh.modifiers[0].use_stretch_u = self.inputs["Stretch U"].execute()
+        self.mesh.modifiers[0].use_stretch_v = self.inputs["Stretch V"].execute()
+class SimpleDeformModNode(Node, ScModifierNode):
+    bl_idname = "SimpleDeformModNode"
+    bl_label = "Simple Deform Modifier"
 
-#     use_x = BoolProperty(name="X", default=True, update=ScNode.update_value)
-#     use_y = BoolProperty(name="Y", default=True, update=ScNode.update_value)
-#     use_z = BoolProperty(name="Z", default=True, update=ScNode.update_value)
-#     factor = FloatProperty(name="Factor", default=0.5, update=ScNode.update_value)
-#     iterations = IntProperty(name="Repeat", default=1, min=0, max=32767, soft_max=30, update=ScNode.update_value)
-#     vertex_group = StringProperty(name="Vertex Group", update=ScNode.update_value)
-    
-#     def draw_buttons(self, context, layout):
-#         split = layout.split(percentage=0.25)
-#         col = split.column()
-#         col.label(text="Axis:")
-#         col.prop(self, "use_x")
-#         col.prop(self, "use_y")
-#         col.prop(self, "use_z")
-#         col = split.column()
-#         col.prop(self, "factor")
-#         col.prop(self, "iterations")
-#         col.label(text="Vertex Group:")
-#         if (not self.mesh == ""):
-#             col.prop_search(self, "vertex_group", self.mesh, "vertex_groups", text="")
-    
-#     def functionality(self):
-#         bpy.ops.object.modifier_add(type="SMOOTH")
-#         self.mesh.modifiers[0].use_x = self.use_x
-#         self.mesh.modifiers[0].use_y = self.use_y
-#         self.mesh.modifiers[0].use_z = self.use_z
-#         self.mesh.modifiers[0].factor = self.factor
-#         self.mesh.modifiers[0].iterations = self.iterations
-#         self.mesh.modifiers[0].vertex_group = self.vertex_group
-#         return True
-# class SolidifyModNode(Node, ScModifierNode):
-#     bl_idname = "SolidifyModNode"
-#     bl_label = "Solidify Modifier"
-    
-#     thickness = FloatProperty(name="Thickness", default=0.01, update=ScNode.update_value)
-#     thickness_clamp = FloatProperty(name="Clamp", default=0.0, min=0.0, max=100.0, update=ScNode.update_value)
-#     vertex_group = StringProperty(name="Vertex Group", update=ScNode.update_value)
-#     invert_vertex_group = BoolProperty(name="Invert", update=ScNode.update_value)
-#     thickness_vertex_group = FloatProperty(default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
-#     edge_crease_inner = FloatProperty(default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
-#     edge_crease_outer = FloatProperty(default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
-#     edge_crease_rim = FloatProperty(default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
-#     offset = FloatProperty(name="Offset", default=-1.0, update=ScNode.update_value)
-#     use_flip_normals = BoolProperty(name="Flip Normals", update=ScNode.update_value)
-#     use_even_offset = BoolProperty(name="Even Thickness", update=ScNode.update_value)
-#     use_quality_normals = BoolProperty(name="High Quality Normals", update=ScNode.update_value)
-#     use_rim = BoolProperty(name="Fill Rim", default=True, update=ScNode.update_value)
-#     use_rim_only = BoolProperty(name="Only Rim", update=ScNode.update_value)
-#     material_offset = IntProperty(default=0, min=-32768, max=32767, update=ScNode.update_value)
-#     material_offset_rim = IntProperty(default=0, min=-32768, max=32767, update=ScNode.update_value)
-    
-#     def draw_buttons(self, context, layout):
-#         split = layout.split()
-#         col = split.column()
-#         col.prop(self, "thickness")
-#         col.prop(self, "thickness_clamp")
-#         col.separator()
-#         row = col.row(align=True)
-#         if (not self.mesh == ""):
-#             row.prop_search(self, "vertex_group", self.mesh, "vertex_groups", text="")
-#         sub = row.row(align=True)
-#         sub.active = bool(self.vertex_group)
-#         sub.prop(self, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
-#         sub = col.row()
-#         sub.active = bool(self.vertex_group)
-#         sub.prop(self, "thickness_vertex_group", text="Factor")
-#         col.label(text="Crease:")
-#         col.prop(self, "edge_crease_inner", text="Inner")
-#         col.prop(self, "edge_crease_outer", text="Outer")
-#         col.prop(self, "edge_crease_rim", text="Rim")
-#         col = split.column()
-#         col.prop(self, "offset")
-#         col.prop(self, "use_flip_normals")
-#         col.prop(self, "use_even_offset")
-#         col.prop(self, "use_quality_normals")
-#         col.prop(self, "use_rim")
-#         col_rim = col.column()
-#         col_rim.active = self.use_rim
-#         col_rim.prop(self, "use_rim_only")
-#         col.separator()
-#         col.label(text="Material Index Offset:")
-#         sub = col.column()
-#         row = sub.split(align=True, percentage=0.4)
-#         row.prop(self, "material_offset", text="")
-#         row = row.row(align=True)
-#         row.active = self.use_rim
-#         row.prop(self, "material_offset_rim", text="Rim")
-    
-#     def functionality(self):
-#         bpy.ops.object.modifier_add(type="SOLIDIFY")
-#         self.mesh.modifiers[0].thickness = self.thickness
-#         self.mesh.modifiers[0].thickness_clamp = self.thickness_clamp
-#         self.mesh.modifiers[0].vertex_group = self.vertex_group
-#         self.mesh.modifiers[0].invert_vertex_group = self.invert_vertex_group
-#         self.mesh.modifiers[0].thickness_vertex_group = self.thickness_vertex_group
-#         self.mesh.modifiers[0].edge_crease_inner = self.edge_crease_inner
-#         self.mesh.modifiers[0].edge_crease_outer = self.edge_crease_outer
-#         self.mesh.modifiers[0].edge_crease_rim = self.edge_crease_rim
-#         self.mesh.modifiers[0].offset = self.offset
-#         self.mesh.modifiers[0].use_flip_normals = self.use_flip_normals
-#         self.mesh.modifiers[0].use_even_offset = self.use_even_offset
-#         self.mesh.modifiers[0].use_quality_normals = self.use_quality_normals
-#         self.mesh.modifiers[0].use_rim = self.use_rim
-#         self.mesh.modifiers[0].use_rim_only = self.use_rim_only
-#         self.mesh.modifiers[0].material_offset = self.material_offset
-#         self.mesh.modifiers[0].material_offset_rim = self.material_offset_rim
-#         return True
-# class SubdivideModNode(Node, ScModifierNode):
-#     bl_idname = "SubdivideModNode"
-#     bl_label = "Subdivision Surface Modifier"
-    
-#     subdivision_type = EnumProperty(items=[("CATMULL_CLARK", "Catmull-Clark", ""), ("SIMPLE", "Simple", "")], default="CATMULL_CLARK", update=ScNode.update_value)
-#     levels = IntProperty(default=1, min=0, max=11, soft_max=6, update=ScNode.update_value)
-#     render_levels = IntProperty(default=2, min=0, max=11, soft_max=6, update=ScNode.update_value)
-#     use_subsurf_uv = BoolProperty(name="Subdivide UVs", default=True, update=ScNode.update_value)
-#     show_only_control_edges = BoolProperty(name="Optimal Display", update=ScNode.update_value)
-    
-#     def draw_buttons(self, context, layout):
-#         layout.row().prop(self, "subdivision_type", expand=True)
-#         split = layout.split()
-#         col = split.column()
-#         col.label(text="Subdivisions:")
-#         col.prop(self, "levels", text="View")
-#         col.prop(self, "render_levels", text="Render")
-#         col = split.column()
-#         col.label(text="Options:")
-#         sub = col.column()
-#         sub.prop(self, "use_subsurf_uv")
-#         col.prop(self, "show_only_control_edges")
-    
-#     def functionality(self):
-#         if (self.levels == 0):
-#             return False
-#         bpy.ops.object.modifier_add(type="SUBSURF")
-#         self.mesh.modifiers[0].subdivision_type = self.subdivision_type
-#         self.mesh.modifiers[0].levels = self.levels
-#         self.mesh.modifiers[0].render_levels = self.render_levels
-#         self.mesh.modifiers[0].use_subsurf_uv = self.use_subsurf_uv
-#         self.mesh.modifiers[0].show_only_control_edges = self.show_only_control_edges
-#         return True
-# class TriangulateModNode(Node, ScModifierNode):
-#     bl_idname = "TriangulateModNode"
-#     bl_label = "Triangulate Modifier"
-    
-#     quad_method = EnumProperty(items=[("BEAUTY", "Beauty", ""), ("FIXED", "Fixed", ""), ("FIXED_ALTERNATE", "Fixed Alternate", ""), ("SHORTEST_DIAGONAL", "Shortest Diagonal", "")], default="SHORTEST_DIAGONAL", update=ScNode.update_value)
-#     ngon_method = EnumProperty(items=[("BEAUTY", "Beauty", ""), ("CLIP", "Clip", "")], default="BEAUTY", update=ScNode.update_value)
+    vertex_group = StringProperty(name="Vertex Group", update=ScNode.update_value)
+    deform_method = EnumProperty(items=[("TWIST", "Twist", ""), ("BEND", "Bend", ""), ("TAPER", "Taper", ""), ("STRETCH", "Stretch", "")], default="TWIST", update=ScNode.update_value)
+    invert_vertex_group = BoolProperty(update=ScNode.update_value)
+    origin = PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    lock_x = BoolProperty(name="Lock X Axis", update=ScNode.update_value)
+    lock_y = BoolProperty(name="Lock Y Axis", update=ScNode.update_value)
+    factor = FloatProperty(name="Factor", default=0.785398, update=ScNode.update_value)
+    angle = FloatProperty(name="Angle", default=0.785398, subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
+    limits = FloatVectorProperty(size=2, default=(0.0, 1.0), min=0.0, max=1.0, update=ScNode.update_value)
 
-#     def draw_buttons(self, context, layout):
-#         row = layout.row()
-#         col = row.column()
-#         col.label(text="Quad Method:")
-#         col.prop(self, "quad_method", text="")
-#         col = row.column()
-#         col.label(text="Ngon Method:")
-#         col.prop(self, "ngon_method", text="")
+    def init(self, context):
+        self.inputs.new("ScMeshRefSocket", "Origin").prop_prop = "origin"
+        self.inputs.new("ScBoolSocket", "Lock X Axis").prop_prop = "lock_x"
+        self.inputs.new("ScBoolSocket", "Lock Y Axis").prop_prop = "lock_y"
+        self.inputs.new("ScFloatSocket", "Factor").prop_prop = "factor"
+        self.inputs.new("ScAngleSocket", "Angle").prop_prop = "angle"
+        super().init(context)
     
-#     def functionality(self):
-#         bpy.ops.object.modifier_add(type="TRIANGULATE")
-#         self.mesh.modifiers[0].quad_method = self.quad_method
-#         self.mesh.modifiers[0].ngon_method = self.ngon_method
-#         return True
-# class WireframeModNode(Node, ScModifierNode):
-#     bl_idname = "WireframeModNode"
-#     bl_label = "Wireframe Modifier"
+    def draw_buttons(self, context, layout):
+        layout.row().prop(self, "deform_method", expand=True)
+        if (not self.mesh == None):
+            split = layout.split()
+            col = split.column()
+            col.label(text="Vertex Group:")
+            row = col.row(align=True)
+            row.prop_search(self, "vertex_group", self.mesh, "vertex_groups", text="")
+            row.prop(self, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
+        split = layout.split()
+        col = split.column()
+        col.prop(self, "limits", slider=True)
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="SIMPLE_DEFORM")
+        self.mesh.modifiers[0].deform_method = self.deform_method
+        self.mesh.modifiers[0].vertex_group = self.vertex_group
+        self.mesh.modifiers[0].invert_vertex_group = self.invert_vertex_group
+        self.mesh.modifiers[0].origin = self.inputs["Origin"].execute()
+        self.mesh.modifiers[0].lock_x = self.inputs["Lock X Axis"].execute()
+        self.mesh.modifiers[0].lock_y = self.inputs["Lock Y Axis"].execute()
+        if self.deform_method in {'TAPER', 'STRETCH'}:
+            self.mesh.modifiers[0].factor = self.inputs["Factor"].execute()
+        else:
+            self.mesh.modifiers[0].angle = self.inputs["Angle"].execute()
+        self.mesh.modifiers[0].limits = self.limits
+class SkinModNode(Node, ScModifierNode):
+    bl_idname = "SkinModNode"
+    bl_label = "Skin Modifier"
 
-#     thickness = FloatProperty(update=ScNode.update_value)
-#     vertex_group = StringProperty(update=ScNode.update_value)
-#     invert_vertex_group = BoolProperty(update=ScNode.update_value)
-#     thickness_vertex_group = FloatProperty(default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
-#     use_crease = BoolProperty(update=ScNode.update_value)
-#     crease_weight = FloatProperty(update=ScNode.update_value)
-#     offset = FloatProperty(name="Offset", update=ScNode.update_value)
-#     use_even_offset = BoolProperty(update=ScNode.update_value)
-#     use_relative_offset = BoolProperty(update=ScNode.update_value)
-#     use_boundary = BoolProperty(update=ScNode.update_value)
-#     use_replace = BoolProperty(update=ScNode.update_value)
-#     material_offset = IntProperty(default=0, min=-32768, max=32767, update=ScNode.update_value)
+    branch_smoothing = FloatProperty(name="Branch Smoothing", default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
+    use_smooth_shade = BoolProperty(name="Smooth Shading", update=ScNode.update_value)
+    use_x_symmetry = BoolProperty(name="X", default=True, update=ScNode.update_value)
+    use_y_symmetry = BoolProperty(name="Y", update=ScNode.update_value)
+    use_z_symmetry = BoolProperty(name="Z", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Branch Smoothing").prop_prop = "branch_smoothing"
+        self.inputs.new("ScBoolSocket", "Smooth Shading").prop_prop = "use_smooth_shade"
+        self.inputs.new("ScBoolSocket", "X").prop_prop = "use_x_symmetry"
+        self.inputs.new("ScBoolSocket", "Y").prop_prop = "use_y_symmetry"
+        self.inputs.new("ScBoolSocket", "Z").prop_prop = "use_z_symmetry"
+        super().init(context)
     
-#     def draw_buttons(self, context, layout):
-#         has_vgroup = bool(self.vertex_group)
-#         split = layout.split()
-#         col = split.column()
-#         col.prop(self, "thickness", text="Thickness")
-#         row = col.row(align=True)
-#         if (not self.mesh == ""):
-#             row.prop_search(self, "vertex_group", self.mesh, "vertex_groups", text="")
-#         sub = row.row(align=True)
-#         sub.active = has_vgroup
-#         sub.prop(self, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
-#         row = col.row(align=True)
-#         row.active = has_vgroup
-#         row.prop(self, "thickness_vertex_group", text="Factor")
-#         col.prop(self, "use_crease", text="Crease Edges")
-#         row = col.row()
-#         row.active = self.use_crease
-#         row.prop(self, "crease_weight", text="Crease Weight")
-#         col = split.column()
-#         col.prop(self, "offset")
-#         col.prop(self, "use_even_offset", text="Even Thickness")
-#         col.prop(self, "use_relative_offset", text="Relative Thickness")
-#         col.prop(self, "use_boundary", text="Boundary")
-#         col.prop(self, "use_replace", text="Replace Original")
-#         col.prop(self, "material_offset", text="Material Offset")
+    def draw_buttons(self, context, layout):
+        row = layout.row()
+        row.operator("object.skin_armature_create", text="Create Armature")
+        row.operator("mesh.customdata_skin_add")
+        layout.label(text="Selected Vertices:")
+        sub = layout.split()
+        # None of the operators below will work as the mesh will be in object mode
+        # Even if it is in the edit mode, the modifier will have already been applied
+        sub.operator("object.skin_loose_mark_clear", text="Mark Loose").action = 'MARK'
+        sub.operator("object.skin_loose_mark_clear", text="Clear Loose").action = 'CLEAR'
+        sub = layout.split()
+        sub.operator("object.skin_root_mark", text="Mark Root")
+        sub.operator("object.skin_radii_equalize", text="Equalize Radii")
     
-#     def functionality(self):
-#         bpy.ops.object.modifier_add(type="WIREFRAME")
-#         self.mesh.modifiers[0].thickness = self.thickness
-#         self.mesh.modifiers[0].vertex_group = self.vertex_group
-#         self.mesh.modifiers[0].invert_vertex_group = self.invert_vertex_group
-#         self.mesh.modifiers[0].thickness_vertex_group = self.thickness_vertex_group
-#         self.mesh.modifiers[0].use_crease = self.use_crease
-#         self.mesh.modifiers[0].crease_weight = self.crease_weight
-#         self.mesh.modifiers[0].offset = self.offset
-#         self.mesh.modifiers[0].use_even_offset = self.use_even_offset
-#         self.mesh.modifiers[0].use_relative_offset = self.use_relative_offset
-#         self.mesh.modifiers[0].use_boundary = self.use_boundary
-#         self.mesh.modifiers[0].use_replace = self.use_replace
-#         self.mesh.modifiers[0].material_offset = self.material_offset
-#         return True
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="SKIN")
+        self.mesh.modifiers[0].branch_smoothing = self.inputs["Branch Smoothing"].execute()
+        self.mesh.modifiers[0].use_smooth_shade = self.inputs["Smooth Shading"].execute()
+        self.mesh.modifiers[0].use_x_symmetry = self.inputs["X"].execute()
+        self.mesh.modifiers[0].use_y_symmetry = self.inputs["Y"].execute()
+        self.mesh.modifiers[0].use_z_symmetry = self.inputs["Z"].execute()
+class SmoothModNode(Node, ScModifierNode):
+    bl_idname = "SmoothModNode"
+    bl_label = "Smooth Modifier"
+
+    use_x = BoolProperty(name="X", default=True, update=ScNode.update_value)
+    use_y = BoolProperty(name="Y", default=True, update=ScNode.update_value)
+    use_z = BoolProperty(name="Z", default=True, update=ScNode.update_value)
+    factor = FloatProperty(name="Factor", default=0.5, update=ScNode.update_value)
+    iterations = IntProperty(name="Repeat", default=1, min=0, max=32767, soft_max=30, update=ScNode.update_value)
+    vertex_group = StringProperty(name="Vertex Group", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Factor").prop_prop = "factor"
+        self.inputs.new("ScIntSocket", "Repeat").prop_prop = "iterations"
+        self.inputs.new("ScBoolSocket", "X").prop_prop = "use_x"
+        self.inputs.new("ScBoolSocket", "Y").prop_prop = "use_y"
+        self.inputs.new("ScBoolSocket", "Z").prop_prop = "use_z"
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        if (not self.mesh == None):
+            layout.prop_search(self, "vertex_group", self.mesh, "vertex_groups", text="")
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="SMOOTH")
+        self.mesh.modifiers[0].use_x = self.inputs["X"].execute()
+        self.mesh.modifiers[0].use_y = self.inputs["Y"].execute()
+        self.mesh.modifiers[0].use_z = self.inputs["Z"].execute()
+        self.mesh.modifiers[0].factor = self.inputs["Factor"].execute()
+        self.mesh.modifiers[0].iterations = self.inputs["Repeat"].execute()
+        self.mesh.modifiers[0].vertex_group = self.vertex_group
+class SolidifyModNode(Node, ScModifierNode):
+    bl_idname = "SolidifyModNode"
+    bl_label = "Solidify Modifier"
+    
+    thickness = FloatProperty(name="Thickness", default=0.01, update=ScNode.update_value)
+    thickness_clamp = FloatProperty(name="Clamp", default=0.0, min=0.0, max=100.0, update=ScNode.update_value)
+    vertex_group = StringProperty(name="Vertex Group", update=ScNode.update_value)
+    invert_vertex_group = BoolProperty(name="Invert", update=ScNode.update_value)
+    thickness_vertex_group = FloatProperty(default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
+    edge_crease_inner = FloatProperty(default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
+    edge_crease_outer = FloatProperty(default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
+    edge_crease_rim = FloatProperty(default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
+    offset = FloatProperty(name="Offset", default=-1.0, update=ScNode.update_value)
+    use_flip_normals = BoolProperty(name="Flip Normals", update=ScNode.update_value)
+    use_even_offset = BoolProperty(name="Even Thickness", update=ScNode.update_value)
+    use_quality_normals = BoolProperty(name="High Quality Normals", update=ScNode.update_value)
+    use_rim = BoolProperty(name="Fill Rim", default=True, update=ScNode.update_value)
+    use_rim_only = BoolProperty(name="Only Rim", update=ScNode.update_value)
+    material_offset = IntProperty(default=0, min=-32768, max=32767, update=ScNode.update_value)
+    material_offset_rim = IntProperty(default=0, min=-32768, max=32767, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Thickness").prop_prop = "thickness"
+        self.inputs.new("ScFloatSocket", "Clamp").prop_prop = "thickness_clamp"
+        self.inputs.new("ScFloatSocket", "Factor").prop_prop = "thickness_vertex_group"
+        self.inputs.new("ScFloatSocket", "Inner").prop_prop = "edge_crease_inner"
+        self.inputs.new("ScFloatSocket", "Outer").prop_prop = "edge_crease_outer"
+        self.inputs.new("ScFloatSocket", "Rim").prop_prop = "edge_crease_rim"
+        self.inputs.new("ScFloatSocket", "Offset").prop_prop = "offset"
+        self.inputs.new("ScBoolSocket", "Flip Normals").prop_prop = "use_flip_normals"
+        self.inputs.new("ScBoolSocket", "Even Thickness").prop_prop = "use_even_offset"
+        self.inputs.new("ScBoolSocket", "High Quality Normals").prop_prop = "use_quality_normals"
+        self.inputs.new("ScBoolSocket", "Fill Rim").prop_prop = "use_rim"
+        self.inputs.new("ScBoolSocket", "Only Rim").prop_prop = "use_rim_only"
+        self.inputs.new("ScIntSocket", "Material Offset").prop_prop = "material_offset"
+        self.inputs.new("ScIntSocket", "Material Offset Rim").prop_prop = "material_offset_rim"
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        split = layout.split()
+        col = split.column()
+        row = col.row(align=True)
+        if (not self.mesh == None):
+            row.prop_search(self, "vertex_group", self.mesh, "vertex_groups", text="")
+            sub = row.row(align=True)
+            sub.active = bool(self.vertex_group)
+            sub.prop(self, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="SOLIDIFY")
+        self.mesh.modifiers[0].thickness = self.inputs["Thickness"].execute()
+        self.mesh.modifiers[0].thickness_clamp = self.inputs["Clamp"].execute()
+        self.mesh.modifiers[0].vertex_group = self.vertex_group
+        self.mesh.modifiers[0].invert_vertex_group = self.invert_vertex_group
+        self.mesh.modifiers[0].thickness_vertex_group = self.inputs["Factor"].execute()
+        self.mesh.modifiers[0].edge_crease_inner = self.inputs["Inner"].execute()
+        self.mesh.modifiers[0].edge_crease_outer = self.inputs["Outer"].execute()
+        self.mesh.modifiers[0].edge_crease_rim = self.inputs["Rim"].execute()
+        self.mesh.modifiers[0].offset = self.inputs["Offset"].execute()
+        self.mesh.modifiers[0].use_flip_normals = self.inputs["Flip Normals"].execute()
+        self.mesh.modifiers[0].use_even_offset = self.inputs["Even Thickness"].execute()
+        self.mesh.modifiers[0].use_quality_normals = self.inputs["High Quality Normals"].execute()
+        self.mesh.modifiers[0].use_rim = self.inputs["Fill Rim"].execute()
+        self.mesh.modifiers[0].use_rim_only = self.inputs["Only Rim"].execute()
+        self.mesh.modifiers[0].material_offset = self.inputs["Material Offset"].execute()
+        self.mesh.modifiers[0].material_offset_rim = self.inputs["Material Offset Rim"].execute()
+class SubdivideModNode(Node, ScModifierNode):
+    bl_idname = "SubdivideModNode"
+    bl_label = "Subdivision Surface Modifier"
+    
+    subdivision_type = EnumProperty(items=[("CATMULL_CLARK", "Catmull-Clark", ""), ("SIMPLE", "Simple", "")], default="CATMULL_CLARK", update=ScNode.update_value)
+    levels = IntProperty(default=1, min=0, max=11, soft_max=6, update=ScNode.update_value)
+    render_levels = IntProperty(default=2, min=0, max=11, soft_max=6, update=ScNode.update_value)
+    use_subsurf_uv = BoolProperty(name="Subdivide UVs", default=True, update=ScNode.update_value)
+    show_only_control_edges = BoolProperty(name="Optimal Display", update=ScNode.update_value)
+    prop_levels = IntProperty()
+
+    def init(self, context):
+        self.inputs.new("ScIntSocket", "View").prop_prop = "levels"
+        self.inputs.new("ScIntSocket", "Render").prop_prop = "render_levels"
+        self.inputs.new("ScBoolSocket", "Subdivide UVs").prop_prop = "use_subsurf_uv"
+        self.inputs.new("ScBoolSocket", "Optimal Display").prop_prop = "show_only_control_edges"
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.row().prop(self, "subdivision_type", expand=True)
+    
+    def pre_execute(self):
+        self.prop_levels = self.inputs["View"].execute()
+        if (self.prop_levels == 0):
+            return False
+        return super().pre_execute()
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="SUBSURF")
+        self.mesh.modifiers[0].subdivision_type = self.subdivision_type
+        self.mesh.modifiers[0].levels = self.prop_levels
+        self.mesh.modifiers[0].render_levels = self.inputs["Render"].execute()
+        self.mesh.modifiers[0].use_subsurf_uv = self.inputs["Subdivide UVs"].execute()
+        self.mesh.modifiers[0].show_only_control_edges = self.inputs["Optimal Display"].execute()
+class TriangulateModNode(Node, ScModifierNode):
+    bl_idname = "TriangulateModNode"
+    bl_label = "Triangulate Modifier"
+    
+    quad_method = EnumProperty(items=[("BEAUTY", "Beauty", ""), ("FIXED", "Fixed", ""), ("FIXED_ALTERNATE", "Fixed Alternate", ""), ("SHORTEST_DIAGONAL", "Shortest Diagonal", "")], default="SHORTEST_DIAGONAL", update=ScNode.update_value)
+    ngon_method = EnumProperty(items=[("BEAUTY", "Beauty", ""), ("CLIP", "Clip", "")], default="BEAUTY", update=ScNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.label(text="Quad Method:")
+        layout.prop(self, "quad_method", text="")
+        layout.label(text="Ngon Method:")
+        layout.prop(self, "ngon_method", text="")
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="TRIANGULATE")
+        self.mesh.modifiers[0].quad_method = self.quad_method
+        self.mesh.modifiers[0].ngon_method = self.ngon_method
+class WireframeModNode(Node, ScModifierNode):
+    bl_idname = "WireframeModNode"
+    bl_label = "Wireframe Modifier"
+
+    thickness = FloatProperty(update=ScNode.update_value)
+    vertex_group = StringProperty(update=ScNode.update_value)
+    invert_vertex_group = BoolProperty(update=ScNode.update_value)
+    thickness_vertex_group = FloatProperty(default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
+    use_crease = BoolProperty(update=ScNode.update_value)
+    crease_weight = FloatProperty(update=ScNode.update_value)
+    offset = FloatProperty(name="Offset", update=ScNode.update_value)
+    use_even_offset = BoolProperty(update=ScNode.update_value)
+    use_relative_offset = BoolProperty(update=ScNode.update_value)
+    use_boundary = BoolProperty(update=ScNode.update_value)
+    use_replace = BoolProperty(update=ScNode.update_value)
+    material_offset = IntProperty(default=0, min=-32768, max=32767, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Thickness").prop_prop = "thickness"
+        self.inputs.new("ScFloatSocket", "Factor").prop_prop = "thickness_vertex_group"
+        self.inputs.new("ScFloatSocket", "Crease Weight").prop_prop = "crease_weight"
+        self.inputs.new("ScFloatSocket", "Offset").prop_prop = "offset"
+        self.inputs.new("ScBoolSocket", "Crease Edges").prop_prop = "use_crease"
+        self.inputs.new("ScBoolSocket", "Even Thickness").prop_prop = "use_even_offset"
+        self.inputs.new("ScBoolSocket", "Relative Thickness").prop_prop = "use_relative_offset"
+        self.inputs.new("ScBoolSocket", "Boundary").prop_prop = "use_boundary"
+        self.inputs.new("ScBoolSocket", "Replace Original").prop_prop = "use_replace"
+        self.inputs.new("ScIntSocket", "Material Offset").prop_prop = "material_offset"
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        if (not self.mesh == None):
+            row = layout.row(align=True)
+            row.prop_search(self, "vertex_group", self.mesh, "vertex_groups", text="")
+            row.prop(self, "invert_vertex_group", text="", icon='ARROW_LEFTRIGHT')
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="WIREFRAME")
+        self.mesh.modifiers[0].thickness = self.inputs["Thickness"].execute()
+        self.mesh.modifiers[0].vertex_group = self.vertex_group
+        self.mesh.modifiers[0].invert_vertex_group = self.invert_vertex_group
+        self.mesh.modifiers[0].thickness_vertex_group = self.inputs["Factor"].execute()
+        self.mesh.modifiers[0].use_crease = self.inputs["Crease Edges"].execute()
+        self.mesh.modifiers[0].crease_weight = self.inputs["Crease Weight"].execute()
+        self.mesh.modifiers[0].offset = self.inputs["Offset"].execute()
+        self.mesh.modifiers[0].use_even_offset = self.inputs["Even Thickness"].execute()
+        self.mesh.modifiers[0].use_relative_offset = self.inputs["Relative Thickness"].execute()
+        self.mesh.modifiers[0].use_boundary = self.inputs["Boundary"].execute()
+        self.mesh.modifiers[0].use_replace = self.inputs["Replace Original"].execute()
+        self.mesh.modifiers[0].material_offset = self.inputs["Material Offset"].execute()
 # Conversion
 class ToComponentNode(Node, ScConversionNode):
     bl_idname = "ToComponentNode"
@@ -3502,7 +3450,7 @@ self.inputs[""].execute()
 
 inputs = [PlaneNode, CubeNode, CircleNode, UVSphereNode, IcoSphereNode, CylinderNode, ConeNode, GridNode, SuzanneNode, CustomMeshNode] # TorusNode
 transform = [LocationNode, RotationNode, ScaleNode, TranslateNode, RotateNode, ResizeNode]
-modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CorrectiveSmoothModNode, CurveModNode, DecimateModNode, EdgeSplitModNode, LaplacianSmoothModNode]#, MirrorModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, TriangulateModNode, WireframeModNode]
+modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CorrectiveSmoothModNode, CurveModNode, DecimateModNode, EdgeSplitModNode, LaplacianSmoothModNode, MirrorModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, TriangulateModNode, WireframeModNode]
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
 selection = [SelectComponentsManuallyNode, SelectFaceByIndexNode, SelectAlternateFacesNode, SelectFacesByNormalNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLoopNode, SelectLoopRegionNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectRegionBoundaryNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectShortestPathNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
 deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode, DissolveVerticesNode, DissolveDegenerateNode, EdgeCollapseNode]
@@ -3517,7 +3465,7 @@ testing = [PrintDataNode, BevelNode, InsetNode]
 
 node_categories = [ScNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
                    ScNodeCategory("transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
-                   ScNodeCategory("modifiers", "Modifiers (WIP)", items=[NodeItem(i.bl_idname) for i in modifiers]),
+                   ScNodeCategory("modifiers", "Modifiers", items=[NodeItem(i.bl_idname) for i in modifiers]),
                    ScNodeCategory("conversion", "Conversion", items=[NodeItem(i.bl_idname) for i in conversion]),
                    ScNodeCategory("selection", "Selection", items=[NodeItem(i.bl_idname) for i in selection]),
                    ScNodeCategory("deletion", "Deletion", items=[NodeItem(i.bl_idname) for i in deletion]),
