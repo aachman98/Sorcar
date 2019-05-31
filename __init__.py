@@ -2,7 +2,7 @@ print("______________________________________________________")
 bl_info = {
     "name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (1, 5, 0),
+    "version": (1, 6, 0),
     "blender": (2, 79, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
@@ -1743,71 +1743,76 @@ class SelectComponentsManuallyNode(Node, ScSelectionNode):
                 break
             self.mesh.data.edges[i].select = True
         bpy.ops.object.mode_set(mode="EDIT")
-# class SelectFaceByIndexNode(Node, ScSelectionNode):
-#     bl_idname = "SelectFaceByIndexNode"
-#     bl_label = "Select Face By Index"
+class SelectFaceByIndexNode(Node, ScSelectionNode):
+    bl_idname = "SelectFaceByIndexNode"
+    bl_label = "Select Face By Index"
 
-#     prop_index = IntProperty(name="Index", min=0, update=ScNode.update_value)
-#     prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
-    
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_index")
-#         layout.prop(self, "prop_extend")
-    
-#     def functionality(self):
-#         if (not self.prop_extend):
-#             bpy.ops.mesh.select_all(action="DESELECT")
-#         bpy.ops.object.mode_set(mode="OBJECT")
-#         total_faces = len(self.mesh.data.polygons)
-#         if (self.prop_index > total_faces - 1):
-#             prop_index = total_faces - 1
-#         else:
-#             prop_index = self.prop_index
-#         self.mesh.data.polygons[prop_index].select = True
-#         bpy.ops.object.mode_set(mode="EDIT")
-# class SelectAlternateFacesNode(Node, ScSelectionNode):
-#     bl_idname = "SelectAlternateFacesNode"
-#     bl_label = "Select Alternate Faces"
+    prop_index = IntProperty(name="Index", min=0, update=ScNode.update_value)
+    prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
 
-#     prop_nth = IntProperty(name="Every Nth", default=1, min=1, update=ScNode.update_value)
-#     prop_offset = IntProperty(name="Offset", default=0, min=0, update=ScNode.update_value)
-#     prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
+    def init(self, context):
+        self.inputs.new("ScIntSocket", "Index").prop_prop = "prop_index"
+        self.inputs.new("ScBoolSocket", "Extend").prop_prop = "prop_extend"
+        super().init(context)
     
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_nth")
-#         layout.prop(self, "prop_offset")
-#         layout.prop(self, "prop_extend")
+    def functionality(self):
+        if (not self.inputs["Extend"].execute()):
+            bpy.ops.mesh.select_all(action="DESELECT")
+        bpy.ops.object.mode_set(mode="OBJECT")
+        total_faces = len(self.mesh.data.polygons)
+        prop_index = self.inputs["Index"].execute()
+        if (prop_index > total_faces - 1):
+            prop_index = total_faces - 1
+        self.mesh.data.polygons[prop_index].select = True
+        bpy.ops.object.mode_set(mode="EDIT")
+class SelectAlternateFacesNode(Node, ScSelectionNode):
+    bl_idname = "SelectAlternateFacesNode"
+    bl_label = "Select Alternate Faces"
+
+    prop_nth = IntProperty(name="Every Nth", default=1, min=1, update=ScNode.update_value)
+    prop_offset = IntProperty(name="Offset", default=0, min=0, update=ScNode.update_value)
+    prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScIntSocket", "Every Nth").prop_prop = "prop_nth"
+        self.inputs.new("ScIntSocket", "Offset").prop_prop = "prop_offset"
+        self.inputs.new("ScBoolSocket", "Extend").prop_prop = "prop_extend"
+        super().init(context)
     
-#     def functionality(self):
-#         if (not self.prop_extend):
-#             bpy.ops.mesh.select_all(action="DESELECT")
-#         bpy.ops.object.mode_set(mode="OBJECT")
-#         i = self.prop_offset
-#         while (i < len(self.mesh.data.polygons)):
-#             self.mesh.data.polygons[i].select = True
-#             i += self.prop_nth
-#         bpy.ops.object.mode_set(mode="EDIT")
-# class SelectFacesByNormalNode(Node, ScSelectionNode):
-#     bl_idname = "SelectFacesByNormalNode"
-#     bl_label = "Select Faces By Normal"
+    def functionality(self):
+        if (not self.inputs["Extend"].execute()):
+            bpy.ops.mesh.select_all(action="DESELECT")
+        bpy.ops.object.mode_set(mode="OBJECT")
+        i = self.inputs["Offset"].execute()
+        prop_nth = self.inputs["Every Nth"].execute()
+        while (i < len(self.mesh.data.polygons)):
+            self.mesh.data.polygons[i].select = True
+            i += prop_nth
+        bpy.ops.object.mode_set(mode="EDIT")
+class SelectFacesByNormalNode(Node, ScSelectionNode):
+    bl_idname = "SelectFacesByNormalNode"
+    bl_label = "Select Faces By Normal"
     
-#     prop_min = FloatVectorProperty(name="Minimum", default=(-1.0, -1.0, -1.0), min=-1.0, max=1.0, update=ScNode.update_value)
-#     prop_max = FloatVectorProperty(name="Maximum", default=(1.0, 1.0, 1.0), min=-1.0, max=1.0, update=ScNode.update_value)
-#     prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
+    prop_min = FloatVectorProperty(name="Minimum", default=(-1.0, -1.0, -1.0), min=-1.0, max=1.0, update=ScNode.update_value)
+    prop_max = FloatVectorProperty(name="Maximum", default=(1.0, 1.0, 1.0), min=-1.0, max=1.0, update=ScNode.update_value)
+    prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Min").prop_prop = "prop_min"
+        self.inputs.new("ScFloatSocket", "Max").prop_prop = "prop_max"
+        self.inputs.new("ScBoolSocket", "Extend").prop_prop = "prop_extend"
+        super().init(context)
     
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_min")
-#         layout.prop(self, "prop_max")
-#         layout.prop(self, "prop_extend")
-    
-#     def functionality(self):
-#         if (not self.prop_extend):
-#             bpy.ops.mesh.select_all(action="DESELECT")
-#         bpy.ops.object.mode_set(mode="OBJECT")
-#         for face in self.mesh.data.polygons:
-#             if ((face.normal[0] >= self.prop_min[0] and face.normal[1] >= self.prop_min[1] and face.normal[2] >= self.prop_min[2]) and (face.normal[0] <= self.prop_max[0] and face.normal[1] <= self.prop_max[1] and face.normal[2] <= self.prop_max[2])):
-#                 face.select = True
-#         bpy.ops.object.mode_set(mode="EDIT")
+    def functionality(self):
+        if (not self.inputs["Extend"].execute()):
+            bpy.ops.mesh.select_all(action="DESELECT")
+        bpy.ops.object.mode_set(mode="OBJECT")
+        prop_min = self.inputs["Min"].execute()
+        prop_max = self.inputs["Max"].execute()
+        for face in self.mesh.data.polygons:
+            if ((face.normal[0] >= prop_min[0] and face.normal[1] >= prop_min[1] and face.normal[2] >= prop_min[2]) and (face.normal[0] <= prop_max[0] and face.normal[1] <= prop_max[1] and face.normal[2] <= prop_max[2])):
+                face.select = True
+        bpy.ops.object.mode_set(mode="EDIT")
 class SelectAllNode(Node, ScSelectionNode):
     bl_idname = "SelectAllNode"
     bl_label = "Select All"
@@ -1819,282 +1824,308 @@ class SelectAllNode(Node, ScSelectionNode):
     
     def functionality(self):
         bpy.ops.mesh.select_all(action=self.prop_action)
-# class SelectAxisNode(Node, ScSelectionNode):
-#     bl_idname = "SelectAxisNode"
-#     bl_label = "Select Axis"
+class SelectAxisNode(Node, ScSelectionNode):
+    bl_idname = "SelectAxisNode"
+    bl_label = "Select Axis"
 
-#     prop_mode = EnumProperty(name="Mode", items=[("POSITIVE", "Positive", ""), ("NEGATIVE", "Negative", ""), ("ALIGNED", "Aligned", "")], default="POSITIVE", update=ScNode.update_value)
-#     prop_axis = EnumProperty(name="Axis", items=[("X_AXIS", "X", ""), ("Y_AXIS", "Y", ""), ("Z_AXIS", "Z", "")], default="X_AXIS", update=ScNode.update_value)
-#     prop_threshold = FloatProperty(name="Threshold", default=0.0001, min=0.000001, max=50, update=ScNode.update_value)
+    prop_mode = EnumProperty(name="Mode", items=[("POSITIVE", "Positive", ""), ("NEGATIVE", "Negative", ""), ("ALIGNED", "Aligned", "")], default="POSITIVE", update=ScNode.update_value)
+    prop_axis = EnumProperty(name="Axis", items=[("X_AXIS", "X", ""), ("Y_AXIS", "Y", ""), ("Z_AXIS", "Z", "")], default="X_AXIS", update=ScNode.update_value)
+    prop_threshold = FloatProperty(name="Threshold", default=0.0001, min=0.000001, max=50, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Threshold").prop_prop = "prop_threshold"
+        super().init(context)
     
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_mode", expand=True)
-#         layout.prop(self, "prop_axis")
-#         layout.prop(self, "prop_threshold")
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_mode", expand=True)
+        layout.prop(self, "prop_axis")
     
-#     def functionality(self):
-#         bpy.ops.mesh.select_axis(mode=self.prop_mode, axis=self.prop_axis, threshold=self.prop_threshold)
-# class SelectFaceBySidesNode(Node, ScSelectionNode):
-#     bl_idname = "SelectFaceBySidesNode"
-#     bl_label = "Select Face By Sides"
+    def functionality(self):
+        bpy.ops.mesh.select_axis(mode=self.prop_mode, axis=self.prop_axis, threshold=self.inputs["Threshold"].execute())
+class SelectFaceBySidesNode(Node, ScSelectionNode):
+    bl_idname = "SelectFaceBySidesNode"
+    bl_label = "Select Face By Sides"
 
-#     prop_number = IntProperty(name="Number", default=3, min=3, update=ScNode.update_value)
-#     prop_type = EnumProperty(name="Type", items=[("LESS", "Less", ""), ("EQUAL", "Equal", ""), ("GREATER", "Greater", ""), ("NOTEQUAL", "Not Equal", "")], default="EQUAL", update=ScNode.update_value)
-#     prop_extend = BoolProperty(name="Extend", default=True, update=ScNode.update_value)
+    prop_number = IntProperty(name="Number", default=3, min=3, update=ScNode.update_value)
+    prop_type = EnumProperty(name="Type", items=[("LESS", "Less", ""), ("EQUAL", "Equal", ""), ("GREATER", "Greater", ""), ("NOTEQUAL", "Not Equal", "")], default="EQUAL", update=ScNode.update_value)
+    prop_extend = BoolProperty(name="Extend", default=True, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScIntSocket", "Number").prop_prop = "prop_number"
+        self.inputs.new("ScBoolSocket", "Extend").prop_prop = "prop_extend"
+        super().init(context)
     
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_number")
-#         layout.prop(self, "prop_type")
-#         layout.prop(self, "prop_extend")
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_type")
     
-#     def functionality(self):
-#         bpy.ops.mesh.select_face_by_sides(number=self.prop_number, type=self.prop_type, extend=self.prop_extend)
-# class SelectInteriorFaces(Node, ScSelectionNode):
-#     bl_idname = "SelectInteriorFaces"
-#     bl_label = "Select Interior Faces"
+    def functionality(self):
+        bpy.ops.mesh.select_face_by_sides(number=self.inputs["Number"].execute(), type=self.prop_type, extend=self.inputs["Extend"].execute())
+class SelectInteriorFaces(Node, ScSelectionNode):
+    bl_idname = "SelectInteriorFaces"
+    bl_label = "Select Interior Faces"
 
-#     def functionality(self):
-#         bpy.ops.mesh.select_interior_faces()
-# class SelectLessNode(Node, ScSelectionNode):
-#     bl_idname = "SelectLessNode"
-#     bl_label = "Select Less"
+    def functionality(self):
+        bpy.ops.mesh.select_interior_faces()
+class SelectLessNode(Node, ScSelectionNode):
+    bl_idname = "SelectLessNode"
+    bl_label = "Select Less"
 
-#     prop_face_step = BoolProperty(name="Face Step", default=True, update=ScNode.update_value)
+    prop_face_step = BoolProperty(name="Face Step", default=True, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Face Step").prop_prop = "prop_face_step"
+        super().init(context)
     
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_face_step")
+    def functionality(self):
+        bpy.ops.mesh.select_less(use_face_step=self.inputs["Face Step"].execute())
+class SelectMoreNode(Node, ScSelectionNode):
+    bl_idname = "SelectMoreNode"
+    bl_label = "Select More"
+
+    prop_face_step = BoolProperty(name="Face Step", default=True, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Face Step").prop_prop = "prop_face_step"
+        super().init(context)
     
-#     def functionality(self):
-#         bpy.ops.mesh.select_less(use_face_step=self.prop_face_step)
-# class SelectMoreNode(Node, ScSelectionNode):
-#     bl_idname = "SelectMoreNode"
-#     bl_label = "Select More"
+    def functionality(self):
+        bpy.ops.mesh.select_more(use_face_step=self.inputs["Face Step"].execute())
+class SelectLinkedNode(Node, ScSelectionNode):
+    bl_idname = "SelectLinkedNode"
+    bl_label = "Select Linked"
 
-#     prop_face_step = BoolProperty(name="Face Step", default=True, update=ScNode.update_value)
+    prop_delimit = EnumProperty(name="Delimit", items=[("NORMAL", "Normal", ""), ("MATERIAL", "Material", ""), ("SEAM", "Seam", ""), ("SHARP", "Sharp", ""), ("UV", "UV", "")], default="SEAM", update=ScNode.update_value)
     
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_face_step")
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_delimit")
     
-#     def functionality(self):
-#         bpy.ops.mesh.select_more(use_face_step=self.prop_face_step)
-# class SelectLinkedNode(Node, ScSelectionNode):
-#     bl_idname = "SelectLinkedNode"
-#     bl_label = "Select Linked"
+    def functionality(self):
+        bpy.ops.mesh.select_linked(delimit={self.prop_delimit})
+class SelectLoopNode(Node, ScSelectionNode):
+    bl_idname = "SelectLoopNode"
+    bl_label = "Select Loop"
 
-#     prop_delimit = EnumProperty(name="Delimit", items=[("NORMAL", "Normal", ""), ("MATERIAL", "Material", ""), ("SEAM", "Seam", ""), ("SHARP", "Sharp", ""), ("UV", "UV", "")], default="SEAM", update=ScNode.update_value)
+    prop_ring = BoolProperty(name="Ring", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Ring").prop_prop = "prop_ring"
+        super().init(context)
     
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_delimit")
+    def functionality(self):
+        bpy.ops.mesh.loop_multi_select(ring=self.inputs["Ring"].execute())
+class SelectLoopRegionNode(Node, ScSelectionNode):
+    bl_idname = "SelectLoopRegionNode"
+    bl_label = "Select Loop Region"
+
+    prop_bigger = BoolProperty(name="Select Bigger", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Select Bigger").prop_prop = "prop_bigger"
+        super().init(context)
     
-#     def functionality(self):
-#         bpy.ops.mesh.select_linked(delimit={self.prop_delimit})
-# class SelectLoopNode(Node, ScSelectionNode):
-#     bl_idname = "SelectLoopNode"
-#     bl_label = "Select Loop"
+    def functionality(self):
+        bpy.ops.mesh.loop_to_region(select_bigger=self.inputs["Select Bigger"].execute())
+class SelectLooseNode(Node, ScSelectionNode):
+    bl_idname = "SelectLooseNode"
+    bl_label = "Select Loose"
 
-#     prop_ring = BoolProperty(name="Ring", update=ScNode.update_value)
+    prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Extend").prop_prop = "prop_extend"
+        super().init(context)
     
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_ring")
+    def functionality(self):
+        bpy.ops.mesh.select_loose(extend=self.inputs["Extend"].execute())
+class SelectMirrorNode(Node, ScSelectionNode):
+    bl_idname = "SelectMirrorNode"
+    bl_label = "Select Mirror"
+
+    prop_axis = EnumProperty(name="Axis", items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="X", update=ScNode.update_value)
+    prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Extend").prop_prop = "prop_extend"
+        super().init(context)
     
-#     def functionality(self):
-#         bpy.ops.mesh.loop_multi_select(ring=self.prop_ring)
-# class SelectLoopRegionNode(Node, ScSelectionNode):
-#     bl_idname = "SelectLoopRegionNode"
-#     bl_label = "Select Loop Region"
-
-#     prop_bigger = BoolProperty(name="Select Bigger", update=ScNode.update_value)
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_axis", expand=True)
     
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_bigger")
+    def functionality(self):
+        bpy.ops.mesh.select_mirror(axis={self.prop_axis}, extend=self.inputs["Extend"].execute())
+class SelectNextItemNode(Node, ScSelectionNode):
+    bl_idname = "SelectNextItemNode"
+    bl_label = "Select Next Item"
+
+    def functionality(self):
+        bpy.ops.mesh.select_next_item()
+class SelectPrevItemNode(Node, ScSelectionNode):
+    bl_idname = "SelectPrevItemNode"
+    bl_label = "Select Previous Item"
+
+    def functionality(self):
+        bpy.ops.mesh.select_prev_item()
+class SelectNonManifoldNode(Node, ScSelectionNode):
+    bl_idname = "SelectNonManifoldNode"
+    bl_label = "Select Non-Manifold"
+
+    prop_extend = BoolProperty(name="Extend", default=True, update=ScNode.update_value)
+    prop_wire = BoolProperty(name="Wire", default=True, update=ScNode.update_value)
+    prop_boundary = BoolProperty(name="Boundary", default=True, update=ScNode.update_value)
+    prop_multi_face = BoolProperty(name="Multiple Faces", default=True, update=ScNode.update_value)
+    prop_non_contiguous = BoolProperty(name="Non Contiguous", default=True, update=ScNode.update_value)
+    prop_verts = BoolProperty(name="Vertices", default=True, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Extend").prop_prop = "prop_extend"
+        self.inputs.new("ScBoolSocket", "Wire").prop_prop = "prop_wire"
+        self.inputs.new("ScBoolSocket", "Boundary").prop_prop = "prop_boundary"
+        self.inputs.new("ScBoolSocket", "Multiple Faces").prop_prop = "prop_multi_face"
+        self.inputs.new("ScBoolSocket", "Non Contiguous").prop_prop = "prop_non_contiguous"
+        self.inputs.new("ScBoolSocket", "Vertices").prop_prop = "prop_verts"
+        super().init(context)
+
+    def functionality(self):
+        bpy.ops.mesh.select_non_manifold(extend=self.inputs["Extend"].execute(), use_wire=self.inputs["Wire"].execute(), use_boundary=self.inputs["Boundary"].execute(), use_multi_face=self.inputs["Multiple Faces"].execute(), use_non_contiguous=self.inputs["Non Contiguous"].execute(), use_verts=self.inputs["Vertices"].execute())
+class SelectNthNode(Node, ScSelectionNode):
+    bl_idname = "SelectNthNode"
+    bl_label = "Select Nth (Checker Deselect)"
+
+    prop_nth = IntProperty(name="Nth", default=2, min=2, update=ScNode.update_value)
+    prop_skip = IntProperty(name="Skip", default=1, min=1, update=ScNode.update_value)
+    prop_offset = IntProperty(name="Offset", default=0, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScIntSocket", "Nth").prop_prop = "prop_nth"
+        self.inputs.new("ScIntSocket", "Skip").prop_prop = "prop_skip"
+        self.inputs.new("ScIntSocket", "Offset").prop_prop = "prop_offset"
+        super().init(context)
+
+    def functionality(self):
+        bpy.ops.mesh.select_nth(nth=self.inputs["Nth"].execute(), skip=self.inputs["Skip"].execute(), offset=self.inputs["Offset"].execute())
+class SelectRandomNode(Node, ScSelectionNode):
+    bl_idname = "SelectRandomNode"
+    bl_label = "Select Random"
+
+    prop_percent = FloatProperty(name="Percent", default=50.0, min=0.0, max=100.0, update=ScNode.update_value)
+    prop_seed = IntProperty(name="Seed", default=0, min=0, update=ScNode.update_value)
+    prop_action = EnumProperty(name="Action", items=[("SELECT", "Select", ""), ("DESELECT", "Deselect", "")], default="SELECT", update=ScNode.update_value)
     
-#     def functionality(self):
-#         bpy.ops.mesh.loop_to_region(select_bigger=self.prop_bigger)
-# class SelectLooseNode(Node, ScSelectionNode):
-#     bl_idname = "SelectLooseNode"
-#     bl_label = "Select Loose"
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Percent").prop_prop = "prop_percent"
+        self.inputs.new("ScIntSocket", "Seed").prop_prop = "prop_seed"
+        super().init(context)
 
-#     prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_action")
+
+    def functionality(self):
+        bpy.ops.mesh.select_random(percent=self.inputs["Percent"].execute(), seed=self.inputs["Seed"].execute(), action=self.prop_action)
+class SelectRegionBoundaryNode(Node, ScSelectionNode):
+    bl_idname = "SelectRegionBoundaryNode"
+    bl_label = "Select Region Boundary"
+
+    def functionality(self):
+        bpy.ops.mesh.region_to_loop()
+class SelectSharpEdgesNode(Node, ScSelectionNode):
+    bl_idname = "SelectSharpEdgesNode"
+    bl_label = "Select Sharp Edges"
+
+    prop_sharpness = FloatProperty(name="Sharpness", default=0.523599, min=0.000174533, max=3.14159, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Sharpness").prop_prop = "prop_sharpness"
+        super().init(context)
+
+    def functionality(self):
+        bpy.ops.mesh.edges_select_sharp(sharpness=self.inputs["Sharpness"].execute())
+class SelectEdgeRingNode(Node, ScSelectionNode):
+    bl_idname = "SelectEdgeRingNode"
+    bl_label = "Select Edge Ring"
+
+    prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
+    prop_deselect = BoolProperty(name="Deselect", update=ScNode.update_value)
+    prop_toggle = BoolProperty(name="Toggle", update=ScNode.update_value)
+    prop_ring = BoolProperty(name="Ring", default=True, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Extend").prop_prop = "prop_extend"
+        self.inputs.new("ScBoolSocket", "Deselect").prop_prop = "prop_deselect"
+        self.inputs.new("ScBoolSocket", "Toggle").prop_prop = "prop_toggle"
+        self.inputs.new("ScBoolSocket", "Ring").prop_prop = "prop_ring"
+
+    def functionality(self):
+        bpy.ops.mesh.edgering_select(extend=self.inputs["Extend"].execute(), deselect=self.inputs["Deselect"].execute(), toggle=self.inputs["Toggle"].execute(), ring=self.inputs["Ring"].execute())
+class SelectSimilarNode(Node, ScSelectionNode):
+    bl_idname = "SelectSimilarNode"
+    bl_label = "Select Similar"
+
+    prop_type = EnumProperty(name="Type", items=[("MATERIAL", "Material", ""), ("IMAGE", "Image", ""), ("AREA", "Area", ""), ("SIDES", "Sides", ""), ("PERIMETER", "Perimeter", ""), ("NORMAL", "Normal", ""), ("COPLANAR", "Co-Planar", ""), ("SMOOTH", "Smooth", ""), ("FREESTYLE_FACE", "Freestyle Face", "")], default="NORMAL", update=ScNode.update_value)
+    prop_compare = EnumProperty(name="Compare", items=[("EQUAL", "Equal", ""), ("GREATER", "Greater", ""), ("LESS", "Less", "")], default="EQUAL", update=ScNode.update_value)
+    prop_threshold = FloatProperty(name="Threshold", default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Threshold").prop_prop = "prop_threshold"
+        super().init(context)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_type")
+        layout.prop(self, "prop_compare")
+
+    def functionality(self):
+        bpy.ops.mesh.select_similar(type=self.prop_type, compare=self.prop_compare, threshold=self.inputs["Threshold"].execute())
+class SelectSimilarRegionNode(Node, ScSelectionNode):
+    bl_idname = "SelectSimilarRegionNode"
+    bl_label = "Select Similar Region"
+
+    def functionality(self):
+        bpy.ops.mesh.select_similar_region()
+class SelectShortestPathNode(Node, ScSelectionNode):
+    bl_idname = "SelectShortestPathNode"
+    bl_label = "Select Shortest Path"
+
+    prop_step = BoolProperty(name="Face Stepping", update=ScNode.update_value)
+    prop_distance = BoolProperty(name="Topology Distance", update=ScNode.update_value)
+    prop_fill = BoolProperty(name="Fill Region", update=ScNode.update_value)
+    prop_nth = IntProperty(name="Nth Selection", default=1, min=1, update=ScNode.update_value)
+    prop_skip = IntProperty(name="Skip", default=1, min=1, update=ScNode.update_value)
+    prop_offset = IntProperty(name="Offset", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Face Stepping").prop_prop = "prop_step"
+        self.inputs.new("ScBoolSocket", "Topology Distance").prop_prop = "prop_distance"
+        self.inputs.new("ScBoolSocket", "Fill Region").prop_prop = "prop_fill"
+        self.inputs.new("ScFloatSocket", "Nth Selection").prop_prop = "prop_nth"
+        self.inputs.new("ScFloatSocket", "Skip").prop_prop = "prop_skip"
+        self.inputs.new("ScFloatSocket", "Offset").prop_prop = "prop_offset"
+        super().init(context)
     
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_extend")
+    def functionality(self):
+        bpy.ops.mesh.shortest_path_select(use_face_step=self.inputs["Face Stepping"].execute(), use_topology_distance=self.inputs["Topology Distance"].execute(), use_fill=self.inputs["Fill Region"].execute(), nth=self.inputs["Nth Selection"].execute(), skip=self.inputs["Skip"].execute(), offset=self.inputs["Offset"].execute())
+class SelectUngroupedNode(Node, ScSelectionNode):
+    bl_idname = "SelectUngroupedNode"
+    bl_label = "Select Ungrouped"
+
+    prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Extend").prop_prop = "prop_extend"
+        super().init(context)
     
-#     def functionality(self):
-#         bpy.ops.mesh.select_loose(extend=self.prop_extend)
-# class SelectMirrorNode(Node, ScSelectionNode):
-#     bl_idname = "SelectMirrorNode"
-#     bl_label = "Select Mirror"
+    def functionality(self):
+        bpy.ops.mesh.select_ungrouped(extend=self.inputs["Extend"].execute())
+class SelectFacesLinkedFlatNode(Node, ScSelectionNode):
+    bl_idname = "SelectFacesLinkedFlatSharpNode"
+    bl_label = "Select Linked Faces By Angle"
 
-#     prop_axis = EnumProperty(name="Axis", items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="X", update=ScNode.update_value)
-#     prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
+    prop_sharpness = FloatProperty(name="Sharpness", default=0.523599, min=0.000174533, max=3.14159, precision=6, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Sharpness").prop_prop = "prop_sharpness"
+        super().init(context)
     
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_axis", expand=True)
-#         layout.prop(self, "prop_extend")
-    
-#     def functionality(self):
-#         bpy.ops.mesh.select_mirror(axis={self.prop_axis}, extend=self.prop_extend)
-# class SelectNextItemNode(Node, ScSelectionNode):
-#     bl_idname = "SelectNextItemNode"
-#     bl_label = "Select Next Item"
-
-#     def functionality(self):
-#         bpy.ops.mesh.select_next_item()
-# class SelectPrevItemNode(Node, ScSelectionNode):
-#     bl_idname = "SelectPrevItemNode"
-#     bl_label = "Select Previous Item"
-
-#     def functionality(self):
-#         bpy.ops.mesh.select_prev_item()
-# class SelectNonManifoldNode(Node, ScSelectionNode):
-#     bl_idname = "SelectNonManifoldNode"
-#     bl_label = "Select Non-Manifold"
-
-#     prop_extend = BoolProperty(name="Extend", default=True, update=ScNode.update_value)
-#     prop_wire = BoolProperty(name="Wire", default=True, update=ScNode.update_value)
-#     prop_boundary = BoolProperty(name="Boundary", default=True, update=ScNode.update_value)
-#     prop_multi_face = BoolProperty(name="Multiple Faces", default=True, update=ScNode.update_value)
-#     prop_non_contiguous = BoolProperty(name="Non Contiguous", default=True, update=ScNode.update_value)
-#     prop_verts = BoolProperty(name="Vertices", default=True, update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_extend")
-#         layout.prop(self, "prop_wire")
-#         layout.prop(self, "prop_boundary")
-#         layout.prop(self, "prop_multi_face")
-#         layout.prop(self, "prop_non_contiguous")
-#         layout.prop(self, "prop_verts")
-
-#     def functionality(self):
-#         bpy.ops.mesh.select_non_manifold(extend=self.prop_extend, use_wire=self.prop_wire, use_boundary=self.prop_boundary, use_multi_face=self.prop_multi_face, use_non_contiguous=self.prop_non_contiguous, use_verts=self.prop_verts)
-# class SelectNthNode(Node, ScSelectionNode):
-#     bl_idname = "SelectNthNode"
-#     bl_label = "Select Nth (Checker Deselect)"
-
-#     prop_nth = IntProperty(name="Nth", default=2, min=2, update=ScNode.update_value)
-#     prop_skip = IntProperty(name="Skip", default=1, min=1, update=ScNode.update_value)
-#     prop_offset = IntProperty(name="Offset", default=0, update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_nth")
-#         layout.prop(self, "prop_skip")
-#         layout.prop(self, "prop_offset")
-
-#     def functionality(self):
-#         bpy.ops.mesh.select_nth(nth=self.prop_nth, skip=self.prop_skip, offset=self.prop_offset)
-# class SelectRandomNode(Node, ScSelectionNode):
-#     bl_idname = "SelectRandomNode"
-#     bl_label = "Select Random"
-
-#     prop_percent = FloatProperty(name="Percent", default=50.0, min=0.0, max=100.0, update=ScNode.update_value)
-#     prop_seed = IntProperty(name="Seed", default=0, min=0, update=ScNode.update_value)
-#     prop_action = EnumProperty(name="Action", items=[("SELECT", "Select", ""), ("DESELECT", "Deselect", "")], default="SELECT", update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_percent")
-#         layout.prop(self, "prop_seed")
-#         layout.prop(self, "prop_action")
-
-#     def functionality(self):
-#         bpy.ops.mesh.select_random(percent=self.prop_percent, seed=self.prop_seed, action=self.prop_action)
-# class SelectRegionBoundaryNode(Node, ScSelectionNode):
-#     bl_idname = "SelectRegionBoundaryNode"
-#     bl_label = "Select Region Boundary"
-
-#     def functionality(self):
-#         bpy.ops.mesh.region_to_loop()
-# class SelectSharpEdgesNode(Node, ScSelectionNode):
-#     bl_idname = "SelectSharpEdgesNode"
-#     bl_label = "Select Sharp Edges"
-
-#     prop_sharpness = FloatProperty(name="Sharpness", default=0.523599, min=0.000174533, max=3.14159, update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_sharpness")
-
-#     def functionality(self):
-#         bpy.ops.mesh.edges_select_sharp(sharpness=self.prop_sharpness)
-# class SelectEdgeRingNode(Node, ScSelectionNode):
-#     bl_idname = "SelectEdgeRingNode"
-#     bl_label = "Select Edge Ring"
-
-#     prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
-#     prop_deselect = BoolProperty(name="Deselect", update=ScNode.update_value)
-#     prop_toggle = BoolProperty(name="Toggle", update=ScNode.update_value)
-#     prop_ring = BoolProperty(name="Ring", default=True, update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_extend")
-#         layout.prop(self, "prop_deselect")
-#         layout.prop(self, "prop_toggle")
-#         layout.prop(self, "prop_ring")
-
-#     def functionality(self):
-#         bpy.ops.mesh.edgering_select(extend=self.prop_extend, deselect=self.prop_deselect, toggle=self.prop_toggle, ring=self.prop_ring)
-# class SelectSimilarNode(Node, ScSelectionNode):
-#     bl_idname = "SelectSimilarNode"
-#     bl_label = "Select Similar"
-
-#     prop_type = EnumProperty(name="Type", items=[("MATERIAL", "Material", ""), ("IMAGE", "Image", ""), ("AREA", "Area", ""), ("SIDES", "Sides", ""), ("PERIMETER", "Perimeter", ""), ("NORMAL", "Normal", ""), ("COPLANAR", "Co-Planar", ""), ("SMOOTH", "Smooth", ""), ("FREESTYLE_FACE", "Freestyle Face", "")], default="NORMAL", update=ScNode.update_value)
-#     prop_compare = EnumProperty(name="Compare", items=[("EQUAL", "Equal", ""), ("GREATER", "Greater", ""), ("LESS", "Less", "")], default="EQUAL", update=ScNode.update_value)
-#     prop_threshold = FloatProperty(name="Threshold", default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_type")
-#         layout.prop(self, "prop_compare")
-#         layout.prop(self, "prop_threshold")
-
-#     def functionality(self):
-#         bpy.ops.mesh.select_similar(type=self.prop_type, compare=self.prop_compare, threshold=self.prop_threshold)
-# class SelectSimilarRegionNode(Node, ScSelectionNode):
-#     bl_idname = "SelectSimilarRegionNode"
-#     bl_label = "Select Similar Region"
-
-#     def functionality(self):
-#         bpy.ops.mesh.select_similar_region()
-# class SelectShortestPathNode(Node, ScSelectionNode):
-#     bl_idname = "SelectShortestPathNode"
-#     bl_label = "Select Shortest Path"
-
-#     prop_step = BoolProperty(name="Face Stepping", update=ScNode.update_value)
-#     prop_distance = BoolProperty(name="Topology Distance", update=ScNode.update_value)
-#     prop_fill = BoolProperty(name="Fill Region", update=ScNode.update_value)
-#     prop_nth = IntProperty(name="Nth Selection", default=1, min=1, update=ScNode.update_value)
-#     prop_skip = IntProperty(name="Skip", default=1, min=1, update=ScNode.update_value)
-#     prop_offset = IntProperty(name="Offset", update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_step")
-#         layout.prop(self, "prop_distance")
-#         layout.prop(self, "prop_fill")
-#         layout.prop(self, "prop_nth")
-#         layout.prop(self, "prop_skip")
-#         layout.prop(self, "prop_offset")
-
-#     def functionality(self):
-#         bpy.ops.mesh.shortest_path_select(use_face_step=self.prop_step, use_topology_distance=self.prop_distance, use_fill=self.prop_fill, nth=self.prop_nth, skip=self.prop_skip, offset=self.prop_offset)
-# class SelectUngroupedNode(Node, ScSelectionNode):
-#     bl_idname = "SelectUngroupedNode"
-#     bl_label = "Select Ungrouped"
-
-#     prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_extend")
-    
-#     def functionality(self):
-#         bpy.ops.mesh.select_ungrouped(extend=self.prop_extend)
-# class SelectFacesLinkedFlatNode(Node, ScSelectionNode):
-#     bl_idname = "SelectFacesLinkedFlatSharpNode"
-#     bl_label = "Select Linked Faces By Angle"
-
-#     prop_sharpness = FloatProperty(name="Sharpness", default=0.523599, min=0.000174533, max=3.14159, precision=6, update=ScNode.update_value)
-    
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_sharpness")
-    
-#     def functionality(self):
-#         bpy.ops.mesh.faces_select_linked_flat(sharpness=self.prop_sharpness)
+    def functionality(self):
+        bpy.ops.mesh.faces_select_linked_flat(sharpness=self.inputs["Sharpness"].execute())
 # Deletion
 class DeleteNode(Node, ScDeletionNode):
     bl_idname = "DeleteNode"
@@ -3469,7 +3500,7 @@ inputs = [PlaneNode, CubeNode, CircleNode, UVSphereNode, IcoSphereNode, Cylinder
 transform = [LocationNode, RotationNode, ScaleNode, TranslateNode, RotateNode, ResizeNode]
 modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CorrectiveSmoothModNode, CurveModNode, DecimateModNode, EdgeSplitModNode, LaplacianSmoothModNode]#, MirrorModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, TriangulateModNode, WireframeModNode]
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
-# selection = [SelectComponentsManuallyNode, SelectFaceByIndexNode, SelectAlternateFacesNode, SelectFacesByNormalNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLoopNode, SelectLoopRegionNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectRegionBoundaryNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectShortestPathNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
+selection = [SelectComponentsManuallyNode, SelectFaceByIndexNode, SelectAlternateFacesNode, SelectFacesByNormalNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLoopNode, SelectLoopRegionNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectRegionBoundaryNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectShortestPathNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
 # deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode, DissolveVerticesNode, DissolveDegenerateNode, EdgeCollapseNode]
 # edit_operators = [AddEdgeFaceNode, BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, ConvexHullNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, ExtrudeRepeatNode, FlipNormalsNode, MakeNormalsConsistentNode, FlattenNode, FillEdgeLoopNode, FillGridNode, FillHolesBySidesNode, InsetNode, LoopCutNode, MaterialNode, MergeComponentsNode, OffsetEdgeLoopNode, PokeNode, RemoveDoublesNode, RotateEdgeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode, TriangulateFacesNode, UnSubdivideNode]
 # object_operators = [ApplyTransformNode, CopyTransformNode, MakeLinksNode, MergeMeshesNode, OriginNode, ShadingNode]
@@ -3478,13 +3509,13 @@ utilities = [MathsOpNode]
 control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode, IfElseNode]
 settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
 outputs = [RefreshMeshNode, ExportMeshFBX]
-testing = [PrintNode, SelectAllNode, SelectComponentsManuallyNode, DeleteNode, DissolveDegenerateNode, BevelNode, InsetNode, OriginNode, ShadingNode, CursorLocationNode, PivotNode]
+testing = [PrintNode, SelectAllNode, SelectComponentsManuallyNode, DeleteNode, DissolveDegenerateNode, BevelNode, InsetNode, OriginNode, ShadingNode]
 
 node_categories = [ScNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
                    ScNodeCategory("transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
                    ScNodeCategory("modifiers", "Modifiers (WIP)", items=[NodeItem(i.bl_idname) for i in modifiers]),
                    ScNodeCategory("conversion", "Conversion", items=[NodeItem(i.bl_idname) for i in conversion]),
-                #    ScNodeCategory("selection", "Selection", items=[NodeItem(i.bl_idname) for i in selection]),
+                   ScNodeCategory("selection", "Selection", items=[NodeItem(i.bl_idname) for i in selection]),
                 #    ScNodeCategory("deletion", "Deletion", items=[NodeItem(i.bl_idname) for i in deletion]),
                 #    ScNodeCategory("edit_operators", "Component Operators", items=[NodeItem(i.bl_idname) for i in edit_operators]),
                 #    ScNodeCategory("object_operators", "Mesh Operators", items=[NodeItem(i.bl_idname) for i in object_operators]),
