@@ -2,7 +2,7 @@ print("______________________________________________________")
 bl_info = {
     "name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (1, 6, 0),
+    "version": (1, 7, 0),
     "blender": (2, 79, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
@@ -491,9 +491,9 @@ def toList(string):
 
 
 ########################### NODES ############################
-class PrintNode(Node, ScNode):
-    bl_idname = "PrintNode"
-    bl_label = "Print"
+class PrintDataNode(Node, ScNode):
+    bl_idname = "PrintDataNode"
+    bl_label = "Print Data"
 
     prop_value = FloatProperty(name="Value", update=ScNode.update_value)
     prop_list = BoolProperty(name="List")
@@ -2138,54 +2138,58 @@ class DeleteNode(Node, ScDeletionNode):
     
     def functionality(self):
         bpy.ops.mesh.delete(type=self.prop_type)
-# class DeleteEdgeLoopNode(Node, ScEditOperatorNode):
-#     bl_idname = "DeleteEdgeLoopNode"
-#     bl_label = "Delete Edge Loop"
+class DeleteEdgeLoopNode(Node, ScEditOperatorNode):
+    bl_idname = "DeleteEdgeLoopNode"
+    bl_label = "Delete Edge Loop"
 
-#     prop_split = BoolProperty(name="Face Split", default=True, update=ScNode.update_value)
+    prop_split = BoolProperty(name="Face Split", default=True, update=ScNode.update_value)
 
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_split")
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Face Split").prop_prop = "prop_split"
+        super().init(context)
     
-#     def functionality(self):
-#         bpy.ops.mesh.delete_edgeloop(use_face_split=self.prop_split)
-# class DissolveFacesNode(Node, ScEditOperatorNode):
-#     bl_idname = "DissolveFacesNode"
-#     bl_label = "Dissolve Faces"
+    def functionality(self):
+        bpy.ops.mesh.delete_edgeloop(use_face_split=self.inputs["Face Split"].execute())
+class DissolveFacesNode(Node, ScEditOperatorNode):
+    bl_idname = "DissolveFacesNode"
+    bl_label = "Dissolve Faces"
 
-#     prop_verts = BoolProperty(name="Dissolve Vertices", update=ScNode.update_value)
+    prop_verts = BoolProperty(name="Dissolve Vertices", update=ScNode.update_value)
 
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_verts")
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Dissolve Vertices").prop_prop = "prop_verts"
+        super().init(context)
     
-#     def functionality(self):
-#         bpy.ops.mesh.dissolve_faces(use_verts=self.prop_verts)
-# class DissolveEdgesNode(Node, ScEditOperatorNode):
-#     bl_idname = "DissolveEdgesNode"
-#     bl_label = "Dissolve Edges"
+    def functionality(self):
+        bpy.ops.mesh.dissolve_faces(use_verts=self.inputs["Dissolve Vertices"].execute())
+class DissolveEdgesNode(Node, ScEditOperatorNode):
+    bl_idname = "DissolveEdgesNode"
+    bl_label = "Dissolve Edges"
 
-#     prop_verts = BoolProperty(name="Dissolve Vertices", default=True, update=ScNode.update_value)
-#     prop_face_split = BoolProperty(name="Face Split", update=ScNode.update_value)
+    prop_verts = BoolProperty(name="Dissolve Vertices", default=True, update=ScNode.update_value)
+    prop_face_split = BoolProperty(name="Face Split", update=ScNode.update_value)
 
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_verts")
-#         layout.prop(self, "prop_face_split")
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Dissolve Vertices").prop_prop = "prop_verts"
+        self.inputs.new("ScBoolSocket", "Face Split").prop_prop = "prop_face_split"
+        super().init(context)
     
-#     def functionality(self):
-#         bpy.ops.mesh.dissolve_edges(use_verts=self.prop_verts, use_face_split=self.prop_face_split)
-# class DissolveVerticesNode(Node, ScEditOperatorNode):
-#     bl_idname = "DissolveVerticesNode"
-#     bl_label = "Dissolve Vertices"
+    def functionality(self):
+        bpy.ops.mesh.dissolve_edges(use_verts=self.inputs["Dissolve Vertices"].execute(), use_face_split=self.inputs["Face Split"].execute())
+class DissolveVerticesNode(Node, ScEditOperatorNode):
+    bl_idname = "DissolveVerticesNode"
+    bl_label = "Dissolve Vertices"
 
-#     prop_face_split = BoolProperty(name="Dissolve Vertices", update=ScNode.update_value)
-#     prop_boundary_tear = BoolProperty(name="Tear Boundary", update=ScNode.update_value)
+    prop_face_split = BoolProperty(name="Face Split", update=ScNode.update_value)
+    prop_boundary_tear = BoolProperty(name="Tear Boundary", update=ScNode.update_value)
 
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_face_split")
-#         layout.prop(self, "prop_boundary_tear")
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Face Split").prop_prop = "prop_face_split"
+        self.inputs.new("ScBoolSocket", "Tear Boundary").prop_prop = "prop_boundary_tear"
+        super().init(context)
     
-#     def functionality(self):
-#         bpy.ops.mesh.dissolve_verts(use_face_split=self.prop_face_split, use_boundary_tear=self.prop_boundary_tear)
+    def functionality(self):
+        bpy.ops.mesh.dissolve_verts(use_face_split=self.inputs["Face Split"].execute(), use_boundary_tear=self.inputs["Tear Boundary"].execute())
 class DissolveDegenerateNode(Node, ScDeletionNode):
     bl_idname = "DissolveDegenerateNode"
     bl_label = "Dissolve Degenerate"
@@ -2198,12 +2202,12 @@ class DissolveDegenerateNode(Node, ScDeletionNode):
     
     def functionality(self):
         bpy.ops.mesh.dissolve_degenerate(threshold=self.inputs["Threshold"].execute())
-# class EdgeCollapseNode(Node, ScEditOperatorNode):
-#     bl_idname = "EdgeCollapseNode"
-#     bl_label = "Edge Collapse"
+class EdgeCollapseNode(Node, ScEditOperatorNode):
+    bl_idname = "EdgeCollapseNode"
+    bl_label = "Edge Collapse"
     
-#     def functionality(self):
-#         bpy.ops.mesh.edge_collapse()
+    def functionality(self):
+        bpy.ops.mesh.edge_collapse()
 # Component Operator
 # class AddEdgeFaceNode(Node, ScEditOperatorNode):
 #     bl_idname = "AddEdgeFaceNode"
@@ -3501,7 +3505,7 @@ transform = [LocationNode, RotationNode, ScaleNode, TranslateNode, RotateNode, R
 modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CorrectiveSmoothModNode, CurveModNode, DecimateModNode, EdgeSplitModNode, LaplacianSmoothModNode]#, MirrorModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, TriangulateModNode, WireframeModNode]
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
 selection = [SelectComponentsManuallyNode, SelectFaceByIndexNode, SelectAlternateFacesNode, SelectFacesByNormalNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLoopNode, SelectLoopRegionNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectRegionBoundaryNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectShortestPathNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
-# deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode, DissolveVerticesNode, DissolveDegenerateNode, EdgeCollapseNode]
+deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode, DissolveVerticesNode, DissolveDegenerateNode, EdgeCollapseNode]
 # edit_operators = [AddEdgeFaceNode, BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, ConvexHullNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, ExtrudeRepeatNode, FlipNormalsNode, MakeNormalsConsistentNode, FlattenNode, FillEdgeLoopNode, FillGridNode, FillHolesBySidesNode, InsetNode, LoopCutNode, MaterialNode, MergeComponentsNode, OffsetEdgeLoopNode, PokeNode, RemoveDoublesNode, RotateEdgeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode, TriangulateFacesNode, UnSubdivideNode]
 # object_operators = [ApplyTransformNode, CopyTransformNode, MakeLinksNode, MergeMeshesNode, OriginNode, ShadingNode]
 constants = [Float, Int, Bool, Angle, FloatVector, AngleVector, RandomFloat, RandomInt, RandomBool, RandomAngle]
@@ -3509,14 +3513,14 @@ utilities = [MathsOpNode]
 control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode, IfElseNode]
 settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
 outputs = [RefreshMeshNode, ExportMeshFBX]
-testing = [PrintNode, SelectAllNode, SelectComponentsManuallyNode, DeleteNode, DissolveDegenerateNode, BevelNode, InsetNode, OriginNode, ShadingNode]
+testing = [PrintDataNode, BevelNode, InsetNode, OriginNode, ShadingNode]
 
 node_categories = [ScNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
                    ScNodeCategory("transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
                    ScNodeCategory("modifiers", "Modifiers (WIP)", items=[NodeItem(i.bl_idname) for i in modifiers]),
                    ScNodeCategory("conversion", "Conversion", items=[NodeItem(i.bl_idname) for i in conversion]),
                    ScNodeCategory("selection", "Selection", items=[NodeItem(i.bl_idname) for i in selection]),
-                #    ScNodeCategory("deletion", "Deletion", items=[NodeItem(i.bl_idname) for i in deletion]),
+                   ScNodeCategory("deletion", "Deletion", items=[NodeItem(i.bl_idname) for i in deletion]),
                 #    ScNodeCategory("edit_operators", "Component Operators", items=[NodeItem(i.bl_idname) for i in edit_operators]),
                 #    ScNodeCategory("object_operators", "Mesh Operators", items=[NodeItem(i.bl_idname) for i in object_operators]),
                    ScNodeCategory("constants", "Constants", items=[NodeItem(i.bl_idname) for i in constants]),
