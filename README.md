@@ -1,5 +1,6 @@
 # Sorcar
 Procedural modeling in Blender using Node Editor
+![alt text](https://github.com/aachman98/Sorcar/raw/master/sorcar.png "Sorcar in action")
 
 Introduction Video: https://www.youtube.com/watch?v=nKEeGVtGdlk
 
