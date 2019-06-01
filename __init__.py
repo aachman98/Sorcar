@@ -2,7 +2,7 @@ print("______________________________________________________")
 bl_info = {
     "name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (1, 9, 0),
+    "version": (1, 10, 0),
     "blender": (2, 79, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
@@ -187,12 +187,14 @@ class ScNode:
                 print("DEBUG: " + self.name + ": Override: No mesh input")
         return ret
     def draw_buttons(self, context, layout):
-        print("DEBUG: " + self.name + ": Draw non-socket attributes")
+        # Draw non-socket attributes
+        pass
     def pre_execute(self):
-        print("DEBUG: " + self.name + ": Condition check, setting up environment, overrides, ...")
+        # Condition check, setting up environment, overrides, ...
         return True
     def post_execute(self):
-        print("DEBUG: " + self.name + ": Reset environment, change active object, ...")
+        # Reset environment, change active object, ...
+        pass
     def execute(self):
         if not self.pre_execute():
             return None
@@ -202,7 +204,8 @@ class ScNode:
             self.first_time = False
         return ret_data
     def functionality(self):
-        print("DEBUG: " + self.name + ": Main functionality of the node using props_ & self.inputs[]")
+        # Main functionality of the node using props_... & self.inputs["..."]
+        pass
 # Node categories
 class ScInputNode(ScNode):
     node_color = (0.5, 0.0, 0.0)
@@ -371,7 +374,7 @@ class ScConstantNode(ScNode):
     def init(self, context):
         self.use_custom_color = True
         self.color = self.node_color
-class ScMathsNode(ScNode):
+class ScUtilityNode(ScNode):
     node_color = (0.7, 0.3, 0.0)
 class ScControlNode(ScNode):
     node_color = (0.0, 0.3, 0.7)
@@ -469,6 +472,7 @@ class ScExecuteNodeOp(Operator):
     def execute(self, context):
         node = context.active_node
         if (not node == None):
+            print("--- EXECUTE NODE: " + node.name + " ---")
             for group in bpy.data.node_groups:
                 for node in group.nodes:
                     try:
@@ -491,30 +495,7 @@ def toList(string):
 
 
 ########################### NODES ############################
-class PrintDataNode(Node, ScNode):
-    bl_idname = "PrintDataNode"
-    bl_label = "Print Data"
-
-    prop_value = FloatProperty(name="Value", update=ScNode.update_value)
-    prop_list = BoolProperty(name="List")
-
-    def init(self, context):
-        self.inputs.new("ScUniversalSocket", "Value").prop_prop = "prop_value"
-        self.outputs.new("ScUniversalSocket", "Value")
-    
-    def draw_buttons(self, context, layout):
-        if (self == self.id_data.nodes.active):
-            layout.operator("sc.execute_node_op", "Print")
-        layout.prop(self, "prop_list")
-
-    def execute(self):
-        temp = self.inputs["Value"].execute()
-        if (self.prop_list):
-            print(list(temp))
-        else:
-            print(temp)
-        return temp
-# Input
+# Inputs
 class PlaneNode(Node, ScInputNode):
     bl_idname = "PlaneNode"
     bl_label = "Plane"
@@ -629,31 +610,31 @@ class ConeNode(Node, ScInputNode):
     
     def functionality(self):
         bpy.ops.mesh.primitive_cone_add(vertices=self.inputs["Vertices"].execute(), radius1=self.inputs["Radius 1"].execute(), radius2=self.inputs["Radius 2"].execute(), depth=self.inputs["Depth"].execute(), end_fill_type=self.prop_end)
-class TorusNode(Node, ScInputNode):
-    bl_idname = "TorusNode"
-    bl_label = "Torus"
+# class TorusNode(Node, ScInputNode):
+#     bl_idname = "TorusNode"
+#     bl_label = "Torus"
     
-    prop_major_segments = IntProperty(name="Major Segment", default=48, min=3, max=256, update=ScNode.update_value)
-    prop_minor_segments = IntProperty(name="Minor Segment", default=12, min=3, max=256, update=ScNode.update_value)
-    prop_mode = EnumProperty(name="Mode", items=[("MAJOR_MINOR", "Major/Minor", "Use the major/minor radii for torus dimensions."), ("EXT_INT", "Exterior/Interior", "Use the exterior/interior radii for torus dimensions.")], default="MAJOR_MINOR", update=ScNode.update_value)
-    prop_major_radius = FloatProperty(name="Major Radius", default=1.0, min=0.01, max=100, update=ScNode.update_value)
-    prop_minor_radius = FloatProperty(name="Minor Radius", default=0.25, min=0.01, max=100, update=ScNode.update_value)
-    prop_ext_radius = FloatProperty(name="Exterior Radius", default=1.25, min=0.01, max=100, update=ScNode.update_value)
-    prop_int_radius = FloatProperty(name="Interior Radius", default=0.75, min=0.01, max=100, update=ScNode.update_value)
+#     prop_major_segments = IntProperty(name="Major Segment", default=48, min=3, max=256, update=ScNode.update_value)
+#     prop_minor_segments = IntProperty(name="Minor Segment", default=12, min=3, max=256, update=ScNode.update_value)
+#     prop_mode = EnumProperty(name="Mode", items=[("MAJOR_MINOR", "Major/Minor", "Use the major/minor radii for torus dimensions."), ("EXT_INT", "Exterior/Interior", "Use the exterior/interior radii for torus dimensions.")], default="MAJOR_MINOR", update=ScNode.update_value)
+#     prop_major_radius = FloatProperty(name="Major Radius", default=1.0, min=0.01, max=100, update=ScNode.update_value)
+#     prop_minor_radius = FloatProperty(name="Minor Radius", default=0.25, min=0.01, max=100, update=ScNode.update_value)
+#     prop_ext_radius = FloatProperty(name="Exterior Radius", default=1.25, min=0.01, max=100, update=ScNode.update_value)
+#     prop_int_radius = FloatProperty(name="Interior Radius", default=0.75, min=0.01, max=100, update=ScNode.update_value)
     
-    def draw_buttons(self, context, layout):
-        layout.column().prop(self, "prop_major_segments")
-        layout.column().prop(self, "prop_minor_segments")
-        layout.column().prop(self, "prop_mode")
-        if (self.prop_mode == "MAJOR_MINOR"):
-            layout.column().prop(self, "prop_major_radius")
-            layout.column().prop(self, "prop_minor_radius")
-        else:
-            layout.column().prop(self, "prop_ext_radius")
-            layout.column().prop(self, "prop_int_radius")
+#     def draw_buttons(self, context, layout):
+#         layout.column().prop(self, "prop_major_segments")
+#         layout.column().prop(self, "prop_minor_segments")
+#         layout.column().prop(self, "prop_mode")
+#         if (self.prop_mode == "MAJOR_MINOR"):
+#             layout.column().prop(self, "prop_major_radius")
+#             layout.column().prop(self, "prop_minor_radius")
+#         else:
+#             layout.column().prop(self, "prop_ext_radius")
+#             layout.column().prop(self, "prop_int_radius")
     
-    def functionality(self, loc, rot):
-        bpy.ops.mesh.primitive_torus_add(major_segments=self.prop_major_segments, minor_segments=self.prop_minor_segments, mode=self.prop_mode, major_radius = self.prop_major_radius, minor_radius = self.prop_minor_radius, abso_major_rad = self.prop_ext_radius, abso_minor_rad = self.prop_int_radius, location=loc, rotation=rot)
+#     def functionality(self, loc, rot):
+#         bpy.ops.mesh.primitive_torus_add(major_segments=self.prop_major_segments, minor_segments=self.prop_minor_segments, mode=self.prop_mode, major_radius = self.prop_major_radius, minor_radius = self.prop_minor_radius, abso_major_rad = self.prop_ext_radius, abso_minor_rad = self.prop_int_radius, location=loc, rotation=rot)
 class GridNode(Node, ScInputNode):
     bl_idname = "GridNode"
     bl_label = "Grid"
@@ -1638,9 +1619,9 @@ class ChangeModeNode(Node, ScConversionNode):
     def functionality(self):
         bpy.ops.mesh.select_mode(type=self.prop_selection_type)
 # Selection
-class SelectComponentsManuallyNode(Node, ScSelectionNode):
-    bl_idname = "SelectComponentsManuallyNode"
-    bl_label = "Select Mesh Manually Components"
+class SelectManuallyNode(Node, ScSelectionNode):
+    bl_idname = "SelectManuallyNode"
+    bl_label = "Select Manually"
     
     selection_face = StringProperty()
     selection_vert = StringProperty()
@@ -1736,8 +1717,8 @@ class SelectFacesByNormalNode(Node, ScSelectionNode):
     prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
 
     def init(self, context):
-        self.inputs.new("ScFloatSocket", "Min").prop_prop = "prop_min"
-        self.inputs.new("ScFloatSocket", "Max").prop_prop = "prop_max"
+        self.inputs.new("ScFloatVectorSocket", "Min").prop_prop = "prop_min"
+        self.inputs.new("ScFloatVectorSocket", "Max").prop_prop = "prop_max"
         self.inputs.new("ScBoolSocket", "Extend").prop_prop = "prop_extend"
         super().init(context)
     
@@ -2146,24 +2127,25 @@ class EdgeCollapseNode(Node, ScEditOperatorNode):
     
     def functionality(self):
         bpy.ops.mesh.edge_collapse()
-# Component Operator
-# class AddEdgeFaceNode(Node, ScEditOperatorNode):
-#     bl_idname = "AddEdgeFaceNode"
-#     bl_label = "Add Edge/Face"
+# Component Operators
+class AddEdgeFaceNode(Node, ScEditOperatorNode):
+    bl_idname = "AddEdgeFaceNode"
+    bl_label = "Add Edge/Face"
 
-#     def functionality(self):
-#         bpy.ops.mesh.edge_face_add()
-# class BeautifyFillNode(Node, ScEditOperatorNode):
-#     bl_idname = "BeautifyFillNode"
-#     bl_label = "Beautify Fill"
+    def functionality(self):
+        bpy.ops.mesh.edge_face_add()
+class BeautifyFillNode(Node, ScEditOperatorNode):
+    bl_idname = "BeautifyFillNode"
+    bl_label = "Beautify Fill"
 
-#     prop_angle_limit = FloatProperty(name="Angle Limit", default=3.14159, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
+    prop_angle_limit = FloatProperty(name="Angle Limit", default=3.14159, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
 
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_angle_limit")
+    def init(self, context):
+        self.inputs.new("ScAngleSocket", "Angle Limit").prop_prop = "prop_angle_limit"
+        super().init(context)
     
-#     def functionality(self):
-#         bpy.ops.mesh.beautify_fill(angle_limit=self.prop_angle_limit)
+    def functionality(self):
+        bpy.ops.mesh.beautify_fill(angle_limit=self.inputs["Angle Limit"].execute())
 class BevelNode(Node, ScEditOperatorNode):
     bl_idname = "BevelNode"
     bl_label = "Bevel"
@@ -2182,182 +2164,150 @@ class BevelNode(Node, ScEditOperatorNode):
         self.inputs.new("ScIntSocket", "Segments").prop_prop = "prop_segments"
         self.inputs.new("ScFloatSocket", "Profile").prop_prop = "prop_profile"
         self.inputs.new("ScBoolSocket", "Vertex Only").prop_prop = "prop_vertex_only"
+        self.inputs.new("ScBoolSocket", "Clamp Overlap").prop_prop = "prop_clamp_overlap"
+        self.inputs.new("ScBoolSocket", "Loop Slide").prop_prop = "prop_loop_slide"
+        self.inputs.new("ScIntSocket", "Material").prop_prop = "prop_material"
         super().init(context)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_offset_type")
-        layout.prop(self, "prop_clamp_overlap")
-        layout.prop(self, "prop_loop_slide")
-        layout.prop(self, "prop_material")
     
     def functionality(self):
-        bpy.ops.mesh.bevel(offset_type=self.prop_offset_type, offset=self.inputs["Offset"].execute(), segments=self.inputs["Segments"].execute(), profile=self.inputs["Profile"].execute(), vertex_only=self.inputs["Vertex Only"].execute(), clamp_overlap=self.prop_clamp_overlap, loop_slide=self.prop_loop_slide, material=self.prop_material)
-# class BridgeEdgeLoopsNode(Node, ScEditOperatorNode):
-#     bl_idname = "BridgeEdgeLoopsNode"
-#     bl_label = "Bridge Edge Loops"
+        bpy.ops.mesh.bevel(offset_type=self.prop_offset_type, offset=self.inputs["Offset"].execute(), segments=self.inputs["Segments"].execute(), profile=self.inputs["Profile"].execute(), vertex_only=self.inputs["Vertex Only"].execute(), clamp_overlap=self.inputs["Clamp Overlap"].execute(), loop_slide=self.inputs["Loop Slide"].execute(), material=self.inputs["Material"].execute())
+class BridgeEdgeLoopsNode(Node, ScEditOperatorNode):
+    bl_idname = "BridgeEdgeLoopsNode"
+    bl_label = "Bridge Edge Loops"
 
-#     prop_type = EnumProperty(name="Connect Loops", items=[("SINGLE", "Single", ""), ("CLOSED", "Closed", ""), ("PAIRS", "Pairs", "")], default="SINGLE", update=ScNode.update_value)
-#     prop_use_merge = BoolProperty(name="Merge", update=ScNode.update_value)
-#     prop_merge_factor = FloatProperty(name="Merge Factor", default=0.5, min=0.0, max=0.1, update=ScNode.update_value)
-#     prop_twist_offset = IntProperty(name="Twist", default=0, min=-1000, max=1000, update=ScNode.update_value)
-#     prop_number_cuts = IntProperty(name="Number of Cuts", default=0, min=0, max=1000, update=ScNode.update_value)
-#     prop_interpolation = EnumProperty(name="Interpolation", items=[("LINEAR", "Linear", ""), ("PATH", "Path", ""), ("SURFACE", "Surface", "")], default="PATH", update=ScNode.update_value)
-#     prop_smoothness = FloatProperty(name="Smoothness", default=1.0, min=0.0, max=1000.0, update=ScNode.update_value)
-#     prop_profile_shape_factor = FloatProperty(name="Profile Factor", default=0.0, min=-1000.0, max=1000.0, update=ScNode.update_value)
-#     prop_profile_shape = EnumProperty(name="Profile Shape", items=[("SMOOTH", "Smooth", ""), ("SPHERE", "Sphere", ""), ("ROOT", "Root", ""), ("INVERSE_SQUARE", "Inverse Square", ""), ("SHARP", "Sharp", ""), ("LINEAR", "Linear", "")], default="SMOOTH", update=ScNode.update_value)
+    prop_type = EnumProperty(name="Connect Loops", items=[("SINGLE", "Single", ""), ("CLOSED", "Closed", ""), ("PAIRS", "Pairs", "")], default="SINGLE", update=ScNode.update_value)
+    prop_use_merge = BoolProperty(name="Merge", update=ScNode.update_value)
+    prop_merge_factor = FloatProperty(name="Merge Factor", default=0.5, min=0.0, max=0.1, update=ScNode.update_value)
+    prop_twist_offset = IntProperty(name="Twist", default=0, min=-1000, max=1000, update=ScNode.update_value)
+    prop_number_cuts = IntProperty(name="Number of Cuts", default=0, min=0, max=1000, update=ScNode.update_value)
+    prop_interpolation = EnumProperty(name="Interpolation", items=[("LINEAR", "Linear", ""), ("PATH", "Path", ""), ("SURFACE", "Surface", "")], default="PATH", update=ScNode.update_value)
+    prop_smoothness = FloatProperty(name="Smoothness", default=1.0, min=0.0, max=1000.0, update=ScNode.update_value)
+    prop_profile_shape_factor = FloatProperty(name="Profile Factor", default=0.0, min=-1000.0, max=1000.0, update=ScNode.update_value)
+    prop_profile_shape = EnumProperty(name="Profile Shape", items=[("SMOOTH", "Smooth", ""), ("SPHERE", "Sphere", ""), ("ROOT", "Root", ""), ("INVERSE_SQUARE", "Inverse Square", ""), ("SHARP", "Sharp", ""), ("LINEAR", "Linear", "")], default="SMOOTH", update=ScNode.update_value)
 
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_type")
-#         layout.prop(self, "prop_use_merge")
-#         layout.prop(self, "prop_merge_factor")
-#         layout.prop(self, "prop_twist_offset")
-#         layout.prop(self, "prop_number_cuts")
-#         layout.prop(self, "prop_interpolation")
-#         layout.prop(self, "prop_smoothness")
-#         layout.prop(self, "prop_profile_shape_factor")
-#         layout.prop(self, "prop_profile_shape")
-    
-#     def functionality(self):
-#         bpy.ops.mesh.bridge_edge_loops(type=self.prop_type, use_merge=self.prop_use_merge, merge_factor=self.prop_merge_factor, twist_offset=self.prop_twist_offset, number_cuts=self.prop_number_cuts, interpolation=self.prop_interpolation, smoothness=self.prop_smoothness, profile_shape_factor=self.prop_profile_shape_factor, profile_shape=self.prop_profile_shape)
-# class ConvexHullNode(Node, ScEditOperatorNode):
-#     bl_idname = "ConvexHullNode"
-#     bl_label = "Convex Hull"
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Merge").prop_prop = "prop_use_merge"
+        self.inputs.new("ScFloatSocket", "Merge Factor").prop_prop = "prop_merge_factor"
+        self.inputs.new("ScIntSocket", "Twist").prop_prop = "prop_twist_offset"
+        self.inputs.new("ScIntSocket", "Number of Cuts").prop_prop = "prop_number_cuts"
+        self.inputs.new("ScFloatSocket", "Smoothness").prop_prop = "prop_smoothness"
+        self.inputs.new("ScFloatSocket", "Profile Factor").prop_prop = "prop_profile_shape_factor"
+        super().init(context)
 
-#     prop_delete_unused = BoolProperty(name="Delete Unused", default=True, update=ScNode.update_value)
-#     prop_use_existing_faces = BoolProperty(name="Use Existing Faces", default=True, update=ScNode.update_value)
-#     prop_make_holes = BoolProperty(name="Make Holes", update=ScNode.update_value)
-#     prop_join_triangles = BoolProperty(name="Join Triangles", default=True, update=ScNode.update_value)
-#     prop_face_threshold = FloatProperty(name="Max Face Angle", default=0.698132, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
-#     prop_shape_threshold = FloatProperty(name="Max Shape Angle", default=0.698132, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
-#     prop_uvs = BoolProperty(name="Compare UVs", update=ScNode.update_value)
-#     prop_vcols = BoolProperty(name="Compare VCols", update=ScNode.update_value)
-#     prop_seam = BoolProperty(name="Compare Seam", update=ScNode.update_value)
-#     prop_sharp = BoolProperty(name="Compare Sharp", update=ScNode.update_value)
-#     prop_materials = BoolProperty(name="Compare Materials", update=ScNode.update_value)
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_type")
+        layout.prop(self, "prop_interpolation")
+        layout.prop(self, "prop_profile_shape")
     
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_delete_unused")
-#         layout.prop(self, "prop_use_existing_faces")
-#         layout.prop(self, "prop_make_holes")
-#         layout.prop(self, "prop_join_triangles")
-#         layout.prop(self, "prop_face_threshold")
-#         layout.prop(self, "prop_shape_threshold")
-#         layout.prop(self, "prop_uvs")
-#         layout.prop(self, "prop_vcols")
-#         layout.prop(self, "prop_seam")
-#         layout.prop(self, "prop_sharp")
-#         layout.prop(self, "prop_materials")
-    
-#     def functionality(self):
-#         bpy.ops.mesh.convex_hull(delete_unused=self.prop_delete_unused, use_existing_faces=self.prop_use_existing_faces, make_holes=self.prop_make_holes, join_triangles=self.prop_join_triangles, face_threshold=self.prop_face_threshold, shape_threshold=self.prop_shape_threshold, uvs=self.prop_uvs, vcols=self.prop_vcols, seam=self.prop_seam, sharp=self.prop_sharp, materials=self.prop_materials)
-# class DecimateNode(Node, ScEditOperatorNode):
-#     bl_idname = "DecimateNode"
-#     bl_label = "Decimate"
+    def functionality(self):
+        bpy.ops.mesh.bridge_edge_loops(type=self.prop_type, use_merge=self.inputs["Merge"].execute(), merge_factor=self.inputs["Merge Factor"].execute(), twist_offset=self.inputs["Twist"].execute(), number_cuts=self.inputs["Number of Cuts"].execute(), interpolation=self.prop_interpolation, smoothness=self.inputs["Smoothness"].execute(), profile_shape_factor=self.inputs["Profile Factor"].execute(), profile_shape=self.prop_profile_shape)
+class ConvexHullNode(Node, ScEditOperatorNode):
+    bl_idname = "ConvexHullNode"
+    bl_label = "Convex Hull"
 
-#     prop_ratio = FloatProperty(name="Ratio", default=1.0, min=0.0, max=1.0, update=ScNode.update_value)
-#     prop_use_vertex_group = BoolProperty(name="Vertex Group", update=ScNode.update_value)
-#     prop_vertex_group_factor = FloatProperty(name="Weight", default=1.0, min=0.0, max=1000.0, update=ScNode.update_value)
-#     prop_invert_vertex_group = BoolProperty(name="Invert", update=ScNode.update_value)
-#     prop_use_symmetry = BoolProperty(name="Symmetry", update=ScNode.update_value)
-#     prop_symmetry_axis = EnumProperty(name="Axis", items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="Y", update=ScNode.update_value)
+    prop_delete_unused = BoolProperty(name="Delete Unused", default=True, update=ScNode.update_value)
+    prop_use_existing_faces = BoolProperty(name="Use Existing Faces", default=True, update=ScNode.update_value)
+    prop_make_holes = BoolProperty(name="Make Holes", update=ScNode.update_value)
+    prop_join_triangles = BoolProperty(name="Join Triangles", default=True, update=ScNode.update_value)
+    prop_face_threshold = FloatProperty(name="Max Face Angle", default=0.698132, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
+    prop_shape_threshold = FloatProperty(name="Max Shape Angle", default=0.698132, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
+    prop_uvs = BoolProperty(name="Compare UVs", update=ScNode.update_value)
+    prop_vcols = BoolProperty(name="Compare VCols", update=ScNode.update_value)
+    prop_seam = BoolProperty(name="Compare Seam", update=ScNode.update_value)
+    prop_sharp = BoolProperty(name="Compare Sharp", update=ScNode.update_value)
+    prop_materials = BoolProperty(name="Compare Materials", update=ScNode.update_value)
 
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_ratio")
-#         layout.prop(self, "prop_use_vertex_group")
-#         layout.prop(self, "prop_vertex_group_factor")
-#         layout.prop(self, "prop_invert_vertex_group")
-#         layout.prop(self, "prop_use_symmetry")
-#         layout.prop(self, "prop_symmetry_axis")
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Delete Unused").prop_prop = "prop_delete_unused"
+        self.inputs.new("ScBoolSocket", "Use Existing Faces").prop_prop = "prop_use_existing_faces"
+        self.inputs.new("ScBoolSocket", "Make Holes").prop_prop = "prop_make_holes"
+        self.inputs.new("ScBoolSocket", "Join Triangles").prop_prop = "prop_join_triangles"
+        self.inputs.new("ScFloatSocket", "Max Face Angle").prop_prop = "prop_face_threshold"
+        self.inputs.new("ScFloatSocket", "Max Shape Angle").prop_prop = "prop_shape_threshold"
+        self.inputs.new("ScBoolSocket", "Compare UVs").prop_prop = "prop_uvs"
+        self.inputs.new("ScBoolSocket", "Compare VCols").prop_prop = "prop_vcols"
+        self.inputs.new("ScBoolSocket", "Compare Seam").prop_prop = "prop_seam"
+        self.inputs.new("ScBoolSocket", "Compare Sharp").prop_prop = "prop_sharp"
+        self.inputs.new("ScBoolSocket", "Compare Materials").prop_prop = "prop_materials"
+        super().init(context)
     
-#     def functionality(self):
-#         bpy.ops.mesh.decimate(ratio=self.prop_ratio, use_vertex_group=self.prop_use_vertex_group, vertex_group_factor=self.prop_vertex_group_factor, invert_vertex_group=self.prop_invert_vertex_group, use_symmetry=self.prop_use_symmetry, symmetry_axis=self.prop_symmetry_axis)
-# class ExtrudeFacesNode(Node, ScEditOperatorNode):
-#     bl_idname = "ExtrudeFacesNode"
-#     bl_label = "Extrude Faces (Individual)"
+    def functionality(self):
+        bpy.ops.mesh.convex_hull(delete_unused=self.inputs["Delete Unused"].execute(), use_existing_faces=self.inputs["Use Existing Faces"].execute(), make_holes=self.inputs["Make Holes"].execute(), join_triangles=self.inputs["Join Triangles"].execute(), face_threshold=self.inputs["Max Face Angle"].execute(), shape_threshold=self.inputs["Max Shape Angle"].execute(), uvs=self.inputs["Compare UVs"].execute(), vcols=self.inputs["Compare VCols"].execute(), seam=self.inputs["Compare Seam"].execute(), sharp=self.inputs["Compare Sharp"].execute(), materials=self.inputs["Compare Materials"].execute())
+class DecimateNode(Node, ScEditOperatorNode):
+    bl_idname = "DecimateNode"
+    bl_label = "Decimate"
 
-#     prop_value = FloatProperty(name="Value", update=ScNode.update_value)
-#     prop_mirror = BoolProperty(name="Mirror", update=ScNode.update_value)
+    prop_ratio = FloatProperty(name="Ratio", default=1.0, min=0.0, max=1.0, update=ScNode.update_value)
+    prop_use_vertex_group = BoolProperty(name="Vertex Group", update=ScNode.update_value)
+    prop_vertex_group_factor = FloatProperty(name="Weight", default=1.0, min=0.0, max=1000.0, update=ScNode.update_value)
+    prop_invert_vertex_group = BoolProperty(name="Invert", update=ScNode.update_value)
+    prop_use_symmetry = BoolProperty(name="Symmetry", update=ScNode.update_value)
+    prop_symmetry_axis = EnumProperty(name="Axis", items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="Y", update=ScNode.update_value)
 
-#     def init(self, context):
-#         super().init(context)
-#         self.inputs.new("FloatSocket", "Value").prop_prop = "prop_value"
-    
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_mirror")
-    
-#     def functionality(self):
-#         window = bpy.data.window_managers['WinMan'].windows[0]
-#         screen = window.screen
-#         area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
-#         space = area.spaces[0]
-#         scene = bpy.data.scenes[0]
-#         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':self.mesh, 'region':region, 'edit_object':self.mesh, 'gpencil_data':bpy.context.gpencil_data}
-#         if (self.inputs["Value"].is_linked):
-#             prop_value = self.inputs["Value"].links[0].from_node.execute()
-#         else:
-#             prop_value = self.prop_value
-#         bpy.ops.mesh.extrude_faces_move(override, MESH_OT_extrude_faces_indiv={"mirror":self.prop_mirror}, TRANSFORM_OT_shrink_fatten={"value":prop_value})
-# class ExtrudeEdgesNode(Node, ScEditOperatorNode):
-#     bl_idname = "ExtrudeEdgesNode"
-#     bl_label = "Extrude Edges (Individual)"
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Ratio").prop_prop = "prop_ratio"
+        self.inputs.new("ScBoolSocket", "Vertex Group").prop_prop = "prop_use_vertex_group"
+        self.inputs.new("ScFloatSocket", "Weight").prop_prop = "prop_vertex_group_factor"
+        self.inputs.new("ScBoolSocket", "Invert").prop_prop = "prop_invert_vertex_group"
+        self.inputs.new("ScBoolSocket", "Symmetry").prop_prop = "prop_use_symmetry"
+        super().init(context)
 
-#     prop_value = FloatVectorProperty(name="Value", update=ScNode.update_value)
-#     prop_mirror = BoolProperty(name="Mirror", update=ScNode.update_value)
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_symmetry_axis")
     
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_value")
-#         layout.prop(self, "prop_mirror")
-    
-#     def functionality(self):
-#         window = bpy.data.window_managers['WinMan'].windows[0]
-#         screen = window.screen
-#         area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
-#         space = area.spaces[0]
-#         scene = bpy.data.scenes[0]
-#         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':self.mesh, 'region':region, 'edit_object':self.mesh, 'gpencil_data':bpy.context.gpencil_data}
-#         bpy.ops.mesh.extrude_edges_move(override, MESH_OT_extrude_edges_indiv={"mirror":self.prop_mirror}, TRANSFORM_OT_translate={"value":self.prop_value})
-# class ExtrudeVerticesNode(Node, ScEditOperatorNode):
-#     bl_idname = "ExtrudeVerticesNode"
-#     bl_label = "Extrude Vertices (Individual)"
+    def functionality(self):
+        bpy.ops.mesh.decimate(ratio=self.inputs["Ratio"].execute(), use_vertex_group=self.inputs["Vertex Group"].execute(), vertex_group_factor=self.inputs["Weight"].execute(), invert_vertex_group=self.inputs["Invert"].execute(), use_symmetry=self.inputs["Symmetry"].execute(), symmetry_axis=self.prop_symmetry_axis)
+class ExtrudeFacesNode(Node, ScEditOperatorNode):
+    bl_idname = "ExtrudeFacesNode"
+    bl_label = "Extrude Faces (Individual)"
 
-#     prop_value = FloatVectorProperty(name="Value", update=ScNode.update_value)
-#     prop_mirror = BoolProperty(name="Mirror", update=ScNode.update_value)
-    
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_value")
-#         layout.prop(self, "prop_mirror")
-    
-#     def functionality(self):
-#         window = bpy.data.window_managers['WinMan'].windows[0]
-#         screen = window.screen
-#         area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
-#         space = area.spaces[0]
-#         scene = bpy.data.scenes[0]
-#         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':self.mesh, 'region':region, 'edit_object':self.mesh, 'gpencil_data':bpy.context.gpencil_data}
-#         bpy.ops.mesh.extrude_vertices_move(override, MESH_OT_extrude_verts_indiv={"mirror":self.prop_mirror}, TRANSFORM_OT_translate={"value":self.prop_value})
-# class ExtrudeRegionNode(Node, ScEditOperatorNode):
-#     bl_idname = "ExtrudeRegionNode"
-#     bl_label = "Extrude Region"
+    prop_value = FloatProperty(name="Value", update=ScNode.update_value)
 
-#     prop_amount = FloatProperty(name="Amount", update=ScNode.update_value)
-#     prop_mirror = BoolProperty(name="Mirror", update=ScNode.update_value)
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Value").prop_prop = "prop_value"
+        super().init(context)
     
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_amount")
-#         layout.prop(self, "prop_mirror")
+    def functionality(self):
+        bpy.ops.mesh.extrude_faces_move(self.override(), TRANSFORM_OT_shrink_fatten={"value":self.inputs["Value"].execute()})
+class ExtrudeEdgesNode(Node, ScEditOperatorNode):
+    bl_idname = "ExtrudeEdgesNode"
+    bl_label = "Extrude Edges (Individual)"
+
+    prop_value = FloatVectorProperty(name="Value", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatVectorSocket", "Value").prop_prop = "prop_value"
+        super().init(context)
     
-#     def functionality(self):
-#         window = bpy.data.window_managers['WinMan'].windows[0]
-#         screen = window.screen
-#         area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
-#         space = area.spaces[0]
-#         scene = bpy.data.scenes[0]
-#         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':self.mesh, 'region':region, 'edit_object':self.mesh, 'gpencil_data':bpy.context.gpencil_data}
-#         bpy.ops.mesh.extrude_region_shrink_fatten(override, MESH_OT_extrude_region={"mirror":self.prop_mirror}, TRANSFORM_OT_shrink_fatten={"value":self.prop_amount, "use_even_offset":False, "mirror":False, "proportional":'DISABLED', "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "release_confirm":True, "use_accurate":False})
+    def functionality(self):
+        bpy.ops.mesh.extrude_edges_move(self.override(), TRANSFORM_OT_translate={"value":self.inputs["Value"].execute()})
+class ExtrudeVerticesNode(Node, ScEditOperatorNode):
+    bl_idname = "ExtrudeVerticesNode"
+    bl_label = "Extrude Vertices (Individual)"
+
+    prop_value = FloatVectorProperty(name="Value", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatVectorSocket", "Value").prop_prop = "prop_value"
+        super().init(context)
+    
+    def functionality(self):
+        bpy.ops.mesh.extrude_vertices_move(self.override(), TRANSFORM_OT_translate={"value":self.inputs["Value"].execute()})
+class ExtrudeRegionNode(Node, ScEditOperatorNode):
+    bl_idname = "ExtrudeRegionNode"
+    bl_label = "Extrude Region"
+
+    prop_amount = FloatProperty(name="Amount", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Amount").prop_prop = "prop_amount"
+        super().init(context)
+    
+    def functionality(self):
+        bpy.ops.mesh.extrude_region_shrink_fatten(self.override(), TRANSFORM_OT_shrink_fatten={"value":self.inputs["Amount"].execute()})
 # class ExtrudeRepeatNode(Node, ScEditOperatorNode):
 #     bl_idname = "ExtrudeRepeatNode"
 #     bl_label = "Extrude Repeat"
@@ -2365,98 +2315,98 @@ class BevelNode(Node, ScEditOperatorNode):
 #     prop_offset = FloatProperty(name="Offset", default=2.0, min=0.0, update=ScNode.update_value)
 #     prop_steps = IntProperty(name="Steps", default=10, min=0, max=1000000, update=ScNode.update_value)
     
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_offset")
-#         layout.prop(self, "prop_steps")
+#     def init(self, context):
+#         self.inputs.new("ScFloatSocket", "Offset").prop_prop = "prop_offset"
+#         self.inputs.new("ScIntSocket", "Steps").prop_prop = "prop_steps"
+#         super().init(context)
     
 #     def functionality(self):
-#         window = bpy.data.window_managers['WinMan'].windows[0]
-#         screen = window.screen
-#         area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
-#         space = area.spaces[0]
-#         scene = bpy.data.scenes[0]
-#         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':self.mesh, 'region':region, 'edit_object':self.mesh, 'gpencil_data':bpy.context.gpencil_data}
-#         bpy.ops.mesh.extrude_repeat(override, offset=self.prop_offset, steps=self.prop_steps)
-# class FlipNormalsNode(Node, ScEditOperatorNode):
-#     bl_idname = "FlipNormalsNode"
-#     bl_label = "Flip Normals"
+#         bpy.ops.mesh.extrude_repeat(self.override(), offset=self.inputs["Offset"].execute(), steps=self.inputs["Steps"].execute())
+class FlipNormalsNode(Node, ScEditOperatorNode):
+    bl_idname = "FlipNormalsNode"
+    bl_label = "Flip Normals"
     
-#     def functionality(self):
-#         bpy.ops.mesh.flip_normals()
-# class MakeNormalsConsistentNode(Node, ScEditOperatorNode):
-#     bl_idname = "MakeNormalsConsistentNode"
-#     bl_label = "Make Normals Consistent"
+    def functionality(self):
+        bpy.ops.mesh.flip_normals()
+class MakeNormalsConsistentNode(Node, ScEditOperatorNode):
+    bl_idname = "MakeNormalsConsistentNode"
+    bl_label = "Make Normals Consistent"
     
-#     prop_inside = BoolProperty(name="Inside", update=ScNode.update_value)
+    prop_inside = BoolProperty(name="Inside", update=ScNode.update_value)
 
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_inside")
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Inside").prop_prop = "prop_inside"
+        super().init(context)
 
-#     def functionality(self):
-#         bpy.ops.mesh.normals_make_consistent(inside=self.prop_inside)
-# class FlattenNode(Node, ScEditOperatorNode):
-#     bl_idname = "FlattenNode"
-#     bl_label = "Flatten"
+    def functionality(self):
+        bpy.ops.mesh.normals_make_consistent(inside=self.inputs["Inside"].execute())
+class FlattenNode(Node, ScEditOperatorNode):
+    bl_idname = "FlattenNode"
+    bl_label = "Flatten"
     
-#     prop_mode = EnumProperty(name="Mode", items=[("FACES", "Faces", ""), ("VERTICES", "Vertices", "")], default="FACES", update=ScNode.update_value)
-#     prop_factor = FloatProperty(name="Factor", default=0.5, min=-10.0, max=10.0, update=ScNode.update_value)
-#     prop_repeat = IntProperty(name="Repeat", default=1, min=0, max=1000, update=ScNode.update_value)
-#     prop_x = BoolProperty(name="X", default=True, update=ScNode.update_value)
-#     prop_y = BoolProperty(name="Y", default=True, update=ScNode.update_value)
-#     prop_z = BoolProperty(name="Z", default=True, update=ScNode.update_value)
+    prop_mode = EnumProperty(name="Mode", items=[("FACES", "Faces", ""), ("VERTICES", "Vertices", "")], default="FACES", update=ScNode.update_value)
+    prop_factor = FloatProperty(name="Factor", default=0.5, min=-10.0, max=10.0, update=ScNode.update_value)
+    prop_repeat = IntProperty(name="Repeat", default=1, min=0, max=1000, update=ScNode.update_value)
+    prop_x = BoolProperty(name="X", default=True, update=ScNode.update_value)
+    prop_y = BoolProperty(name="Y", default=True, update=ScNode.update_value)
+    prop_z = BoolProperty(name="Z", default=True, update=ScNode.update_value)
 
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_mode", expand=True)
-#         layout.prop(self, "prop_factor")
-#         layout.prop(self, "prop_repeat")
-#         if (self.prop_mode == "VERTICES"):
-#             layout.prop(self, "prop_x")
-#             layout.prop(self, "prop_y")
-#             layout.prop(self, "prop_z")
-
-#     def functionality(self):
-#         if (self.prop_mode == "VERTICES"):
-#             bpy.ops.mesh.vertices_smooth(factor=self.prop_factor, repeat=self.prop_repeat, xaxis=self.prop_x, yaxis=self.prop_y, zaxis=self.prop_z)
-#         else:
-#             bpy.ops.mesh.face_make_planar(factor=self.prop_factor, repeat=self.prop_repeat)
-# class FillEdgeLoopNode(Node, ScEditOperatorNode):
-#     bl_idname = "FillEdgeLoopNode"
-#     bl_label = "Fill Edge Loop"
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Factor").prop_prop = "prop_factor"
+        self.inputs.new("ScIntSocket", "Repeat").prop_prop = "prop_repeat"
+        self.inputs.new("ScBoolSocket", "X").prop_prop = "prop_x"
+        self.inputs.new("ScBoolSocket", "Y").prop_prop = "prop_y"
+        self.inputs.new("ScBoolSocket", "Z").prop_prop = "prop_z"
+        super().init(context)
     
-#     prop_beauty = BoolProperty(name="Beauty", default=True, update=ScNode.update_value)
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_mode", expand=True)
 
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_beauty")
-
-#     def functionality(self):
-#         bpy.ops.mesh.fill(use_beauty=self.prop_beauty)
-# class FillGridNode(Node, ScEditOperatorNode):
-#     bl_idname = "FillGridNode"
-#     bl_label = "Fill Grid"
+    def functionality(self):
+        if (self.prop_mode == "VERTICES"):
+            bpy.ops.mesh.vertices_smooth(factor=self.inputs["Factor"].execute(), repeat=self.inputs["Repeat"].execute(), xaxis = self.inputs["X"].execute(), yaxis = self.inputs["Y"].execute(), zaxis = self.inputs["Z"].execute())
+        else:
+            bpy.ops.mesh.face_make_planar(factor=self.inputs["Factor"].execute(), repeat=self.inputs["Repeat"].execute())
+class FillEdgeLoopNode(Node, ScEditOperatorNode):
+    bl_idname = "FillEdgeLoopNode"
+    bl_label = "Fill Edge Loop"
     
-#     prop_span = IntProperty(name="Span", default=1, min=1, max=1000, update=ScNode.update_value)
-#     prop_offset = IntProperty(name="Offset", default=0, min=-1000, max=1000, update=ScNode.update_value)
-#     prop_interp = BoolProperty(name="Simple Blending", update=ScNode.update_value)
+    prop_beauty = BoolProperty(name="Beauty", default=True, update=ScNode.update_value)
 
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_span")
-#         layout.prop(self, "prop_offset")
-#         layout.prop(self, "prop_interp")
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Beauty").prop_prop = "prop_beauty"
+        super().init(context)
 
-#     def functionality(self):
-#         bpy.ops.mesh.fill_grid(span=self.prop_span, offset=self.prop_offset, use_interp_simple=self.prop_interp)
-# class FillHolesBySidesNode(Node, ScEditOperatorNode):
-#     bl_idname = "FillHolesBySidesNode"
-#     bl_label = "Fill Holes By Sides"
+    def functionality(self):
+        bpy.ops.mesh.fill(use_beauty=self.inputs["Beauty"].execute())
+class FillGridNode(Node, ScEditOperatorNode):
+    bl_idname = "FillGridNode"
+    bl_label = "Fill Grid"
     
-#     prop_sides = IntProperty(name="Sides", default=4, min=0, max=1000, update=ScNode.update_value)
+    prop_span = IntProperty(name="Span", default=1, min=1, max=1000, update=ScNode.update_value)
+    prop_offset = IntProperty(name="Offset", default=0, min=-1000, max=1000, update=ScNode.update_value)
+    prop_interp = BoolProperty(name="Simple Blending", update=ScNode.update_value)
 
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_sides")
+    def init(self, context):
+        self.inputs.new("ScIntSocket", "Span").prop_prop = "prop_span"
+        self.inputs.new("ScIntSocket", "Offset").prop_prop = "prop_offset"
+        self.inputs.new("ScBoolSocket", "Simple Blending").prop_prop = "prop_interp"
+        super().init(context)
+    
+    def functionality(self):
+        bpy.ops.mesh.fill_grid(span=self.inputs["Span"].execute(), offset=self.inputs["Offset"].execute(), use_interp_simple=self.inputs["Simple Blending"].execute())
+class FillHolesBySidesNode(Node, ScEditOperatorNode):
+    bl_idname = "FillHolesBySidesNode"
+    bl_label = "Fill Holes By Sides"
+    
+    prop_sides = IntProperty(name="Sides", default=4, min=0, max=1000, update=ScNode.update_value)
 
-#     def functionality(self):
-#         bpy.ops.mesh.fill_holes(sides=self.prop_sides)
+    def init(self, context):
+        self.inputs.new("ScIntSocket", "Sides").prop_prop = "prop_sides"
+        super().init(context)
+
+    def functionality(self):
+        bpy.ops.mesh.fill_holes(sides=self.inputs["Sides"].execute())
 class InsetNode(Node, ScEditOperatorNode):
     bl_idname = "InsetNode"
     bl_label = "Inset"
@@ -2477,294 +2427,302 @@ class InsetNode(Node, ScEditOperatorNode):
         self.inputs.new("ScFloatSocket", "Depth").prop_prop = "prop_depth"
         self.inputs.new("ScBoolSocket", "Individual").prop_prop = "prop_individual"
         self.inputs.new("ScBoolSocket", "Select Inset").prop_prop = "prop_select_inset"
+        self.inputs.new("ScBoolSocket", "Boundary").prop_prop = "prop_boundary"
+        self.inputs.new("ScBoolSocket", "Even Offset").prop_prop = "prop_even_offset"
+        self.inputs.new("ScBoolSocket", "Edge Rail").prop_prop = "prop_edge_rail"
+        self.inputs.new("ScBoolSocket", "Outset").prop_prop = "prop_outset"
+        self.inputs.new("ScBoolSocket", "Relative Offset").prop_prop = "prop_relative_offset"
+        self.inputs.new("ScBoolSocket", "Interpolate").prop_prop = "prop_interpolate"
+        super().init(context)
+
+    def functionality(self):
+        bpy.ops.mesh.inset(use_boundary=self.inputs["Boundary"].execute(), use_even_offset=self.inputs["Even Offset"].execute(), use_relative_offset=self.inputs["Relative Offset"].execute(), use_edge_rail=self.inputs["Edge Rail"].execute(), thickness=self.inputs["Thickness"].execute(), depth=self.inputs["Depth"].execute(), use_outset=self.inputs["Outset"].execute(), use_select_inset=self.inputs["Select Inset"].execute(), use_individual=self.inputs["Individual"].execute(), use_interpolate=self.inputs["Interpolate"].execute())
+class LoopCutNode(Node, ScEditOperatorNode):
+    bl_idname = "LoopCutNode"
+    bl_label = "Loop Cut"
+
+    prop_number = IntProperty(name="Number of Cuts", default=1, min=1, soft_max=100, update=ScNode.update_value)
+    prop_smoothness = FloatProperty(name="Smoothness", soft_min=-4.0, soft_max=4.0, update=ScNode.update_value)
+    prop_use_selected_edge = BoolProperty(name="Use selected edge", default=True, update=ScNode.update_value)
+    prop_index = IntProperty(name="Edge Index", default=0, min=0, update=ScNode.update_value)
+    prop_factor = FloatProperty(name="Factor", default=0.0, min=-1.0, max=1.0, update=ScNode.update_value)
+    prop_single = BoolProperty(name="Single Side", update=ScNode.update_value)
+    prop_even = BoolProperty(name="Even", update=ScNode.update_value)
+    prop_flipped = BoolProperty(name="Flipped", update=ScNode.update_value)
+    prop_clamp = BoolProperty(name="Clamp", default=True, update=ScNode.update_value)
+    index = IntProperty()
+
+    def init(self, context):
+        self.inputs.new("ScIntSocket", "Number of Cuts").prop_prop = "prop_number"
+        self.inputs.new("ScFloatSocket", "Smoothness").prop_prop = "prop_smoothness"
+        self.inputs.new("ScBoolSocket", "Use Selected Edge").prop_prop = "prop_use_selected_edge"
+        self.inputs.new("ScIntSocket", "Edge Index").prop_prop = "prop_index"
+        self.inputs.new("ScFloatSocket", "Factor").prop_prop = "prop_factor"
+        self.inputs.new("ScBoolSocket", "Single Side").prop_prop = "prop_single"
+        self.inputs.new("ScBoolSocket", "Even").prop_prop = "prop_even"
+        self.inputs.new("ScBoolSocket", "Flipped").prop_prop = "prop_flipped"
+        self.inputs.new("ScBoolSocket", "Clamp").prop_prop = "prop_clamp"
+        super().init(context)
+    
+    def pre_execute(self):
+        self.mesh = self.inputs["Component"].execute()
+        if (self.mesh == None):
+            print("DEBUG: " + self.name + ": Empty object recieved")
+            return False
+        bpy.ops.object.mode_set(mode="OBJECT")
+        if (self.inputs["Use Selected Edge"].execute()):
+            try:
+                self.index = [i.index for i in self.mesh.data.edges if i.select][0]
+            except:
+                print("DEBUG: " + self.name + ": No edge selected")
+                bpy.ops.object.mode_set(mode="EDIT")
+                return False
+        else:
+            self.index = max(min(self.inputs["Edge Index"].execute(), len(self.mesh.data.edges)-1), 0)
+        bpy.ops.object.mode_set(mode="EDIT")
+        return True
+    
+    def functionality(self):
+        bpy.ops.mesh.loopcut_slide(self.override(), MESH_OT_loopcut={"number_cuts":self.inputs["Number of Cuts"].execute(), "smoothness":self.inputs["Smoothness"].execute(), "falloff":'INVERSE_SQUARE', "edge_index":self.index}, TRANSFORM_OT_edge_slide={"value":self.inputs["Factor"].execute(), "single_side":self.inputs["Single Side"].execute(), "use_even":self.inputs["Even"].execute(), "flipped":self.inputs["Flipped"].execute(), "use_clamp":self.inputs["Clamp"].execute()})
+class MaterialNode(Node, ScEditOperatorNode):
+    bl_idname = "MaterialNode"
+    bl_label = "Material"
+
+    prop_mat = PointerProperty(name="Material", type=bpy.types.Material, update=ScNode.update_value)
+    slot = IntProperty()
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_mat")
+    
+    def pre_execute(self):
+        if (self.prop_mat == None):
+            print("DEBUG: " + self.name + ": No material selected")
+            return False
+        self.slot = self.mesh.material_slots.find(self.prop_mat.name)
+        return super().pre_execute()
+
+    def functionality(self):
+        if (self.slot == -1):
+            bpy.ops.object.material_slot_add()
+            self.mesh.active_material = self.prop_mat
+        else:
+            self.mesh.active_material_index = self.slot
+        bpy.ops.object.material_slot_assign()
+class MergeComponentsNode(Node, ScEditOperatorNode):
+    bl_idname = "MergeComponentsNode"
+    bl_label = "Merge Components"
+    
+    prop_type = EnumProperty(name="Type", items=[("CENTER", "Center", ""), ("CURSOR", "Cursor", ""), ("COLLAPSE", "Collapse", "")], default="CENTER", update=ScNode.update_value)
+    prop_uv = BoolProperty(name="UVs", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "UVs").prop_prop = "prop_uv"
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_type")
+
+    def functionality(self):
+        bpy.ops.mesh.merge(type=self.prop_type, uvs=self.inputs["UVs"].execute())
+class OffsetEdgeLoopNode(Node, ScEditOperatorNode):
+    bl_idname = "OffsetEdgeLoopNode"
+    bl_label = "Offset Edge Loop"
+    
+    prop_cap = BoolProperty(name="Cap Endpoint", update=ScNode.update_value)
+    prop_factor = FloatProperty(name="Factor", default=0.523187, min=-1.0, max=1.0, update=ScNode.update_value)
+    prop_single = BoolProperty(name="Single Side", update=ScNode.update_value)
+    prop_even = BoolProperty(name="Even", update=ScNode.update_value)
+    prop_flipped = BoolProperty(name="Flipped", update=ScNode.update_value)
+    prop_clamp = BoolProperty(name="Clamp", default=True, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Cap Endpoint").prop_prop = "prop_cap"
+        self.inputs.new("ScFloatSocket", "Factor").prop_prop = "prop_factor"
+        self.inputs.new("ScBoolSocket", "Single Side").prop_prop = "prop_single"
+        self.inputs.new("ScBoolSocket", "Even").prop_prop = "prop_even"
+        self.inputs.new("ScBoolSocket", "Flipped").prop_prop = "prop_flipped"
+        self.inputs.new("ScBoolSocket", "Clamp").prop_prop = "prop_clamp"
+        super().init(context)
+    
+    def functionality(self):
+        bpy.ops.mesh.offset_edge_loops_slide(self.override(), MESH_OT_offset_edge_loops={"use_cap_endpoint":self.inputs["Cap Endpoint"].execute()}, TRANSFORM_OT_edge_slide={"value":self.inputs["Factor"].execute(), "single_side":self.inputs["Single Side"].execute(), "use_even":self.inputs["Even"].execute(), "flipped":self.inputs["Flipped"].execute(), "use_clamp":self.inputs["Clamp"].execute()})
+class PokeNode(Node, ScEditOperatorNode):
+    bl_idname = "PokeNode"
+    bl_label = "Poke"
+
+    prop_offset = FloatProperty(name="Poke Offset", default=0.0, min=-1000.0, max=1000.0, update=ScNode.update_value)
+    prop_use_relative_offset = BoolProperty(name="Relative Offset", update=ScNode.update_value)
+    prop_center_mode = EnumProperty(name="Poke Center", items=[("MEAN_WEIGHTED", "Mean Weighted", ""), ("MEAN", "Mean", ""), ("BOUNDS", "Bounds", "")], default="MEAN_WEIGHTED", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Poke Offset").prop_prop = "prop_offset"
+        self.inputs.new("ScBoolSocket", "Relative Offset").prop_prop = "prop_use_relative_offset"
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_center_mode")
+    
+    def functionality(self):
+        bpy.ops.mesh.poke(offset=self.inputs["Poke Offset"].execute(), use_relative_offset=self.inputs["Relative Offset"].execute(), center_mode=self.prop_center_mode)
+class RemoveDoublesNode(Node, ScEditOperatorNode): # Contributed by @lucaspedrajas
+    bl_idname = "RemoveDoublesNode"
+    bl_label = "Remove Doubles"
+
+    prop_threshold = FloatProperty(name="Threshold", default=0.0001, min=0.000001, max=50.0, update=ScNode.update_value)
+    prop_unselected = BoolProperty(name="Unselected", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Threshold").prop_prop = "prop_threshold"
+        self.inputs.new("ScBoolSocket", "Unselected").prop_prop = "prop_unselected"
+        super().init(context)
+    
+    def functionality(self):
+        bpy.ops.mesh.remove_doubles(threshold=self.inputs["Threshold"].execute(), use_unselected=self.inputs["Unselected"].execute())
+class RotateEdgeNode(Node, ScEditOperatorNode):
+    bl_idname = "RotateEdgeNode"
+    bl_label = "Rotate Edge"
+    
+    prop_ccw = BoolProperty(name="Counter Clockwise", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Counter Clockwise").prop_prop = "prop_ccw"
+        super().init(context)
+    
+    def functionality(self):
+        bpy.ops.mesh.edge_rotate(use_ccw=self.inputs["Counter Clockwise"].execute())
+class ScrewNode(Node, ScEditOperatorNode):
+    bl_idname = "ScrewNode"
+    bl_label = "Screw"
+
+    prop_steps = IntProperty(name="Steps",default=9, min=1, max=100000, update=ScNode.update_value)
+    prop_turns = IntProperty(name="Turns",default=1, min=1, max=100000, update=ScNode.update_value)
+    prop_center = FloatVectorProperty(name="Center", update=ScNode.update_value)
+    prop_axis = FloatVectorProperty(name="Axis", default=(1.0, 0.0, 0.0), min=-1.0, max=1.0, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScIntSocket", "Steps").prop_prop = "prop_steps"
+        self.inputs.new("ScIntSocket", "Turns").prop_prop = "prop_turns"
+        self.inputs.new("ScFloatVectorSocket", "Center").prop_prop = "prop_center"
+        self.inputs.new("ScFloatVectorSocket", "Axis").prop_prop = "prop_axis"
+        super().init(context)
+    
+    def functionality(self):
+        bpy.ops.mesh.screw(steps=self.inputs["Steps"].execute(), turns=self.inputs["Turns"].execute(), center=self.inputs["Center"].execute(), axis=self.inputs["Axis"].execute())
+class SolidifyNode(Node, ScEditOperatorNode):
+    bl_idname = "SolidifyNode"
+    bl_label = "Solidify"
+    
+    prop_thickness = FloatProperty(name="Thickness", default=0.01, min=-10000.0, max=10000.0, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Thickness").prop_prop = "prop_thickness"
+        super().init(context)
+
+    def functionality(self):
+        bpy.ops.mesh.solidify(thickness=self.inputs["Thickness"].execute())
+class SpinNode(Node, ScEditOperatorNode):
+    bl_idname = "SpinNode"
+    bl_label = "Spin"
+    
+    prop_steps = IntProperty(name="Steps", default=9, min=0, max=1000000, update=ScNode.update_value)
+    prop_dupli = BoolProperty(name="Duplicate", update=ScNode.update_value)
+    prop_angle = FloatProperty(name="Angle", default=1.5708, subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
+    prop_center = FloatVectorProperty(name="Center", update=ScNode.update_value)
+    prop_axis = FloatVectorProperty(name="Axis", min=-1.0, max=1.0, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScIntSocket", "Steps").prop_prop = "prop_steps"
+        self.inputs.new("ScBoolSocket", "Dupli").prop_prop = "prop_dupli"
+        self.inputs.new("ScAngleSocket", "Angle").prop_prop = "prop_angle"
+        self.inputs.new("ScFloatVectorSocket", "Center").prop_prop = "prop_center"
+        self.inputs.new("ScFloatVectorSocket", "Axis").prop_prop = "prop_axis"
+        super().init(context)
+    
+    def functionality(self):
+        bpy.ops.mesh.spin(steps=self.inputs["Steps"].execute(), dupli=self.inputs["Dupli"].execute(), angle=self.inputs["Angle"].execute(), center=self.inputs["Center"].execute(), axis=self.inputs["Axis"].execute())
+class SplitNode(Node, ScEditOperatorNode):
+    bl_idname = "SplitNode"
+    bl_label = "Split"
+
+    prop_individual = BoolProperty(name="Individual", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Individual").prop_prop = "prop_individual"
+        super().init(context)
+
+    def functionality(self):
+        if (self.inputs["Individual"].execute()):
+            bpy.ops.mesh.edge_split()
+        else:
+            bpy.ops.mesh.split()
+class SubdivideNode(Node, ScEditOperatorNode):
+    bl_idname = "SubdivideNode"
+    bl_label = "Subdivide"
+
+    prop_number_cuts = IntProperty(name="Number of Cuts", default=1, min=1, max=100, update=ScNode.update_value)
+    prop_smoothness = FloatProperty(name="Smoothness", default=0.0, min=0.0, max=1000.0, update=ScNode.update_value)
+    prop_quadtri = BoolProperty(name="Quad/Tri Mode", update=ScNode.update_value)
+    prop_quadcorner = EnumProperty(name="Quad Corner Type", items=[("INNERVERT", "Inner Vertices", ""), ("PATH", "Path", ""), ("STRAIGHT_CUT", "Straight Cut", ""), ("FAN", "Fan", "")], default="STRAIGHT_CUT", update=ScNode.update_value)
+    prop_fractal = FloatProperty(name="Fractal", default=0.0, min=0.0, max=1000000, update=ScNode.update_value)
+    prop_fractal_along_normal = FloatProperty(name="Along Normal", default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
+    prop_seed = IntProperty(name="Random Seed", default=0, min=0, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScIntSocket", "Number of Cuts").prop_prop = "prop_number_cuts"
+        self.inputs.new("ScFloatSocket", "Smoothness").prop_prop = "prop_smoothness"
+        self.inputs.new("ScBoolSocket", "Quad/Tri Mode").prop_prop = "prop_quadtri"
+        self.inputs.new("ScFloatSocket", "Fractal").prop_prop = "prop_fractal"
+        self.inputs.new("ScFloatSocket", "Along Normal").prop_prop = "prop_fractal_along_normal"
+        self.inputs.new("ScIntSocket", "Random Seed").prop_prop = "prop_seed"
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_quadcorner")
+    
+    def functionality(self):
+        bpy.ops.mesh.subdivide(number_cuts=self.inputs["Number of Cuts"].execute(), smoothness=self.inputs["Smoothness"].execute(), quadtri=self.inputs["Quad/Tri Mode"].execute(), quadcorner=self.prop_quadcorner, fractal=self.inputs["Fractal"].execute(), fractal_along_normal=self.inputs["Along Normal"].execute(), seed=self.inputs["Random Seed"].execute())
+class SymmetrizeNode(Node, ScEditOperatorNode):
+    bl_idname = "SymmetrizeNode"
+    bl_label = "Symmetrize"
+    
+    prop_direction = EnumProperty(name="Direction", items=[("NEGATIVE_X", "-X", ""), ("POSITIVE_X", "X", ""), ("NEGATIVE_Y", "-Y", ""), ("POSITIVE_Y", "Y", ""), ("NEGATIVE_Z", "-Z", ""), ("POSITIVE_Z", "Z", "")], default="NEGATIVE_X", update=ScNode.update_value)
+    prop_threshold = FloatProperty(name="Threshold", default=0.0001, min=0.0, max=10.0, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Threshold").prop_prop = "prop_threshold"
         super().init(context)
 
     def draw_buttons(self, context, layout):
-        split = layout.split()
-        col=split.column()
-        col.prop(self, "prop_boundary")
-        col.prop(self, "prop_even_offset")
-        col.prop(self, "prop_edge_rail")
-        col=split.column()
-        col.prop(self, "prop_outset")
-        col.prop(self, "prop_relative_offset")
-        col.prop(self, "prop_interpolate")
+        layout.prop(self, "prop_direction")
 
     def functionality(self):
-        bpy.ops.mesh.inset(use_boundary=self.prop_boundary, use_even_offset=self.prop_even_offset, use_relative_offset=self.prop_relative_offset, use_edge_rail=self.prop_edge_rail, thickness=self.inputs["Thickness"].execute(), depth=self.inputs["Depth"].execute(), use_outset=self.prop_outset, use_select_inset=self.inputs["Select Inset"].execute(), use_individual=self.inputs["Individual"].execute(), use_interpolate=self.prop_interpolate)
-# class LoopCutNode(Node, ScEditOperatorNode):
-#     bl_idname = "LoopCutNode"
-#     bl_label = "Loop Cut"
-
-#     prop_number = IntProperty(name="Number of Cuts", default=1, min=1, soft_max=100, update=ScNode.update_value)
-#     prop_smoothness = FloatProperty(name="Smoothness", soft_min=-4.0, soft_max=4.0, update=ScNode.update_value)
-#     prop_use_selected_edge = BoolProperty(name="Use selected edge", default=True, update=ScNode.update_value)
-#     prop_index = IntProperty(name="Edge Index", default=0, min=0, update=ScNode.update_value)
-#     prop_factor = FloatProperty(name="Factor", default=0.0, min=-1.0, max=1.0, update=ScNode.update_value)
-#     prop_single = BoolProperty(name="Single Side", update=ScNode.update_value)
-#     prop_even = BoolProperty(name="Even", update=ScNode.update_value)
-#     prop_flipped = BoolProperty(name="Flipped", update=ScNode.update_value)
-#     prop_clamp = BoolProperty(name="Clamp", default=True, update=ScNode.update_value)
+        bpy.ops.mesh.symmetrize(direction=self.prop_direction, threshold=self.inputs["Threshold"].execute())
+class TriangulateFacesNode(Node, ScEditOperatorNode):
+    bl_idname = "TriangulateFacesNode"
+    bl_label = "Triangulate Faces"
     
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_number")
-#         layout.prop(self, "prop_smoothness")
-#         layout.prop(self, "prop_use_selected_edge")
-#         if (not self.prop_use_selected_edge):
-#             layout.prop(self, "prop_index")
-#         layout.prop(self, "prop_factor")
-#         layout.prop(self, "prop_single")
-#         layout.prop(self, "prop_even")
-#         layout.prop(self, "prop_flipped")
-#         layout.prop(self, "prop_clamp")
+    prop_quad = EnumProperty(name="Quad Method", items=[("BEAUTY", "Beauty", ""), ("FIXED", "Fixed", ""), ("FIXED_ALTERNATE", "Fixed Alternate", ""), ("SHORTEST_DIAGONAL", "Shortest Diagonal", "")], default="BEAUTY", update=ScNode.update_value)
+    prop_ngon = EnumProperty(name="Polygon Method", items=[("BEAUTY", "Beauty", ""), ("CLIP", "Clip", "")], default="BEAUTY", update=ScNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_quad")
+        layout.prop(self, "prop_ngon")
+
+    def functionality(self):
+        bpy.ops.mesh.quads_convert_to_tris(quad_method=self.prop_quad, ngon_method=self.prop_ngon)
+class UnSubdivideNode(Node, ScEditOperatorNode):
+    bl_idname = "UnSubdivideNode"
+    bl_label = "Un-Subdivide"
     
-#     def functionality(self):
-#         window = bpy.data.window_managers['WinMan'].windows[0]
-#         screen = window.screen
-#         area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
-#         space = area.spaces[0]
-#         scene = bpy.data.scenes[0]
-#         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':self.mesh, 'region':region, 'edit_object':self.mesh, 'gpencil_data':bpy.context.gpencil_data}
-#         bpy.ops.object.mode_set(mode="OBJECT")
-#         total_edges = len(self.mesh.data.edges)
-#         if (self.prop_use_selected_edge):
-#             prop_index = 0
-#             for i in range (0, total_edges):
-#                 if (self.mesh.data.edges[i].select):
-#                     prop_index = i
-#                     break
-#         else:
-#             if (self.prop_index > total_edges - 1):
-#                 prop_index = total_edges - 1
-#             else:
-#                 prop_index = self.prop_index
-#         bpy.ops.object.mode_set(mode="EDIT")
-#         bpy.ops.mesh.loopcut_slide(override, MESH_OT_loopcut={"number_cuts":self.prop_number, "smoothness":self.prop_smoothness, "falloff":'INVERSE_SQUARE', "edge_index":prop_index}, TRANSFORM_OT_edge_slide={"value":self.prop_factor, "single_side":self.prop_single, "use_even":self.prop_even, "flipped":self.prop_flipped, "use_clamp":self.prop_clamp})
-# class MaterialNode(Node, ScEditOperatorNode):
-#     bl_idname = "MaterialNode"
-#     bl_label = "Material"
+    prop_iterations = IntProperty(name="Iterations", default=2, min=1, max=1000, update=ScNode.update_value)
 
-#     prop_mat = PointerProperty(name="Material", type=bpy.types.Material, update=ScNode.update_value)
-#     prop_type = EnumProperty(name="Type", items=[("GEOMETRY_ORIGIN", "Geometry to Origin", ""), ("ORIGIN_GEOMETRY", "Origin to Geometry", ""), ("ORIGIN_CURSOR", "Origin to 3D Cursor", ""), ("ORIGIN_CENTER_OF_MASS", "Origin to Center of Mass (Surface)", ""), ("ORIGIN_CENTER_OF_VOLUME", "Origin to Center of Mass (Volume)", "")], default="GEOMETRY_ORIGIN", update=ScNode.update_value)
-#     prop_center = EnumProperty(name="Center", items=[("MEDIAN", "Median", ""), ("BOUNDS", "Bounds", "")], default="MEDIAN", update=ScNode.update_value)
+    def init(self, context):
+        self.inputs.new("ScIntSocket", "Iterations").prop_prop = "prop_iterations"
+        super().init(context)
 
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_mat")
-
-#     def functionality(self):
-#         if (self.prop_mat == None):
-#             print("DEBUG: " + self.name + ": No material selected")
-#             return
-#         i = self.mesh.material_slots.find(self.prop_mat.name)
-#         if (i == -1):
-#             bpy.ops.object.material_slot_add()
-#             self.mesh.active_material = self.prop_mat
-#         else:
-#             self.mesh.active_material_index = i
-#         bpy.ops.object.material_slot_assign()
-# class MergeComponentsNode(Node, ScEditOperatorNode):
-#     bl_idname = "MergeComponentsNode"
-#     bl_label = "Merge Components"
-    
-#     prop_type = EnumProperty(name="Type", items=[("CENTER", "Center", ""), ("CURSOR", "Cursor", ""), ("COLLAPSE", "Collapse", "")], default="CENTER", update=ScNode.update_value)
-#     prop_uv = BoolProperty(name="UVs", update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_type")
-#         layout.prop(self, "prop_uv")
-
-#     def functionality(self):
-#         bpy.ops.mesh.merge(type=self.prop_type, uvs=self.prop_uv)
-# class OffsetEdgeLoopNode(Node, ScEditOperatorNode):
-#     bl_idname = "OffsetEdgeLoopNode"
-#     bl_label = "Offset Edge Loop"
-    
-#     prop_cap = BoolProperty(name="Cap Endpoint", update=ScNode.update_value)
-#     prop_factor = FloatProperty(name="Factor", default=0.523187, min=-1.0, max=1.0, update=ScNode.update_value)
-#     prop_single = BoolProperty(name="Single Side", update=ScNode.update_value)
-#     prop_even = BoolProperty(name="Even", update=ScNode.update_value)
-#     prop_flipped = BoolProperty(name="Flipped", update=ScNode.update_value)
-#     prop_clamp = BoolProperty(name="Clamp", default=True, update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_cap")
-#         layout.prop(self, "prop_factor")
-#         layout.prop(self, "prop_single")
-#         layout.prop(self, "prop_even")
-#         layout.prop(self, "prop_flipped")
-#         layout.prop(self, "prop_clamp")
-
-#     def functionality(self):
-#         window = bpy.data.window_managers['WinMan'].windows[0]
-#         screen = window.screen
-#         area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
-#         space = area.spaces[0]
-#         scene = bpy.data.scenes[0]
-#         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-#         override = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'active_object':self.mesh, 'region':region, 'edit_object':self.mesh, 'gpencil_data':bpy.context.gpencil_data}
-#         bpy.ops.mesh.offset_edge_loops_slide(override, MESH_OT_offset_edge_loops={"use_cap_endpoint":self.prop_cap}, TRANSFORM_OT_edge_slide={"value":self.prop_factor, "single_side":self.prop_single, "use_even":self.prop_even, "flipped":self.prop_flipped, "use_clamp":self.prop_clamp})
-# class PokeNode(Node, ScEditOperatorNode):
-#     bl_idname = "PokeNode"
-#     bl_label = "Poke"
-
-#     prop_offset = FloatProperty(name="Poke Offset", default=0.0, min=-1000.0, max=1000.0, update=ScNode.update_value)
-#     prop_use_relative_offset = BoolProperty(name="Relative Offset", update=ScNode.update_value)
-#     prop_center_mode = EnumProperty(name="Poke Center", items=[("MEAN_WEIGHTED", "Mean Weighted", ""), ("MEAN", "Mean", ""), ("BOUNDS", "Bounds", "")], default="MEAN_WEIGHTED", update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_offset")
-#         layout.prop(self, "prop_use_relative_offset")
-#         layout.prop(self, "prop_center_mode")
-    
-#     def functionality(self):
-#         bpy.ops.mesh.poke(offset=self.prop_offset, use_relative_offset=self.prop_use_relative_offset, center_mode=self.prop_center_mode)
-# class RemoveDoublesNode(Node, ScEditOperatorNode): # Contributed by @lucaspedrajas
-#     bl_idname = "RemoveDoublesNode"
-#     bl_label = "Remove Doubles"
-
-#     prop_threshold = FloatProperty(name="Threshold", default=0.0001, min=0.000001, max=50.0, update=ScNode.update_value)
-#     prop_unselected = BoolProperty(name="Unselected", update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_threshold")
-#         layout.prop(self, "prop_unselected")
-    
-#     def functionality(self):
-#         bpy.ops.mesh.remove_doubles(threshold=self.prop_threshold, use_unselected=self.prop_unselected)
-# class RotateEdgeNode(Node, ScEditOperatorNode):
-#     bl_idname = "RotateEdgeNode"
-#     bl_label = "Rotate Edge"
-    
-#     prop_ccw = BoolProperty(name="Counter Clockwise", update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_ccw")
-
-#     def functionality(self):
-#         bpy.ops.mesh.edge_rotate(use_ccw=self.prop_ccw)
-# class ScrewNode(Node, ScEditOperatorNode):
-#     bl_idname = "ScrewNode"
-#     bl_label = "Screw"
-
-#     prop_steps = IntProperty(name="Steps",default=9, min=1, max=100000, update=ScNode.update_value)
-#     prop_turns = IntProperty(name="Turns",default=1, min=1, max=100000, update=ScNode.update_value)
-#     prop_center = FloatVectorProperty(name="Center", update=ScNode.update_value)
-#     prop_axis = FloatVectorProperty(name="Axis", default=(1.0, 0.0, 0.0), min=-1.0, max=1.0, update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_steps")
-#         layout.prop(self, "prop_turns")
-#         layout.prop(self, "prop_center")
-#         layout.prop(self, "prop_axis")
-
-#     def functionality(self):
-#         bpy.ops.mesh.screw(steps=self.prop_steps, turns=self.prop_turns, center=self.prop_center, axis=self.prop_axis)
-# class SolidifyNode(Node, ScEditOperatorNode):
-#     bl_idname = "SolidifyNode"
-#     bl_label = "Solidify"
-    
-#     prop_thickness = FloatProperty(name="Thickness", default=0.01, min=-10000.0, max=10000.0, update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_thickness")
-
-#     def functionality(self):
-#         bpy.ops.mesh.solidify(thickness=self.prop_thickness)
-# class SpinNode(Node, ScEditOperatorNode):
-#     bl_idname = "SpinNode"
-#     bl_label = "Spin"
-    
-#     prop_steps = IntProperty(name="Steps", default=9, min=0, max=1000000, update=ScNode.update_value)
-#     prop_dupli = BoolProperty(name="Duplicate", update=ScNode.update_value)
-#     prop_angle = FloatProperty(name="Angle", default=1.5708, subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
-#     prop_center = FloatVectorProperty(name="Center", update=ScNode.update_value)
-#     prop_axis = FloatVectorProperty(name="Axis", min=-1.0, max=1.0, update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_steps")
-#         layout.prop(self, "prop_dupli")
-#         layout.prop(self, "prop_angle")
-#         layout.prop(self, "prop_center")
-#         layout.prop(self, "prop_axis")
-
-#     def functionality(self):
-#         bpy.ops.mesh.spin(steps=self.prop_steps, dupli=self.prop_dupli, angle=self.prop_angle, center=self.prop_center, axis=self.prop_axis)
-# class SplitNode(Node, ScEditOperatorNode):
-#     bl_idname = "SplitNode"
-#     bl_label = "Split"
-
-#     prop_individual = BoolProperty(name="Individual", update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_individual")
-    
-#     def functionality(self):
-#         if (self.prop_individual):
-#             bpy.ops.mesh.edge_split()
-#         else:
-#             bpy.ops.mesh.split()
-# class SubdivideNode(Node, ScEditOperatorNode):
-#     bl_idname = "SubdivideNode"
-#     bl_label = "Subdivide"
-
-#     prop_number_cuts = IntProperty(name="Number of Cuts", default=1, min=1, max=100, update=ScNode.update_value)
-#     prop_smoothness = FloatProperty(name="Smoothness", default=0.0, min=0.0, max=1000.0, update=ScNode.update_value)
-#     prop_quadtri = BoolProperty(name="Quad/Tri Mode", update=ScNode.update_value)
-#     prop_quadcorner = EnumProperty(name="Quad Corner Type", items=[("INNERVERT", "Inner Vertices", ""), ("PATH", "Path", ""), ("STRAIGHT_CUT", "Straight Cut", ""), ("FAN", "Fan", "")], default="STRAIGHT_CUT", update=ScNode.update_value)
-#     prop_fractal = FloatProperty(name="Fractal", default=0.0, min=0.0, max=1000000, update=ScNode.update_value)
-#     prop_fractal_along_normal = FloatProperty(name="Along Normal", default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
-#     prop_seed = IntProperty(name="Random Seed", default=0, min=0, update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_number_cuts")
-#         layout.prop(self, "prop_smoothness")
-#         layout.prop(self, "prop_quadtri")
-#         layout.prop(self, "prop_quadcorner")
-#         layout.prop(self, "prop_fractal")
-#         layout.prop(self, "prop_fractal_along_normal")
-#         layout.prop(self, "prop_seed")
-    
-#     def functionality(self):
-#         bpy.ops.mesh.subdivide(number_cuts=self.prop_number_cuts, smoothness=self.prop_smoothness, quadtri=self.prop_quadtri, quadcorner=self.prop_quadcorner, fractal=self.prop_fractal, fractal_along_normal=self.prop_fractal_along_normal, seed=self.prop_seed)
-# class SymmetrizeNode(Node, ScEditOperatorNode):
-#     bl_idname = "SymmetrizeNode"
-#     bl_label = "Symmetrize"
-    
-#     prop_direction = EnumProperty(name="Direction", items=[("NEGATIVE_X", "-X", ""), ("POSITIVE_X", "X", ""), ("NEGATIVE_Y", "-Y", ""), ("POSITIVE_Y", "Y", ""), ("NEGATIVE_Z", "-Z", ""), ("POSITIVE_Z", "Z", "")], default="NEGATIVE_X", update=ScNode.update_value)
-#     prop_threshold = FloatProperty(name="Threshold", default=0.0001, min=0.0, max=10.0, update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_direction")
-#         layout.prop(self, "prop_threshold")
-
-#     def functionality(self):
-#         bpy.ops.mesh.symmetrize(direction=self.prop_direction, threshold=self.prop_threshold)
-# class TriangulateFacesNode(Node, ScEditOperatorNode):
-#     bl_idname = "TriangulateFacesNode"
-#     bl_label = "Triangulate Faces"
-    
-#     prop_quad = EnumProperty(items=[("BEAUTY", "Beauty", ""), ("FIXED", "Fixed", ""), ("FIXED_ALTERNATE", "Fixed Alternate", ""), ("SHORTEST_DIAGONAL", "Shortest Diagonal", "")], default="BEAUTY", update=ScNode.update_value)
-#     prop_ngon = EnumProperty(items=[("BEAUTY", "Beauty", ""), ("CLIP", "Clip", "")], default="BEAUTY", update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_quad")
-#         layout.prop(self, "prop_ngon")
-
-#     def functionality(self):
-#         bpy.ops.mesh.quads_convert_to_tris(quad_method=self.prop_quad, ngon_method=self.prop_ngon)
-# class UnSubdivideNode(Node, ScEditOperatorNode):
-#     bl_idname = "UnSubdivideNode"
-#     bl_label = "Un-Subdivide"
-    
-#     prop_iterations = IntProperty(name="Iterations", default=2, min=1, max=1000, update=ScNode.update_value)
-
-#     def draw_buttons(self, context, layout):
-#         layout.prop(self, "prop_iterations")
-
-#     def functionality(self):
-#         bpy.ops.mesh.unsubdivide(iterations=self.prop_iterations)
-# Mesh Operator
+    def functionality(self):
+        bpy.ops.mesh.unsubdivide(iterations=self.inputs["Iterations"].execute())
+# Mesh Operators
 class ApplyTransformNode(Node, ScObjectOperatorNode):
     bl_idname = "ApplyTransformNode"
     bl_label = "Apply Transform"
@@ -3148,8 +3106,32 @@ class RandomAngle(Node, ScConstantNode):
     
     def post_execute(self):
         return random.uniform(self.inputs["Min"].execute(), self.inputs["Max"].execute())
-# Maths
-class MathsOpNode(Node, ScMathsNode):
+# Utilities
+class PrintDataNode(Node, ScUtilityNode):
+    bl_idname = "PrintDataNode"
+    bl_label = "Print Data (Debug)"
+
+    prop_value = FloatProperty(name="Value", update=ScNode.update_value)
+    prop_list = BoolProperty(name="List")
+
+    def init(self, context):
+        self.inputs.new("ScUniversalSocket", "Value").prop_prop = "prop_value"
+        self.inputs.new("ScBoolSocket", "List").prop_prop = "prop_list"
+        self.outputs.new("ScUniversalSocket", "Value")
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        if (self == self.id_data.nodes.active):
+            layout.operator("sc.execute_node_op", "Print")
+
+    def execute(self):
+        temp = self.inputs["Value"].execute()
+        if (self.inputs["List"].execute()):
+            print(list(temp))
+        else:
+            print(temp)
+        return temp
+class MathsOpNode(Node, ScUtilityNode):
     bl_idname = "MathsOpNode"
     bl_label = "Maths Operation"
 
@@ -3173,7 +3155,7 @@ class MathsOpNode(Node, ScMathsNode):
             return self.inputs["X"].execute() - self.inputs["Y"].execute()
         elif(self.prop_op == "MULT"):
             return self.inputs["X"].execute() * self.inputs["Y"].execute()
-# Control
+# Flow Control
 class BeginForLoopNode(Node, ScControlNode):
     bl_idname = "BeginForLoopNode"
     bl_label = "Begin For Loop"
@@ -3437,31 +3419,19 @@ class ExportMeshFBX(Node, ScOutputNode):
 ##############################################################
 
 
-##### EASY COPY-PASTE #####
-'''
-def init(self, context):
-    self.puts.new("Sc.Socket", "M").prop_prop = "prop_"
-    super().init(context)
-
-self.inputs[""].execute()
-'''
-###########################
-
-
 inputs = [PlaneNode, CubeNode, CircleNode, UVSphereNode, IcoSphereNode, CylinderNode, ConeNode, GridNode, SuzanneNode, CustomMeshNode] # TorusNode
 transform = [LocationNode, RotationNode, ScaleNode, TranslateNode, RotateNode, ResizeNode]
 modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CorrectiveSmoothModNode, CurveModNode, DecimateModNode, EdgeSplitModNode, LaplacianSmoothModNode, MirrorModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, TriangulateModNode, WireframeModNode]
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
-selection = [SelectComponentsManuallyNode, SelectFaceByIndexNode, SelectAlternateFacesNode, SelectFacesByNormalNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLoopNode, SelectLoopRegionNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectRegionBoundaryNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectShortestPathNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
+selection = [SelectManuallyNode, SelectFaceByIndexNode, SelectAlternateFacesNode, SelectFacesByNormalNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLoopNode, SelectLoopRegionNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectRegionBoundaryNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectShortestPathNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
 deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode, DissolveVerticesNode, DissolveDegenerateNode, EdgeCollapseNode]
-# edit_operators = [AddEdgeFaceNode, BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, ConvexHullNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, ExtrudeRepeatNode, FlipNormalsNode, MakeNormalsConsistentNode, FlattenNode, FillEdgeLoopNode, FillGridNode, FillHolesBySidesNode, InsetNode, LoopCutNode, MaterialNode, MergeComponentsNode, OffsetEdgeLoopNode, PokeNode, RemoveDoublesNode, RotateEdgeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode, TriangulateFacesNode, UnSubdivideNode]
+edit_operators = [AddEdgeFaceNode, BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, ConvexHullNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, FlipNormalsNode, MakeNormalsConsistentNode, FlattenNode, FillEdgeLoopNode, FillGridNode, FillHolesBySidesNode, InsetNode, LoopCutNode, MaterialNode, MergeComponentsNode, OffsetEdgeLoopNode, PokeNode, RemoveDoublesNode, RotateEdgeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode, TriangulateFacesNode, UnSubdivideNode] # ExtrudeRepeatNode
 object_operators = [ApplyTransformNode, CopyTransformNode, DrawModeNode, MakeLinksNode, OriginNode, ShadingNode] # MergeMeshesNode
 constants = [Float, Int, Bool, Angle, FloatVector, AngleVector, RandomFloat, RandomInt, RandomBool, RandomAngle]
-utilities = [MathsOpNode]
+utilities = [PrintDataNode, MathsOpNode]
 control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode, IfElseNode]
 settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
 outputs = [RefreshMeshNode, ExportMeshFBX]
-testing = [PrintDataNode, BevelNode, InsetNode]
 
 node_categories = [ScNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
                    ScNodeCategory("transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
@@ -3469,14 +3439,13 @@ node_categories = [ScNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idnam
                    ScNodeCategory("conversion", "Conversion", items=[NodeItem(i.bl_idname) for i in conversion]),
                    ScNodeCategory("selection", "Selection", items=[NodeItem(i.bl_idname) for i in selection]),
                    ScNodeCategory("deletion", "Deletion", items=[NodeItem(i.bl_idname) for i in deletion]),
-                #    ScNodeCategory("edit_operators", "Component Operators", items=[NodeItem(i.bl_idname) for i in edit_operators]),
+                   ScNodeCategory("edit_operators", "Component Operators", items=[NodeItem(i.bl_idname) for i in edit_operators]),
                    ScNodeCategory("object_operators", "Mesh Operators", items=[NodeItem(i.bl_idname) for i in object_operators]),
                    ScNodeCategory("constants", "Constants", items=[NodeItem(i.bl_idname) for i in constants]),
                    ScNodeCategory("utilities", "Utilities", items=[NodeItem(i.bl_idname) for i in utilities]),
                    ScNodeCategory("control", "Flow Control", items=[NodeItem(i.bl_idname) for i in control]),
                    ScNodeCategory("settings", "Settings", items=[NodeItem(i.bl_idname) for i in settings]),
-                   ScNodeCategory("outputs", "Outputs", items=[NodeItem(i.bl_idname) for i in outputs]),
-                   ScNodeCategory("testing", "_unsorted", items=[NodeItem(i.bl_idname) for i in testing])]
+                   ScNodeCategory("outputs", "Outputs", items=[NodeItem(i.bl_idname) for i in outputs])]
 
 def register():
     nodeitems_utils.register_node_categories("ScNodeCategories", node_categories)
