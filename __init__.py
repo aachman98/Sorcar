@@ -2,7 +2,7 @@ print("______________________________________________________")
 bl_info = {
     "name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (1, 10, 1),
+    "version": (2, 0, 0),
     "blender": (2, 79, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
@@ -2489,7 +2489,6 @@ class MaterialNode(Node, ScEditOperatorNode):
     bl_label = "Material"
 
     prop_mat = PointerProperty(name="Material", type=bpy.types.Material, update=ScNode.update_value)
-    slot = IntProperty()
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_mat")
@@ -2498,15 +2497,15 @@ class MaterialNode(Node, ScEditOperatorNode):
         if (self.prop_mat == None):
             print("DEBUG: " + self.name + ": No material selected")
             return False
-        self.slot = self.mesh.material_slots.find(self.prop_mat.name)
         return super().pre_execute()
 
     def functionality(self):
-        if (self.slot == -1):
+        slot = self.mesh.material_slots.find(self.prop_mat.name)
+        if (slot == -1):
             bpy.ops.object.material_slot_add()
             self.mesh.active_material = self.prop_mat
         else:
-            self.mesh.active_material_index = self.slot
+            self.mesh.active_material_index = slot
         bpy.ops.object.material_slot_assign()
 class MergeComponentsNode(Node, ScEditOperatorNode):
     bl_idname = "MergeComponentsNode"
