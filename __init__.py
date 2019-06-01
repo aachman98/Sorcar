@@ -2,7 +2,7 @@ print("______________________________________________________")
 bl_info = {
     "name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (1, 10, 0),
+    "version": (1, 10, 1),
     "blender": (2, 79, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
@@ -37,7 +37,7 @@ class ScAddonUpdater(Operator):
         user_prefs = context.user_preferences
         addon_prefs = user_prefs.addons[__name__].preferences
         print("DEBUG: Sorcar: Fetching data...")
-        r = requests.get("https://raw.githubusercontent.com/aachman98/procgenmod/master/__init__.py")
+        r = requests.get("https://raw.githubusercontent.com/aachman98/Sorcar/master/__init__.py")
         print("DEBUG: Sorcar: Data Fetched! Writing data...")
         f = open(addon_prefs.prop_addon_location, 'w', encoding="utf8")
         f.write(r.text)
