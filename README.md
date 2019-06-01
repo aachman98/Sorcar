@@ -2,9 +2,9 @@
 Procedural modeling in Blender using Node Editor
 ![alt text](https://github.com/aachman98/Sorcar/raw/master/sorcar.png "Sorcar in action")
 
-Introduction Video: https://www.youtube.com/watch?v=nKEeGVtGdlk
+Introduction Video: https://www.youtube.com/watch?v=nKEeGVtGdlk (outdated)
 
-Tutorials & Feature showcase: https://www.youtube.com/playlist?list=PLZiIC3gdS_O4bXF1cN6T68coTcOUzZOjW
+Tutorials & Feature showcase: https://www.youtube.com/playlist?list=PLZiIC3gdS_O4bXF1cN6T68coTcOUzZOjW (old system - v1.0)
 
 BlenderArtist thread: https://blenderartists.org/t/procgenmod-procedural-modeling-in-blender-using-node-editor/1156769
 
