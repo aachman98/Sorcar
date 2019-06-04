@@ -2,7 +2,7 @@ print("______________________________________________________")
 bl_info = {
     "name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (2, 0, 0),
+    "version": (2, 0, 1),
     "blender": (2, 79, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
@@ -433,7 +433,10 @@ class ScRealtimeMeshOp(Operator):
             print("DEBUG: ScRealtimeMeshOp: STOP")
             return {'FINISHED'}
         elif (event.type == "LEFTMOUSE"):
-            node = context.active_node
+            try:
+                node = context.active_node
+            except:
+                return {'PASS_THROUGH'}
             if (not node == self.node):
                 print("DEBUG: ScRealtimeMeshOp: Active node changed")
                 self.node = node
@@ -1084,6 +1087,62 @@ class DecimateModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].angle_limit = self.inputs["Angle Limit"].execute()
         self.mesh.modifiers[0].use_dissolve_boundaries = self.inputs["All Boundaries"].execute()
         self.mesh.modifiers[0].delimit = self.delimit
+class DisplaceModNode(Node, ScModifierNode):
+    bl_idname = "DisplaceModNode"
+    bl_label = "Displace Modifier"
+
+    texture = PointerProperty(type=bpy.types.Texture)
+    direction = EnumProperty(items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", ""), ("NORMAL", "Normal", ""), ("CUSTOM_NORMAL", "Custom Normal", ""), ("RGB_TO_XYZ", "RGB to XYZ", "")], default="NORMAL", update=ScNode.update_value)
+    space = EnumProperty(items=[("LOCAL", "Local", ""), ("GLOBAL", "Global", "")], default="LOCAL", update=ScNode.update_value)
+    texture_coords = EnumProperty(items=[("LOCAL", "Local", ""), ("GLOBAL", "Global", ""), ("OBJECT", "Object", ""), ("UV", "UV", "")], default="LOCAL", update=ScNode.update_value)
+    texture_coords_object = PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    vertex_group = StringProperty(update=ScNode.update_value)
+    uv_layer = StringProperty(update=ScNode.update_value)
+    mid_level = FloatProperty(name="Midlevel", default=0.5, soft_min=0.0, soft_max=1.0, update=ScNode.update_value)
+    strength = FloatProperty(name="Strength", default=1.0, soft_min=-100.0, soft_max=100.0, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Midlevel").prop_prop = "mid_level"
+        self.inputs.new("ScFloatSocket", "Strength").prop_prop = "strength"
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        has_texture = (self.texture is not None)
+        col = layout.column(align=True)
+        col.label(text="Texture:")
+        col.prop(self, "texture", text="")
+        split = layout.split()
+        col = split.column(align=True)
+        col.label(text="Direction:")
+        col.prop(self, "direction", text="")
+        if self.direction in {'X', 'Y', 'Z', 'RGB_TO_XYZ'}:
+            col.label(text="Space:")
+            col.prop(self, "space", text="")
+        col.label(text="Vertex Group:")
+        if (not self.mesh == None):
+            col.prop_search(self, "vertex_group", self.mesh, "vertex_groups", text="")
+        col = split.column(align=True)
+        col.active = has_texture
+        col.label(text="Texture Coordinates:")
+        col.prop(self, "texture_coords", text="")
+        if self.texture_coords == 'OBJECT':
+            col.label(text="Object:")
+            col.prop(self, "texture_coords_object", text="")
+        elif self.texture_coords == 'UV' and (not self.mesh == None):
+            col.label(text="UV Map:")
+            col.prop_search(self, "uv_layer", self.mesh.data, "uv_textures", text="")
+    
+    def functionality(self):
+        bpy.ops.object.modifier_add(type="DISPLACE")
+        self.mesh.modifiers[0].texture = self.texture
+        self.mesh.modifiers[0].direction = self.direction
+        self.mesh.modifiers[0].space = self.space
+        self.mesh.modifiers[0].texture_coords = self.texture_coords
+        self.mesh.modifiers[0].texture_coords_object = self.texture_coords_object
+        self.mesh.modifiers[0].vertex_group = self.vertex_group
+        self.mesh.modifiers[0].uv_layer = self.uv_layer
+        self.mesh.modifiers[0].mid_level = self.inputs["Midlevel"].execute()
+        self.mesh.modifiers[0].strength = self.inputs["Strength"].execute()
 class EdgeSplitModNode(Node, ScModifierNode):
     bl_idname = "EdgeSplitModNode"
     bl_label = "Edge Split Modifier"
@@ -1662,52 +1721,69 @@ class SelectManuallyNode(Node, ScSelectionNode):
                 break
             self.mesh.data.edges[i].select = True
         bpy.ops.object.mode_set(mode="EDIT")
-class SelectFaceByIndexNode(Node, ScSelectionNode):
-    bl_idname = "SelectFaceByIndexNode"
-    bl_label = "Select Face By Index"
+class SelectComponentByIndexNode(Node, ScSelectionNode):
+    bl_idname = "SelectComponentByIndexNode"
+    bl_label = "Select Component By Index"
 
     prop_index = IntProperty(name="Index", min=0, update=ScNode.update_value)
     prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
+    prop_deselect = BoolProperty(name="Deselect", update=ScNode.update_value)
+    prop_selection_type = EnumProperty(name="Component", items=[("FACE", "Faces", ""), ("VERT", "Vertices", ""), ("EDGE", "Edges", "")], default="FACE", update=ScNode.update_value)
 
     def init(self, context):
         self.inputs.new("ScIntSocket", "Index").prop_prop = "prop_index"
         self.inputs.new("ScBoolSocket", "Extend").prop_prop = "prop_extend"
+        self.inputs.new("ScBoolSocket", "Deselect").prop_prop = "prop_deselect"
         super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_selection_type")
     
     def functionality(self):
         if (not self.inputs["Extend"].execute()):
             bpy.ops.mesh.select_all(action="DESELECT")
         bpy.ops.object.mode_set(mode="OBJECT")
-        total_faces = len(self.mesh.data.polygons)
-        prop_index = self.inputs["Index"].execute()
-        if (prop_index > total_faces - 1):
-            prop_index = total_faces - 1
-        self.mesh.data.polygons[prop_index].select = True
+        if (self.prop_selection_type == "FACE"):
+            self.mesh.data.polygons[min(max(self.inputs["Index"].execute(), 0), len(self.mesh.data.polygons)-1)].select = not self.inputs["Deselect"].execute()
+        elif (self.prop_selection_type == "VERT"):
+            self.mesh.data.vertices[min(max(self.inputs["Index"].execute(), 0), len(self.mesh.data.vertices)-1)].select = not self.inputs["Deselect"].execute()
+        else:
+            self.mesh.data.edges[min(max(self.inputs["Index"].execute(), 0), len(self.mesh.data.edges)-1)].select = not self.inputs["Deselect"].execute()
         bpy.ops.object.mode_set(mode="EDIT")
-class SelectAlternateFacesNode(Node, ScSelectionNode):
-    bl_idname = "SelectAlternateFacesNode"
-    bl_label = "Select Alternate Faces"
+class SelectFacesByMaterialNode(Node, ScSelectionNode):
+    bl_idname = "SelectFacesByMaterialNode"
+    bl_label = "Select Faces By Material"
 
-    prop_nth = IntProperty(name="Every Nth", default=1, min=1, update=ScNode.update_value)
-    prop_offset = IntProperty(name="Offset", default=0, min=0, update=ScNode.update_value)
+    prop_mat = PointerProperty(name="Material", type=bpy.types.Material, update=ScNode.update_value)
     prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
+    prop_deselect = BoolProperty(name="Deselect", update=ScNode.update_value)
 
     def init(self, context):
-        self.inputs.new("ScIntSocket", "Every Nth").prop_prop = "prop_nth"
-        self.inputs.new("ScIntSocket", "Offset").prop_prop = "prop_offset"
         self.inputs.new("ScBoolSocket", "Extend").prop_prop = "prop_extend"
+        self.inputs.new("ScBoolSocket", "Deselect").prop_prop = "prop_deselect"
         super().init(context)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_mat")
     
+    def pre_execute(self):
+        if (self.prop_mat == None):
+            print("DEBUG: " + self.name + ": No material selected")
+            return False
+        return super().pre_execute()
+
     def functionality(self):
         if (not self.inputs["Extend"].execute()):
             bpy.ops.mesh.select_all(action="DESELECT")
-        bpy.ops.object.mode_set(mode="OBJECT")
-        i = self.inputs["Offset"].execute()
-        prop_nth = self.inputs["Every Nth"].execute()
-        while (i < len(self.mesh.data.polygons)):
-            self.mesh.data.polygons[i].select = True
-            i += prop_nth
-        bpy.ops.object.mode_set(mode="EDIT")
+        slot = self.mesh.material_slots.find(self.prop_mat.name)
+        if (slot == -1):
+            print("DEBUG: " + self.name + ": No material slot found")
+        else:
+            self.mesh.active_material_index = slot
+            if (self.inputs["Deselect"].execute()):
+                bpy.ops.object.material_slot_deselect()
+            else:
+                bpy.ops.object.material_slot_select()
 class SelectFacesByNormalNode(Node, ScSelectionNode):
     bl_idname = "SelectFacesByNormalNode"
     bl_label = "Select Faces By Normal"
@@ -1732,6 +1808,41 @@ class SelectFacesByNormalNode(Node, ScSelectionNode):
             if ((face.normal[0] >= prop_min[0] and face.normal[1] >= prop_min[1] and face.normal[2] >= prop_min[2]) and (face.normal[0] <= prop_max[0] and face.normal[1] <= prop_max[1] and face.normal[2] <= prop_max[2])):
                 face.select = True
         bpy.ops.object.mode_set(mode="EDIT")
+class SelectVerticesByVertexGroupNode(Node, ScSelectionNode):
+    bl_idname = "SelectVerticesByVertexGroupNode"
+    bl_label = "Select Vertices By Vertex Group"
+
+    prop_vg = StringProperty(name="Vertex Group", update=ScNode.update_value)
+    prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
+    prop_deselect = BoolProperty(name="Deselect", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Extend").prop_prop = "prop_extend"
+        self.inputs.new("ScBoolSocket", "Deselect").prop_prop = "prop_deselect"
+        super().init(context)
+
+    def draw_buttons(self, context, layout):
+        if (not self.mesh == None):
+            layout.prop_search(self, "prop_vg", self.mesh, "vertex_groups")
+    
+    def pre_execute(self):
+        self.mesh = self.inputs["Component"].execute()
+        if (self.mesh == None):
+            print("DEBUG: " + self.name + ": Empty object recieved")
+            return False
+        if (self.prop_vg == ""):
+            print("DEBUG: " + self.name + ": No vertex group selected")
+            return False
+        return True
+
+    def functionality(self):
+        if (not self.inputs["Extend"].execute()):
+            bpy.ops.mesh.select_all(action="DESELECT")
+        self.mesh.vertex_groups.active = self.mesh.vertex_groups[self.prop_vg]
+        if (self.inputs["Deselect"].execute()):
+            bpy.ops.object.vertex_group_deselect()
+        else:
+            bpy.ops.object.vertex_group_select()
 class SelectAllNode(Node, ScSelectionNode):
     bl_idname = "SelectAllNode"
     bl_label = "Select All"
@@ -1922,6 +2033,30 @@ class SelectNthNode(Node, ScSelectionNode):
 
     def functionality(self):
         bpy.ops.mesh.select_nth(nth=self.inputs["Nth"].execute(), skip=self.inputs["Skip"].execute(), offset=self.inputs["Offset"].execute())
+class SelectAlternateFacesNode(Node, ScSelectionNode):
+    bl_idname = "SelectAlternateFacesNode"
+    bl_label = "Select Alternate Faces"
+
+    prop_nth = IntProperty(name="Every Nth", default=1, min=1, update=ScNode.update_value)
+    prop_offset = IntProperty(name="Offset", default=0, min=0, update=ScNode.update_value)
+    prop_extend = BoolProperty(name="Extend", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScIntSocket", "Every Nth").prop_prop = "prop_nth"
+        self.inputs.new("ScIntSocket", "Offset").prop_prop = "prop_offset"
+        self.inputs.new("ScBoolSocket", "Extend").prop_prop = "prop_extend"
+        super().init(context)
+    
+    def functionality(self):
+        if (not self.inputs["Extend"].execute()):
+            bpy.ops.mesh.select_all(action="DESELECT")
+        bpy.ops.object.mode_set(mode="OBJECT")
+        i = self.inputs["Offset"].execute()
+        prop_nth = self.inputs["Every Nth"].execute()
+        while (i < len(self.mesh.data.polygons)):
+            self.mesh.data.polygons[i].select = True
+            i += prop_nth
+        bpy.ops.object.mode_set(mode="EDIT")
 class SelectRandomNode(Node, ScSelectionNode):
     bl_idname = "SelectRandomNode"
     bl_label = "Select Random"
@@ -2721,6 +2856,30 @@ class UnSubdivideNode(Node, ScEditOperatorNode):
 
     def functionality(self):
         bpy.ops.mesh.unsubdivide(iterations=self.inputs["Iterations"].execute())
+class VertexGroupNode(Node, ScEditOperatorNode):
+    bl_idname = "VertexGroupNode"
+    bl_label = "Vertex Group"
+
+    prop_vg = StringProperty(default="Group", update=ScNode.update_value)
+    prop_assign = BoolProperty(default=True, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScStringSocket", "Vertex Group").prop_prop = "prop_vg"
+        self.inputs.new("ScBoolSocket", "Assign").prop_prop = "prop_assign"
+        super().init(context)
+    
+    def functionality(self):
+        name = self.inputs["Vertex Group"].execute()
+        slot = self.mesh.vertex_groups.find(name)
+        if (slot == -1):
+            bpy.ops.object.vertex_group_add()
+            self.mesh.vertex_groups.active.name = name
+        else:
+            self.mesh.vertex_groups.active_index = slot
+        if (self.inputs["Assign"].execute()):
+            bpy.ops.object.vertex_group_assign()
+        else:
+            bpy.ops.object.vertex_group_remove_from()
 # Mesh Operators
 class ApplyTransformNode(Node, ScObjectOperatorNode):
     bl_idname = "ApplyTransformNode"
@@ -2881,8 +3040,8 @@ class ShadingNode(Node, ScObjectOperatorNode):
         self.mesh.data.use_auto_smooth = self.inputs["Auto Smooth"].execute()
         self.mesh.data.auto_smooth_angle = self.inputs["Angle"].execute()
 # Constants
-class Float(Node, ScConstantNode):
-    bl_idname = "Float"
+class FloatNode(Node, ScConstantNode):
+    bl_idname = "FloatNode"
     bl_label = "Float"
 
     prop_float = FloatProperty(name="Float", update=ScNode.update_value)
@@ -2896,8 +3055,8 @@ class Float(Node, ScConstantNode):
     
     def post_execute(self):
         return self.prop_float
-class Int(Node, ScConstantNode):
-    bl_idname = "Int"
+class IntNode(Node, ScConstantNode):
+    bl_idname = "IntNode"
     bl_label = "Integer"
 
     prop_int = IntProperty(name="Integer", update=ScNode.update_value)
@@ -2911,8 +3070,8 @@ class Int(Node, ScConstantNode):
     
     def post_execute(self):
         return self.prop_int
-class Bool(Node, ScConstantNode):
-    bl_idname = "Bool"
+class BoolNode(Node, ScConstantNode):
+    bl_idname = "BoolNode"
     bl_label = "Boolean"
 
     prop_bool = BoolProperty(name="Boolean", update=ScNode.update_value)
@@ -2926,8 +3085,8 @@ class Bool(Node, ScConstantNode):
     
     def post_execute(self):
         return self.prop_bool
-class Angle(Node, ScConstantNode):
-    bl_idname = "Angle"
+class AngleNode(Node, ScConstantNode):
+    bl_idname = "AngleNode"
     bl_label = "Angle"
 
     prop_angle = FloatProperty(name="Angle", subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
@@ -2941,8 +3100,8 @@ class Angle(Node, ScConstantNode):
     
     def post_execute(self):
         return self.prop_angle
-class FloatVector(Node, ScConstantNode):
-    bl_idname = "FloatVector"
+class FloatVectorNode(Node, ScConstantNode):
+    bl_idname = "FloatVectorNode"
     bl_label = "Float Vector"
 
     prop_x = FloatProperty(name="X", update=ScNode.update_value)
@@ -2983,8 +3142,8 @@ class FloatVector(Node, ScConstantNode):
     
     def post_execute(self):
         return self.prop_vector
-class AngleVector(Node, ScConstantNode):
-    bl_idname = "AngleVector"
+class AngleVectorNode(Node, ScConstantNode):
+    bl_idname = "AngleVectorNode"
     bl_label = "Angle Vector"
 
     prop_x = FloatProperty(name="X", subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
@@ -3025,8 +3184,8 @@ class AngleVector(Node, ScConstantNode):
     
     def post_execute(self):
         return self.prop_vector
-class RandomFloat(Node, ScConstantNode):
-    bl_idname = "RandomFloat"
+class RandomFloatNode(Node, ScConstantNode):
+    bl_idname = "RandomFloatNode"
     bl_label = "Random Float"
 
     prop_min = FloatProperty(name="Min", update=ScNode.update_value)
@@ -3046,8 +3205,8 @@ class RandomFloat(Node, ScConstantNode):
     
     def post_execute(self):
         return random.uniform(self.inputs["Min"].execute(), self.inputs["Max"].execute())
-class RandomInt(Node, ScConstantNode):
-    bl_idname = "RandomInt"
+class RandomIntNode(Node, ScConstantNode):
+    bl_idname = "RandomIntNode"
     bl_label = "Random Integer"
 
     prop_min = IntProperty(name="Min", default=1, update=ScNode.update_value)
@@ -3067,8 +3226,8 @@ class RandomInt(Node, ScConstantNode):
     
     def post_execute(self):
         return random.randint(self.inputs["Min"].execute(), self.inputs["Max"].execute())
-class RandomBool(Node, ScConstantNode):
-    bl_idname = "RandomBool"
+class RandomBoolNode(Node, ScConstantNode):
+    bl_idname = "RandomBoolNode"
     bl_label = "Random Boolean"
 
     prop_seed = IntProperty(name="Seed", update=ScNode.update_value)
@@ -3084,8 +3243,8 @@ class RandomBool(Node, ScConstantNode):
     
     def post_execute(self):
         return bool(random.getrandbits(1))
-class RandomAngle(Node, ScConstantNode):
-    bl_idname = "RandomAngle"
+class RandomAngleNode(Node, ScConstantNode):
+    bl_idname = "RandomAngleNode"
     bl_label = "Random Angle"
 
     prop_min = FloatProperty(name="Min", subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
@@ -3105,6 +3264,21 @@ class RandomAngle(Node, ScConstantNode):
     
     def post_execute(self):
         return random.uniform(self.inputs["Min"].execute(), self.inputs["Max"].execute())
+class StringNode(Node, ScConstantNode):
+    bl_idname = "StringNode"
+    bl_label = "String"
+
+    prop_string = StringProperty(name="String", update=ScNode.update_value)
+
+    def init(self, context):
+        self.outputs.new("ScStringSocket", "String")
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_string")
+    
+    def post_execute(self):
+        return self.prop_string
 # Utilities
 class PrintDataNode(Node, ScUtilityNode):
     bl_idname = "PrintDataNode"
@@ -3396,8 +3570,8 @@ class RefreshMeshNode(Node, ScOutputNode):
     def functionality(self):
         if (self.print_output):
             print(self.name + ": " + self.mesh.name)
-class ExportMeshFBX(Node, ScOutputNode):
-    bl_idname = "ExportMeshFBX"
+class ExportMeshFBXNode(Node, ScOutputNode):
+    bl_idname = "ExportMeshFBXNode"
     bl_label = "Export Mesh (FBX)"
 
     prop_filepath = StringProperty(name="File Path", default="/path/to/dir/")
@@ -3420,31 +3594,31 @@ class ExportMeshFBX(Node, ScOutputNode):
 
 inputs = [PlaneNode, CubeNode, CircleNode, UVSphereNode, IcoSphereNode, CylinderNode, ConeNode, GridNode, SuzanneNode, CustomMeshNode] # TorusNode
 transform = [LocationNode, RotationNode, ScaleNode, TranslateNode, RotateNode, ResizeNode]
-modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CorrectiveSmoothModNode, CurveModNode, DecimateModNode, EdgeSplitModNode, LaplacianSmoothModNode, MirrorModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, TriangulateModNode, WireframeModNode]
+modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CorrectiveSmoothModNode, CurveModNode, DecimateModNode, DisplaceModNode, EdgeSplitModNode, LaplacianSmoothModNode, MirrorModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, TriangulateModNode, WireframeModNode]
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode]
-selection = [SelectManuallyNode, SelectFaceByIndexNode, SelectAlternateFacesNode, SelectFacesByNormalNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLoopNode, SelectLoopRegionNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectRandomNode, SelectRegionBoundaryNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectShortestPathNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
+selection = [SelectManuallyNode, SelectComponentByIndexNode, SelectFacesByMaterialNode, SelectFacesByNormalNode, SelectVerticesByVertexGroupNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLoopNode, SelectLoopRegionNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectAlternateFacesNode, SelectRandomNode, SelectRegionBoundaryNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectShortestPathNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
 deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode, DissolveVerticesNode, DissolveDegenerateNode, EdgeCollapseNode]
-edit_operators = [AddEdgeFaceNode, BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, ConvexHullNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, FlipNormalsNode, MakeNormalsConsistentNode, FlattenNode, FillEdgeLoopNode, FillGridNode, FillHolesBySidesNode, InsetNode, LoopCutNode, MaterialNode, MergeComponentsNode, OffsetEdgeLoopNode, PokeNode, RemoveDoublesNode, RotateEdgeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode, TriangulateFacesNode, UnSubdivideNode] # ExtrudeRepeatNode
+edit_operators = [AddEdgeFaceNode, BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, ConvexHullNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, FlipNormalsNode, MakeNormalsConsistentNode, FlattenNode, FillEdgeLoopNode, FillGridNode, FillHolesBySidesNode, InsetNode, LoopCutNode, MaterialNode, MergeComponentsNode, OffsetEdgeLoopNode, PokeNode, RemoveDoublesNode, RotateEdgeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode, TriangulateFacesNode, UnSubdivideNode, VertexGroupNode] # ExtrudeRepeatNode
 object_operators = [ApplyTransformNode, CopyTransformNode, DrawModeNode, MakeLinksNode, OriginNode, ShadingNode] # MergeMeshesNode
-constants = [Float, Int, Bool, Angle, FloatVector, AngleVector, RandomFloat, RandomInt, RandomBool, RandomAngle]
+constants = [FloatNode, IntNode, BoolNode, AngleNode, FloatVectorNode, AngleVectorNode, RandomFloatNode, RandomIntNode, RandomBoolNode, RandomAngleNode, StringNode]
 utilities = [PrintDataNode, MathsOpNode]
 control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode, IfElseNode]
 settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
-outputs = [RefreshMeshNode, ExportMeshFBX]
+outputs = [RefreshMeshNode, ExportMeshFBXNode]
 
-node_categories = [ScNodeCategory("inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
-                   ScNodeCategory("transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
-                   ScNodeCategory("modifiers", "Modifiers", items=[NodeItem(i.bl_idname) for i in modifiers]),
-                   ScNodeCategory("conversion", "Conversion", items=[NodeItem(i.bl_idname) for i in conversion]),
-                   ScNodeCategory("selection", "Selection", items=[NodeItem(i.bl_idname) for i in selection]),
-                   ScNodeCategory("deletion", "Deletion", items=[NodeItem(i.bl_idname) for i in deletion]),
-                   ScNodeCategory("edit_operators", "Component Operators", items=[NodeItem(i.bl_idname) for i in edit_operators]),
-                   ScNodeCategory("object_operators", "Mesh Operators", items=[NodeItem(i.bl_idname) for i in object_operators]),
-                   ScNodeCategory("constants", "Constants", items=[NodeItem(i.bl_idname) for i in constants]),
-                   ScNodeCategory("utilities", "Utilities", items=[NodeItem(i.bl_idname) for i in utilities]),
-                   ScNodeCategory("control", "Flow Control", items=[NodeItem(i.bl_idname) for i in control]),
-                   ScNodeCategory("settings", "Settings", items=[NodeItem(i.bl_idname) for i in settings]),
-                   ScNodeCategory("outputs", "Outputs", items=[NodeItem(i.bl_idname) for i in outputs])]
+node_categories = [ScNodeCategory("sc.inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
+                   ScNodeCategory("sc.transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
+                   ScNodeCategory("sc.modifiers", "Modifiers", items=[NodeItem(i.bl_idname) for i in modifiers]),
+                   ScNodeCategory("sc.conversion", "Conversion", items=[NodeItem(i.bl_idname) for i in conversion]),
+                   ScNodeCategory("sc.selection", "Selection", items=[NodeItem(i.bl_idname) for i in selection]),
+                   ScNodeCategory("sc.deletion", "Deletion", items=[NodeItem(i.bl_idname) for i in deletion]),
+                   ScNodeCategory("sc.edit_operators", "Component Operators", items=[NodeItem(i.bl_idname) for i in edit_operators]),
+                   ScNodeCategory("sc.object_operators", "Mesh Operators", items=[NodeItem(i.bl_idname) for i in object_operators]),
+                   ScNodeCategory("sc.constants", "Constants", items=[NodeItem(i.bl_idname) for i in constants]),
+                   ScNodeCategory("sc.utilities", "Utilities", items=[NodeItem(i.bl_idname) for i in utilities]),
+                   ScNodeCategory("sc.control", "Flow Control", items=[NodeItem(i.bl_idname) for i in control]),
+                   ScNodeCategory("sc.settings", "Settings", items=[NodeItem(i.bl_idname) for i in settings]),
+                   ScNodeCategory("sc.outputs", "Outputs", items=[NodeItem(i.bl_idname) for i in outputs])]
 
 def register():
     nodeitems_utils.register_node_categories("ScNodeCategories", node_categories)
