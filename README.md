@@ -16,17 +16,17 @@ Sorcar (formerly ProcGenMod) is a procedural modeling node-based system which ut
 Latest version: v2.0.1
 
 ## Instructions 
-1. Install the file as a Blender addon (User preferences -> Install addon from file...)
+1. Download the zip file and install it as a Blender addon (User preferences -> Install addon from file...)
 
 _NOTE: Built and tested only for Blender 2.79b_
 
 2. Open Node Editor (__Do not__ remove the 3D viewport as it is required by some operations like extrude, transform, ...)
-3. Navigate to "PCG Node Tree" and create a new tree
+3. Navigate to "Sorcar" node tree and create a new one
 4. (Optional) Search for "Realtime Mesh Update" operator (search hotkey: Spacebar) and run it to enable active node preview. Now selecting any node will change the mesh accordingly.
 
 _NOTE: Re-run the operator if encountered any error/exception. To stop realtime preview, press "ESC"._
 
 5. Press Shift+A to open the nodes menu. Alternatively, navigate through tabs on the left panel in the node editor
-6. Add a "Mesh Output" node and select it to display an option to refresh geometry (if not using realtime preview).
+6. Add a "Refresh Mesh" node (from the Output category) and select it to display an option to refresh geometry (for cases when not using realtime preview).
 
 Open blender using a command prompt to view degub logs and errors, if encountered.
