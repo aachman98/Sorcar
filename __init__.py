@@ -2,7 +2,7 @@ print("______________________________________________________")
 bl_info = {
     "name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (2, 0, 2),
+    "version": (2, 0, 3),
     "blender": (2, 79, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
@@ -13,10 +13,12 @@ import bmesh
 import nodeitems_utils
 import random
 import requests
+import math
 
 from bpy.types import NodeTree, Node, NodeSocket, Operator
 from bpy.props import IntProperty, FloatProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, PointerProperty, BoolVectorProperty
 from nodeitems_utils import NodeCategory, NodeItem
+from mathutils import Matrix, Vector
 
 ######################### ADDON UPDATER ######################
 class ScPreferences(bpy.types.AddonPreferences):
@@ -223,12 +225,7 @@ class ScInputNode(ScNode):
         super().init(context)
 
     def pre_execute(self):
-        if (not self.mesh == None):
-            try:
-                bpy.data.meshes.remove(bpy.data.meshes[self.mesh.name])
-                bpy.data.objects.remove(self.mesh)
-            except:
-                print("DEBUG: " + self.name + ": Mesh object non-existant")
+        removeMesh(self.mesh)
         if ((not bpy.context.active_object == None) and (not bpy.context.active_object.mode == "OBJECT")):
             bpy.ops.object.mode_set(mode="OBJECT")
         return True
@@ -512,6 +509,15 @@ def focusMesh(mesh, deselect=True, meshes=None):
             m.select = True
     bpy.context.scene.objects.active = mesh
     mesh.select = True
+def removeMesh(mesh, remove_object=True):
+    if (not mesh == None):
+        try:
+            name = mesh.name
+            if (remove_object):
+                bpy.data.objects.remove(bpy.data.objects[name])
+            bpy.data.meshes.remove(bpy.data.meshes[name])
+        except:
+            print("DEBUG: " + name + ": Mesh/object non-existant")
 ##############################################################
 
 
@@ -3016,6 +3022,180 @@ class CopyTransformNode(Node, ScObjectOperatorNode):
             self.mesh.rotation_euler = self.obj.rotation_euler
         if ("SCALE" in self.prop_transform):
             self.mesh.scale = self.obj.scale
+class MakeLinksNode(Node, ScObjectOperatorNode):
+    bl_idname = "MakeLinksNode"
+    bl_label = "Make Links"
+
+    prop_type = EnumProperty(items=[("OBDATA", "Object Data", ""), ("MATERIAL", "Material", ""), ("ANIMATION", "Animation", ""), ("GROUPS", "Groups", ""), ("DUPLIGROUP", "Dupligroup", ""), ("MODIFIERS", "Modifiers", ""), ("FONTS", "Fonts", "")], default="OBDATA", update=ScNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.column().prop(self, "prop_type", expand=True)
+    
+    def functionality(self):
+        bpy.ops.object.make_links_data(type=self.prop_type)
+class MergeMeshesNode(Node, ScObjectOperatorNode):
+    bl_idname = "MergeMeshesNode"
+    bl_label = "Merge Meshes"
+
+    def init(self, context):
+        self.inputs.new("ScMeshArraySocket", "Mesh Array").link_limit = 100
+        super().init(context)
+    
+    def pre_execute(self):
+        if (not self.inputs[1].is_linked):
+            print("DEBUG: " + self.name + ": Mesh array not linked")
+            return False
+        meshes = []
+        for link in self.inputs[1].links:
+            mesh = link.from_socket.execute()
+            if (mesh == None):
+                print("DEBUG: " + self.name + ": Empty object received")
+                return False
+            meshes.append(mesh)
+        self.mesh = self.inputs["Mesh"].execute()
+        if (self.mesh == None):
+            print("DEBUG: " + self.name + ": Empty object recieved")
+            return False
+        focusMesh(self.mesh, True, meshes)
+        return True
+    
+    def functionality(self):
+        bpy.ops.object.join()
+class OriginNode(Node, ScObjectOperatorNode):
+    bl_idname = "OriginNode"
+    bl_label = "Origin"
+
+    prop_type = EnumProperty(name="Type", items=[("GEOMETRY_ORIGIN", "Geometry to Origin", ""), ("ORIGIN_GEOMETRY", "Origin to Geometry", ""), ("ORIGIN_CURSOR", "Origin to 3D Cursor", ""), ("ORIGIN_CENTER_OF_MASS", "Origin to Center of Mass (Surface)", ""), ("ORIGIN_CENTER_OF_VOLUME", "Origin to Center of Mass (Volume)", "")], default="GEOMETRY_ORIGIN", update=ScNode.update_value)
+    prop_center = EnumProperty(name="Center", items=[("MEDIAN", "Median", ""), ("BOUNDS", "Bounds", "")], default="MEDIAN", update=ScNode.update_value)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_type")
+        layout.prop(self, "prop_center", expand=True)
+    
+    def functionality(self):
+        bpy.ops.object.origin_set(type=self.prop_type, center=self.prop_center)
+class ScatterNode(Node, ScObjectOperatorNode):
+    bl_idname = "ScatterNode"
+    bl_label = "Scatter"
+
+    prop_component = EnumProperty(name="Component", items=[("FACE", "Faces", ""), ("VERT", "Vertices", ""), ("EDGE", "Edges", "")], default="FACE", update=ScNode.update_value)
+    prop_location = EnumProperty(name="Location", items=[("X", "X", "", 2), ("Y", "Y", "", 4), ("Z", "Z", "", 8)], default={"X", "Y", "Z"}, options={"ENUM_FLAG"}, update=ScNode.update_value)
+    prop_rotation = EnumProperty(name="Rotation", items=[("X", "X", "", 2), ("Y", "Y", "", 4), ("Z", "Z", "", 8)], default={"X", "Y", "Z"}, options={"ENUM_FLAG"}, update=ScNode.update_value)
+    prop_random = BoolProperty(update=ScNode.update_value)
+    prop_obj = PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    obj = PointerProperty(type=bpy.types.Object)
+    scatter = PointerProperty(type=bpy.types.Object)
+
+    def init(self, context):
+        self.inputs.new("ScMeshRefSocket", "Base Mesh").prop_prop = "prop_obj"
+        self.inputs.new("ScBoolSocket", "Random").prop_prop = "prop_random"
+        super().init(context)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_component", expand=True)
+        layout.label("Align Location:")
+        layout.prop(self, "prop_location", expand=True)
+        # layout.label("Align Rotation:")
+        # layout.prop(self, "prop_rotation", expand=True)
+    
+    def pre_execute(self):
+        self.obj = self.inputs["Base Mesh"].execute()
+        if (self.obj == None):
+            print("DEBUG: " + self.name + ": Empty base mesh recieved")
+            return False
+        return super().pre_execute()
+    
+    def functionality(self):
+        removeMesh(self.scatter)
+        if (self.prop_component == "FACE"):
+            selected_components = [i for i in self.obj.data.polygons if i.select]
+        elif (self.prop_component == "VERT"):
+            selected_components = [i for i in self.obj.data.vertices if i.select]
+        else:
+            selected_components = [i for i in self.obj.data.edges if i.select]
+        if (len(selected_components) == 0):
+            print("DEBUG: " + self.name + ": No selected component")
+            return
+        re_evaluate = self.inputs["Random"].execute()
+        meshes = []
+        for i in selected_components:
+            focusMesh(self.mesh)
+            bpy.ops.object.duplicate()
+            mesh = bpy.context.active_object
+            if (self.prop_component == "FACE"):
+                if ("X" in  self.prop_location):
+                    mesh.location[0] = i.center[0]
+                if ("Y" in  self.prop_location):
+                    mesh.location[1] = i.center[1]
+                if ("Z" in  self.prop_location):
+                    mesh.location[2] = i.center[2]
+                # if ("X" in  self.prop_rotation):
+                #     mesh.rotation_euler[1] = i.normal[0]
+                # if ("Y" in  self.prop_rotation):
+                #     mesh.rotation_euler[1] = i.normal[1]
+                # if ("Z" in  self.prop_rotation):
+                #     mesh.rotation_euler[2] = i.normal[2]
+            elif (self.prop_component == "VERT"):
+                if ("X" in self.prop_location):
+                    mesh.location[0] = i.co[0]
+                if ("Y" in self.prop_location):
+                    mesh.location[1] = i.co[1]
+                if ("Z" in self.prop_location):
+                    mesh.location[2] = i.co[2]
+                # if ("X" in  self.prop_rotation):
+                #     mesh.rotation_euler[0] = i.normal[0]
+                # if ("Y" in  self.prop_rotation):
+                #     mesh.rotation_euler[1] = i.normal[1]
+                # if ("Z" in  self.prop_rotation):
+                #     mesh.rotation_euler[2] = i.normal[2]
+            else:
+                if ("X" in self.prop_location):
+                    mesh.location[0] = (self.obj.data.vertices[i.vertices[0]].co[0]+self.obj.data.vertices[i.vertices[1]].co[0])/2
+                if ("Y" in self.prop_location):
+                    mesh.location[1] = (self.obj.data.vertices[i.vertices[0]].co[1]+self.obj.data.vertices[i.vertices[1]].co[1])/2
+                if ("Z" in self.prop_location):
+                    mesh.location[2] = (self.obj.data.vertices[i.vertices[0]].co[2]+self.obj.data.vertices[i.vertices[1]].co[2])/2
+                # if ("X" in self.prop_rotation):
+                #     mesh.rotation_euler[0] = self.obj.data.vertices[i.vertices[0]].co[0]-self.obj.data.vertices[i.vertices[1]].co[0]
+                # if ("Y" in self.prop_rotation):
+                #     mesh.rotation_euler[1] = self.obj.data.vertices[i.vertices[0]].co[1]-self.obj.data.vertices[i.vertices[1]].co[1]
+                # if ("Z" in self.prop_rotation):
+                #     mesh.rotation_euler[2] = self.obj.data.vertices[i.vertices[0]].co[2]-self.obj.data.vertices[i.vertices[1]].co[2]
+            meshes.append(mesh)
+            if (re_evaluate):
+                self.mesh = self.inputs["Mesh"].execute()
+        focusMesh(mesh, True, meshes)
+        bpy.ops.object.join()
+        meshes.remove(mesh)
+        for i in meshes:
+            removeMesh(i, False)
+        self.scatter = bpy.context.active_object
+    
+    def post_execute(self):
+        return self.scatter
+class ShadingNode(Node, ScObjectOperatorNode):
+    bl_idname = "ShadingNode"
+    bl_label = "Shading"
+
+    prop_shading = EnumProperty(name="Shading", items=[("SMOOTH", "Smooth", ""), ("FLAT", "Flat", "")], default="FLAT", update=ScNode.update_value)
+    prop_auto = BoolProperty(name="Auto Smooth", update=ScNode.update_value)
+    prop_angle = FloatProperty(name="Angle", default=0.523599, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Auto Smooth").prop_prop = "prop_auto"
+        self.inputs.new("ScFloatSocket", "Angle").prop_prop = "prop_angle"
+        super().init(context)
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_shading", expand=True)
+    
+    def functionality(self):
+        if (self.prop_shading == "FLAT"):
+            bpy.ops.object.shade_flat()
+        else:
+            bpy.ops.object.shade_smooth()
+        self.mesh.data.use_auto_smooth = self.inputs["Auto Smooth"].execute()
+        self.mesh.data.auto_smooth_angle = self.inputs["Angle"].execute()
 class ViewportDrawModeNode(Node, ScObjectOperatorNode):
     bl_idname = "ViewportDrawModeNode"
     bl_label = "Viewport Draw Mode"
@@ -3070,81 +3250,6 @@ class CyclesDrawModeNode(Node, ScObjectOperatorNode):
         self.mesh.cycles_visibility.transmission = self.inputs["Transmission"].execute()
         self.mesh.cycles_visibility.scatter = self.inputs["Scatter"].execute()
         self.mesh.cycles_visibility.shadow = self.inputs["Shadow"].execute()
-class MakeLinksNode(Node, ScObjectOperatorNode):
-    bl_idname = "MakeLinksNode"
-    bl_label = "Make Links"
-
-    prop_type = EnumProperty(items=[("OBDATA", "Object Data", ""), ("MATERIAL", "Material", ""), ("ANIMATION", "Animation", ""), ("GROUPS", "Groups", ""), ("DUPLIGROUP", "Dupligroup", ""), ("MODIFIERS", "Modifiers", ""), ("FONTS", "Fonts", "")], default="OBDATA", update=ScNode.update_value)
-
-    def draw_buttons(self, context, layout):
-        layout.column().prop(self, "prop_type", expand=True)
-    
-    def functionality(self):
-        bpy.ops.object.make_links_data(type=self.prop_type)
-class MergeMeshesNode(Node, ScObjectOperatorNode):
-    bl_idname = "MergeMeshesNode"
-    bl_label = "Merge Meshes"
-
-    def init(self, context):
-        self.inputs.new("ScMeshArraySocket", "Mesh Array").link_limit = 100
-        super().init(context)
-    
-    def pre_execute(self):
-        if (not self.inputs[1].is_linked):
-            print("DEBUG: " + self.name + ": Mesh array not linked")
-            return False
-        meshes = []
-        for link in self.inputs[1].links:
-            mesh = link.from_socket.execute()
-            if (mesh == None):
-                print("DEBUG: " + self.name + ": Empty object received")
-                return False
-            meshes.append(mesh)
-        self.mesh = self.inputs["Mesh"].execute()
-        if (self.mesh == None):
-            print("DEBUG: " + self.name + ": Empty object recieved")
-            return False
-        focusMesh(self.mesh, True, meshes)
-        return True
-    
-    def functionality(self):
-        bpy.ops.object.join()
-class OriginNode(Node, ScObjectOperatorNode):
-    bl_idname = "OriginNode"
-    bl_label = "Origin"
-
-    prop_type = EnumProperty(name="Type", items=[("GEOMETRY_ORIGIN", "Geometry to Origin", ""), ("ORIGIN_GEOMETRY", "Origin to Geometry", ""), ("ORIGIN_CURSOR", "Origin to 3D Cursor", ""), ("ORIGIN_CENTER_OF_MASS", "Origin to Center of Mass (Surface)", ""), ("ORIGIN_CENTER_OF_VOLUME", "Origin to Center of Mass (Volume)", "")], default="GEOMETRY_ORIGIN", update=ScNode.update_value)
-    prop_center = EnumProperty(name="Center", items=[("MEDIAN", "Median", ""), ("BOUNDS", "Bounds", "")], default="MEDIAN", update=ScNode.update_value)
-
-    def draw_buttons(self, context, layout):
-        layout.prop(self, "prop_type")
-        layout.prop(self, "prop_center", expand=True)
-    
-    def functionality(self):
-        bpy.ops.object.origin_set(type=self.prop_type, center=self.prop_center)
-class ShadingNode(Node, ScObjectOperatorNode):
-    bl_idname = "ShadingNode"
-    bl_label = "Shading"
-
-    prop_shading = EnumProperty(name="Shading", items=[("SMOOTH", "Smooth", ""), ("FLAT", "Flat", "")], default="FLAT", update=ScNode.update_value)
-    prop_auto = BoolProperty(name="Auto Smooth", update=ScNode.update_value)
-    prop_angle = FloatProperty(name="Angle", default=0.523599, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
-
-    def init(self, context):
-        self.inputs.new("ScBoolSocket", "Auto Smooth").prop_prop = "prop_auto"
-        self.inputs.new("ScFloatSocket", "Angle").prop_prop = "prop_angle"
-        super().init(context)
-
-    def draw_buttons(self, context, layout):
-        layout.prop(self, "prop_shading", expand=True)
-    
-    def functionality(self):
-        if (self.prop_shading == "FLAT"):
-            bpy.ops.object.shade_flat()
-        else:
-            bpy.ops.object.shade_smooth()
-        self.mesh.data.use_auto_smooth = self.inputs["Auto Smooth"].execute()
-        self.mesh.data.auto_smooth_angle = self.inputs["Angle"].execute()
 # Constants
 class FloatNode(Node, ScConstantNode):
     bl_idname = "FloatNode"
@@ -3425,6 +3530,115 @@ class BooleanOpNode(Node, ScUtilityNode):
             return self.inputs["X"].execute() or self.inputs["Y"].execute()
         elif(self.prop_op == "EQUAL"):
             return self.inputs["X"].execute() == self.inputs["Y"].execute()
+class ComparisonOpNode(Node, ScUtilityNode):
+    bl_idname = "ComparisonOpNode"
+    bl_label = "Comparision Operation"
+
+    prop_op = EnumProperty(name="Opertion", items=[("LT", "X < Y", ""), ("GT", "X > Y", ""), ("LE", "X <= Y", ""), ("GE", "X >= Y", ""), ("EQ", "X == Y", ""), ("NE", "X != Y", "")], default="EQ", update=ScNode.update_value)
+    prop_x = FloatProperty(name="X", update=ScNode.update_value)
+    prop_y = FloatProperty(name="Y", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "X").prop_prop = "prop_x"
+        self.inputs.new("ScFloatSocket", "Y").prop_prop = "prop_y"
+        self.outputs.new("ScBoolSocket", "")
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_op")
+    
+    def execute(self):
+        if (self.prop_op == "LT"):
+            return self.inputs["X"].execute() < self.inputs["Y"].execute()
+        elif (self.prop_op == "GT"):
+            return self.inputs["X"].execute() > self.inputs["Y"].execute()
+        elif (self.prop_op == "LE"):
+            return self.inputs["X"].execute() <= self.inputs["Y"].execute()
+        elif (self.prop_op == "GE"):
+            return self.inputs["X"].execute() >= self.inputs["Y"].execute()
+        elif (self.prop_op == "EQ"):
+            return self.inputs["X"].execute() == self.inputs["Y"].execute()
+        elif (self.prop_op == "NE"):
+            return self.inputs["X"].execute() != self.inputs["Y"].execute()
+class MathsOpNode(Node, ScUtilityNode):
+    bl_idname = "MathsOpNode"
+    bl_label = "Maths Operation"
+
+    prop_op = EnumProperty(name="Opertion", items=[("ADD", "X + Y", "Addition"), ("SUB", "X - Y", "Subtraction"), ("MULT", "X * Y", "Multiplication"), ("DIV", "X / Y", "Division"), ("MOD", "X % Y", "Modulo (Remainder)"), ("POW", "X ^ Y", "Exponent (Power)"), ("LOG", "Log(X) to base Y", "Logarithm")], default="ADD", update=ScNode.update_value)
+    prop_x = FloatProperty(name="X", update=ScNode.update_value)
+    prop_y = FloatProperty(name="Y", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "X").prop_prop = "prop_x"
+        self.inputs.new("ScFloatSocket", "Y").prop_prop = "prop_y"
+        self.outputs.new("ScFloatSocket", "")
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_op")
+    
+    def execute(self):
+        if (self.prop_op == "ADD"):
+            return self.inputs["X"].execute()+self.inputs["Y"].execute()
+        elif (self.prop_op == "SUB"):
+            return self.inputs["X"].execute()-self.inputs["Y"].execute()
+        elif (self.prop_op == "MULT"):
+            return self.inputs["X"].execute()*self.inputs["Y"].execute()
+        elif (self.prop_op == "DIV"):
+            temp = self.inputs["Y"].execute()
+            if (temp == 0):
+                print("DEBUG: " + self.name + ": Cannot divide by 0")
+                return 0
+            return self.inputs["X"].execute()/temp
+        elif (self.prop_op == "MOD"):
+            temp = int(self.inputs["Y"].execute())
+            if (temp == 0):
+                print("DEBUG: " + self.name + ": Cannot divide by 0")
+                return 0
+            return int(self.inputs["X"].execute()) % temp
+        elif (self.prop_op == "POW"):
+            return pow(self.inputs["X"].execute(), self.inputs["Y"].execute())
+        elif (self.prop_op == "LOG"):
+            return math.log(self.inputs["X"].execute(), self.inputs["Y"].execute())
+class TrigonometricOpNode(Node, ScUtilityNode):
+    bl_idname = "TrigonometricOpNode"
+    bl_label = "Trigonometric Operation"
+
+    prop_op = EnumProperty(name="Opertion", items=[("SIN","Sin",""), ("COS","Cos",""), ("TAN","Tan","")], default="SIN", update=ScNode.update_value)
+    prop_op2 = EnumProperty(name="Opertion 2", items=[("NONE","None",""), ("HB","Hyperbolic",""), ("INV","Inverse","")], default="NONE", update=ScNode.update_value)
+    prop_x = FloatProperty(name="X", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "X").prop_prop = "prop_x"
+        self.outputs.new("ScFloatSocket", "")
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_op")
+        layout.prop(self, "prop_op2", expand=True)
+        
+    def execute(self):
+        if (self.prop_op == "SIN"):
+            if (self.prop_op2 == "NONE"):
+                return math.sin(self.inputs["X"].execute())
+            elif (self.prop_op2 == "HB"):
+                return math.sinh(self.inputs["X"].execute())
+            else:
+                return math.asin(max(min(self.inputs["X"].execute(), 1), -1))
+        elif (self.prop_op == "COS"):
+            if (self.prop_op2 == "NONE"):
+                return math.cos(self.inputs["X"].execute())
+            elif (self.prop_op2 == "HB"):
+                return math.cosh(self.inputs["X"].execute())
+            else:
+                return math.acos(max(min(self.inputs["X"].execute(), 1), -1))
+        else:
+            if (self.prop_op2 == "NONE"):
+                return math.tan(self.inputs["X"].execute())
+            elif (self.prop_op2 == "HB"):
+                return math.tanh(self.inputs["X"].execute())
+            else:
+                return math.atan(self.inputs["X"].execute())
 class ClampNode(Node, ScUtilityNode):
     bl_idname = "ClampNode"
     bl_label = "Clamp"
@@ -3475,36 +3689,6 @@ class MapRangeNode(Node, ScUtilityNode):
         if (self.inputs["Clamp"].execute()):
             x = max(min(x, x_max), x_min)
         return (((x-x_min)*(y_max-y_min))/(x_max-x_min))+(y_min)
-class MathsOpNode(Node, ScUtilityNode):
-    bl_idname = "MathsOpNode"
-    bl_label = "Maths Operation"
-
-    prop_op = EnumProperty(name="Opertion", items=[("ADD", "+", ""), ("SUB", "-", ""), ("MULT", "*", ""), ("DIV", "/", "")], default="ADD", update=ScNode.update_value)
-    prop_x = FloatProperty(name="X", update=ScNode.update_value)
-    prop_y = FloatProperty(name="Y", update=ScNode.update_value)
-
-    def init(self, context):
-        self.inputs.new("ScFloatSocket", "X").prop_prop = "prop_x"
-        self.inputs.new("ScFloatSocket", "Y").prop_prop = "prop_y"
-        self.outputs.new("ScFloatSocket", "Sum")
-        super().init(context)
-    
-    def draw_buttons(self, context, layout):
-        layout.prop(self, "prop_op")
-    
-    def execute(self):
-        if (self.prop_op == "ADD"):
-            return self.inputs["X"].execute() + self.inputs["Y"].execute()
-        elif(self.prop_op == "SUB"):
-            return self.inputs["X"].execute() - self.inputs["Y"].execute()
-        elif(self.prop_op == "MULT"):
-            return self.inputs["X"].execute() * self.inputs["Y"].execute()
-        elif(self.prop_op == "DIV"):
-            temp = self.inputs["Y"].execute()
-            if (temp == 0):
-                print("DEBUG: " + self.name + ": Cannot divide by 0")
-                return 0
-            return self.inputs["X"].execute() / temp
 class PrintDataNode(Node, ScUtilityNode):
     bl_idname = "PrintDataNode"
     bl_label = "Print Data (Debug)"
@@ -3691,6 +3875,30 @@ class IfElseNode(Node, ScControlNode):
             return self.inputs["True"].execute()
         else:
             return self.inputs["False"].execute()
+class SwitchNode(Node, ScControlNode):
+    bl_idname = "SwitchNode"
+    bl_label = "Switch"
+
+    prop_int = IntProperty(default=0, min=0, max=10, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScIntSocket", "Integer").prop_prop = "prop_int"
+        self.inputs.new("ScUniversalSocket", "Default")
+        self.inputs.new("ScUniversalSocket", "Case 1")
+        self.inputs.new("ScUniversalSocket", "Case 2")
+        self.inputs.new("ScUniversalSocket", "Case 3")
+        self.inputs.new("ScUniversalSocket", "Case 4")
+        self.inputs.new("ScUniversalSocket", "Case 5")
+        self.inputs.new("ScUniversalSocket", "Case 6")
+        self.inputs.new("ScUniversalSocket", "Case 7")
+        self.inputs.new("ScUniversalSocket", "Case 8")
+        self.inputs.new("ScUniversalSocket", "Case 9")
+        self.inputs.new("ScUniversalSocket", "Case 10")
+        self.outputs.new("ScUniversalSocket", "")
+        super().init(context)
+    
+    def post_execute(self):
+        return self.inputs[max(min(self.inputs["Integer"].execute(), 10), 0)+1].execute()
 # Settings
 class CursorLocationNode(Node, ScSettingNode):
     bl_idname = "CursorLocationNode"
@@ -3803,10 +4011,10 @@ conversion = [ToComponentNode, ToMeshNode, ChangeModeNode, ToStringNode, ToFloat
 selection = [SelectComponentsManuallyNode, SelectComponentByIndexNode, SelectFacesByMaterialNode, SelectFacesByNormalNode, SelectVerticesByVertexGroupNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLoopNode, SelectLoopRegionNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectAlternateFacesNode, SelectRandomNode, SelectRegionBoundaryNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectShortestPathNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
 deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode, DissolveVerticesNode, DissolveDegenerateNode, EdgeCollapseNode]
 edit_operators = [AddEdgeFaceNode, BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, ConvexHullNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, FlipNormalsNode, MakeNormalsConsistentNode, FlattenNode, FillEdgeLoopNode, FillGridNode, FillHolesBySidesNode, InsetNode, LoopCutNode, MaterialNode, MergeComponentsNode, OffsetEdgeLoopNode, PokeNode, RemoveDoublesNode, RotateEdgeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode, TriangulateFacesNode, UnSubdivideNode, VertexGroupNode] # ExtrudeRepeatNode
-object_operators = [ApplyTransformNode, CopyTransformNode, MakeLinksNode, MergeMeshesNode, OriginNode, ShadingNode, ViewportDrawModeNode, CyclesDrawModeNode]
+object_operators = [ApplyTransformNode, CopyTransformNode, MakeLinksNode, MergeMeshesNode, OriginNode, ScatterNode, ShadingNode, ViewportDrawModeNode, CyclesDrawModeNode]
 constants = [FloatNode, IntNode, BoolNode, AngleNode, FloatVectorNode, AngleVectorNode, RandomFloatNode, RandomIntNode, RandomBoolNode, RandomAngleNode, StringNode]
-utilities = [AppendStringNode, BooleanOpNode, ClampNode, MapRangeNode, MathsOpNode, PrintDataNode]
-control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode, IfElseNode]
+utilities = [AppendStringNode, BooleanOpNode, ComparisonOpNode, MathsOpNode, TrigonometricOpNode, ClampNode, MapRangeNode, PrintDataNode]
+control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode, IfElseNode, SwitchNode]
 settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
 outputs = [RefreshMeshNode, ExportMeshFBXNode]
 
