@@ -2,7 +2,7 @@ print("______________________________________________________")
 bl_info = {
     "name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (2, 0, 3),
+    "version": (2, 0, 4),
     "blender": (2, 79, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
@@ -18,7 +18,7 @@ import math
 from bpy.types import NodeTree, Node, NodeSocket, Operator
 from bpy.props import IntProperty, FloatProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, PointerProperty, BoolVectorProperty
 from nodeitems_utils import NodeCategory, NodeItem
-from mathutils import Matrix, Vector
+from mathutils import Vector
 
 ######################### ADDON UPDATER ######################
 class ScPreferences(bpy.types.AddonPreferences):
@@ -118,7 +118,7 @@ class ScObjectSocket(NodeSocket, ScNodeSocket):
     bl_label = "Object"
     color = (0.5, 0.5, 0.5, 1.0)
     mirror_prop = False
-    friends = ["ScMeshSocket", "ScComponentSocket", "ScMeshRefSocket", "ScMeshArraySocket"]
+    friends = ["ScMeshSocket", "ScComponentSocket", "ScMeshRefSocket", "ScMeshArraySocket", "ScCurveSocket"]
 class ScBoolSocket(NodeSocket, ScNodeSocket):
     bl_idname = "ScBoolSocket"
     bl_label = "Boolean"
@@ -154,11 +154,16 @@ class ScUniversalSocket(NodeSocket, ScNodeSocket):
     bl_label = "Universal"
     color = (1.0, 1.0, 1.0, 0.0)
     mirror_prop = False
-    friends = ["ScMeshSocket", "ScComponentSocket", "ScObjectSocket", "ScBoolSocket", "ScIntSocket", "ScFloatSocket", "ScFloatVectorSocket", "ScAngleSocket", "ScAngleVectorSocket", "ScStringSocket"]
+    friends = ["ScMeshSocket", "ScComponentSocket", "ScObjectSocket", "ScBoolSocket", "ScIntSocket", "ScFloatSocket", "ScFloatVectorSocket", "ScAngleSocket", "ScAngleVectorSocket", "ScStringSocket", "ScCurveSocket"]
 class ScInfoSocket(NodeSocket, ScNodeSocket):
     bl_idname = "ScInfoSocket"
     bl_label = "Info"
     color = (1.0, 0.5, 0.5, 1.0)
+    mirror_prop = False
+class ScCurveSocket(NodeSocket, ScNodeSocket):
+    bl_idname = "ScCurveSocket"
+    bl_label = "Curve"
+    color = (0.3, 0.5, 0.0, 1.0)
     mirror_prop = False
 ##############################################################
 
@@ -225,9 +230,9 @@ class ScInputNode(ScNode):
         super().init(context)
 
     def pre_execute(self):
-        removeMesh(self.mesh)
-        if ((not bpy.context.active_object == None) and (not bpy.context.active_object.mode == "OBJECT")):
+        if (not bpy.context.active_object == None):
             bpy.ops.object.mode_set(mode="OBJECT")
+        removeMesh(self.mesh)
         return True
     
     def post_execute(self):
@@ -371,6 +376,26 @@ class ScObjectOperatorNode(ScNode):
     
     def post_execute(self):
         return self.mesh
+class ScCurveOperatorNode(ScNode):
+    node_color = (0.3, 0.7, 0.7)
+
+    mesh = PointerProperty(type=bpy.types.Object)
+
+    def init(self, context):
+        self.inputs.new("ScCurveSocket", "Curve").prop_prop = "mesh"
+        self.outputs.new("ScCurveSocket", "Curve")
+        self.inputs.move(len(self.inputs)-1, 0)
+        super().init(context)
+    
+    def pre_execute(self):
+        self.mesh = self.inputs["Curve"].execute()
+        if (self.mesh == None):
+            print("DEBUG: " + self.name + ": Empty object recieved")
+            return False
+        return True
+    
+    def post_execute(self):
+        return self.mesh
 class ScConstantNode(ScNode):
     node_color = (0.3, 0.0, 0.7)
 
@@ -501,7 +526,7 @@ def focusMesh(mesh, deselect=True, meshes=None):
     active = bpy.context.scene.objects.active
     if not active == None:
         if not active.mode == "OBJECT":
-            bpy.ops.obsject.mode_set(mode="OBJECT")
+            bpy.ops.object.mode_set(mode="OBJECT")
     if deselect:
         bpy.ops.object.select_all(action="DESELECT")
     if not meshes == None:
@@ -516,6 +541,15 @@ def removeMesh(mesh, remove_object=True):
             if (remove_object):
                 bpy.data.objects.remove(bpy.data.objects[name])
             bpy.data.meshes.remove(bpy.data.meshes[name])
+        except:
+            print("DEBUG: " + name + ": Mesh/object non-existant")
+def removeCurve(curve, remove_object=True):
+    if (not curve == None):
+        try:
+            name = curve.name
+            if (remove_object):
+                bpy.data.objects.remove(bpy.data.objects[name])
+            bpy.data.curves.remove(bpy.data.curves[name])
         except:
             print("DEBUG: " + name + ": Mesh/object non-existant")
 ##############################################################
@@ -706,9 +740,34 @@ class CustomMeshNode(Node, ScInputNode):
         return super().pre_execute()
     
     def functionality(self):
-        bpy.ops.object.select_all(action='DESELECT')
-        bpy.context.scene.objects.active = self.prop_mesh
-        self.prop_mesh.select = True
+        focusMesh(self.prop_mesh)
+        bpy.ops.object.duplicate()
+class CustomCurveNode(Node, ScInputNode):
+    bl_idname = "CustomCurveNode"
+    bl_label = "Custom Curve"
+    
+    prop_curve = PointerProperty(name="Curve", type=bpy.types.Curve, update=ScNode.update_value)
+
+    def init(self, context):
+        self.outputs.new("ScCurveSocket", "Curve")
+        self.hide = True
+        self.use_custom_color = True
+        self.color = self.node_color
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_curve")
+    
+    def pre_execute(self):
+        if (self.prop_curve == None):
+            print("DEBUG: " + self.name + ": No curve selected")
+            return False
+        if (not bpy.context.active_object == None):
+            bpy.ops.object.mode_set(mode="OBJECT")
+        removeCurve(self.mesh)
+        return True
+    
+    def functionality(self):
+        focusMesh(bpy.data.objects[self.prop_curve.name])
         bpy.ops.object.duplicate()
 # Transform
 class LocationNode(Node, ScTransformNode):
@@ -1671,7 +1730,7 @@ class WireframeModNode(Node, ScModifierNode):
 # Conversion
 class ToComponentNode(Node, ScConversionNode):
     bl_idname = "ToComponentNode"
-    bl_label = "To Component"
+    bl_label = "To Component Mode"
     
     prop_selection_type = EnumProperty(name="Component", items=[("FACE", "Faces", ""), ("VERT", "Vertices", ""), ("EDGE", "Edges", "")], default="FACE", update=ScNode.update_value)
     prop_deselect = BoolProperty(name="Deselect All", default=True, update=ScNode.update_value)
@@ -1692,7 +1751,7 @@ class ToComponentNode(Node, ScConversionNode):
             bpy.ops.mesh.select_all(action="DESELECT")
 class ToMeshNode(Node, ScConversionNode):
     bl_idname = "ToMeshNode"
-    bl_label = "To Mesh"
+    bl_label = "To Mesh Mode"
 
     def init(self, context):
         self.inputs.new("ScComponentSocket", "Component").prop_prop = "mesh"
@@ -1778,6 +1837,17 @@ class ToBoolNode(Node, ScConversionNode):
     
     def post_execute(self):
         return bool(self.inputs["In"].execute())
+class CurveToMeshNode(Node, ScConversionNode):
+    bl_idname = "CurveToMeshNode"
+    bl_label = "Curve To Mesh"
+
+    def init(self, context):
+        self.inputs.new("ScCurveSocket", "Curve")
+        self.outputs.new("ScMeshSocket", "Mesh")
+        super().init(context)
+    
+    def functionality(self):
+        bpy.ops.object.convert(target="MESH")
 # Selection
 class SelectComponentsManuallyNode(Node, ScSelectionNode):
     bl_idname = "SelectComponentsManuallyNode"
@@ -3022,6 +3092,23 @@ class CopyTransformNode(Node, ScObjectOperatorNode):
             self.mesh.rotation_euler = self.obj.rotation_euler
         if ("SCALE" in self.prop_transform):
             self.mesh.scale = self.obj.scale
+class DuplicateMeshNode(Node, ScObjectOperatorNode):
+    bl_idname = "DuplicateMeshNode"
+    bl_label = "Duplicate Mesh"
+    
+    prop_linked = BoolProperty(update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScBoolSocket", "Linked").prop_prop = "prop_linked"
+        super().init(context)
+    
+    def pre_execute(self):
+        removeMesh(self.mesh)
+        return super().pre_execute()
+    
+    def functionality(self):
+        bpy.ops.object.duplicate(linked=self.inputs["Linked"].execute())
+        self.mesh = bpy.context.active_object
 class MakeLinksNode(Node, ScObjectOperatorNode):
     bl_idname = "MakeLinksNode"
     bl_label = "Make Links"
@@ -3095,8 +3182,8 @@ class ScatterNode(Node, ScObjectOperatorNode):
         layout.prop(self, "prop_component", expand=True)
         layout.label("Align Location:")
         layout.prop(self, "prop_location", expand=True)
-        # layout.label("Align Rotation:")
-        # layout.prop(self, "prop_rotation", expand=True)
+        layout.label("Align Rotation:")
+        layout.prop(self, "prop_rotation", expand=True)
     
     def pre_execute(self):
         self.obj = self.inputs["Base Mesh"].execute()
@@ -3129,12 +3216,15 @@ class ScatterNode(Node, ScObjectOperatorNode):
                     mesh.location[1] = i.center[1]
                 if ("Z" in  self.prop_location):
                     mesh.location[2] = i.center[2]
-                # if ("X" in  self.prop_rotation):
-                #     mesh.rotation_euler[1] = i.normal[0]
-                # if ("Y" in  self.prop_rotation):
-                #     mesh.rotation_euler[1] = i.normal[1]
-                # if ("Z" in  self.prop_rotation):
-                #     mesh.rotation_euler[2] = i.normal[2]
+                mesh.rotation_mode = 'AXIS_ANGLE'
+                mesh.rotation_axis_angle[0] = 3.14159
+                if ("X" in  self.prop_rotation):
+                    mesh.rotation_axis_angle[1] = i.normal[0]
+                if ("Y" in  self.prop_rotation):
+                    mesh.rotation_axis_angle[2] = i.normal[1]
+                if ("Z" in  self.prop_rotation):
+                    mesh.rotation_axis_angle[3] = i.normal[2]+1
+                mesh.rotation_mode = 'XYZ'
             elif (self.prop_component == "VERT"):
                 if ("X" in self.prop_location):
                     mesh.location[0] = i.co[0]
@@ -3142,12 +3232,15 @@ class ScatterNode(Node, ScObjectOperatorNode):
                     mesh.location[1] = i.co[1]
                 if ("Z" in self.prop_location):
                     mesh.location[2] = i.co[2]
-                # if ("X" in  self.prop_rotation):
-                #     mesh.rotation_euler[0] = i.normal[0]
-                # if ("Y" in  self.prop_rotation):
-                #     mesh.rotation_euler[1] = i.normal[1]
-                # if ("Z" in  self.prop_rotation):
-                #     mesh.rotation_euler[2] = i.normal[2]
+                mesh.rotation_mode = 'AXIS_ANGLE'
+                mesh.rotation_axis_angle[0] = 3.14159
+                if ("X" in  self.prop_rotation):
+                    mesh.rotation_axis_angle[1] = i.normal[0]
+                if ("Y" in  self.prop_rotation):
+                    mesh.rotation_axis_angle[2] = i.normal[1]
+                if ("Z" in  self.prop_rotation):
+                    mesh.rotation_axis_angle[3] = i.normal[2]+1
+                mesh.rotation_mode = 'XYZ'
             else:
                 if ("X" in self.prop_location):
                     mesh.location[0] = (self.obj.data.vertices[i.vertices[0]].co[0]+self.obj.data.vertices[i.vertices[1]].co[0])/2
@@ -3155,12 +3248,15 @@ class ScatterNode(Node, ScObjectOperatorNode):
                     mesh.location[1] = (self.obj.data.vertices[i.vertices[0]].co[1]+self.obj.data.vertices[i.vertices[1]].co[1])/2
                 if ("Z" in self.prop_location):
                     mesh.location[2] = (self.obj.data.vertices[i.vertices[0]].co[2]+self.obj.data.vertices[i.vertices[1]].co[2])/2
-                # if ("X" in self.prop_rotation):
-                #     mesh.rotation_euler[0] = self.obj.data.vertices[i.vertices[0]].co[0]-self.obj.data.vertices[i.vertices[1]].co[0]
-                # if ("Y" in self.prop_rotation):
-                #     mesh.rotation_euler[1] = self.obj.data.vertices[i.vertices[0]].co[1]-self.obj.data.vertices[i.vertices[1]].co[1]
-                # if ("Z" in self.prop_rotation):
-                #     mesh.rotation_euler[2] = self.obj.data.vertices[i.vertices[0]].co[2]-self.obj.data.vertices[i.vertices[1]].co[2]
+                mesh.rotation_mode = 'AXIS_ANGLE'
+                mesh.rotation_axis_angle[0] = 3.14159
+                if ("X" in  self.prop_rotation):
+                    mesh.rotation_axis_angle[1] = (self.obj.data.vertices[i.vertices[0]].normal[0]+self.obj.data.vertices[i.vertices[1]].normal[0])/2
+                if ("Y" in  self.prop_rotation):
+                    mesh.rotation_axis_angle[2] = (self.obj.data.vertices[i.vertices[0]].normal[1]+self.obj.data.vertices[i.vertices[1]].normal[1])/2
+                if ("Z" in  self.prop_rotation):
+                    mesh.rotation_axis_angle[3] = ((self.obj.data.vertices[i.vertices[0]].normal[2]+self.obj.data.vertices[i.vertices[1]].normal[2])/2)+1
+                mesh.rotation_mode = 'XYZ'
             meshes.append(mesh)
             if (re_evaluate):
                 self.mesh = self.inputs["Mesh"].execute()
@@ -3250,6 +3346,128 @@ class CyclesDrawModeNode(Node, ScObjectOperatorNode):
         self.mesh.cycles_visibility.transmission = self.inputs["Transmission"].execute()
         self.mesh.cycles_visibility.scatter = self.inputs["Scatter"].execute()
         self.mesh.cycles_visibility.shadow = self.inputs["Shadow"].execute()
+# Curve Operations
+class CurveShapeNode(Node, ScCurveOperatorNode):
+    bl_idname = "CurveShapeNode"
+    bl_label = "Curve Shape"
+
+    prop_dimensions = EnumProperty(name="Dimensions", items=[("2D", "2D", ""), ("3D", "3D", "")], default="3D", update=ScNode.update_value)
+    prop_fill_mode = EnumProperty(name="Fill", items=[("FULL", "Full", ""), ("BACK", "Back", ""), ("FRONT", "Front", ""), ("HALF", "Half", "")], default="HALF", update=ScNode.update_value)
+    prop_fill_mode_2d = EnumProperty(name="Fill", items=[("NONE", "None", ""), ("BACK", "Back", ""), ("FRONT", "Front", ""), ("BOTH", "Both", "")], default="NONE", update=ScNode.update_value)
+    prop_resolution = IntProperty(default=12, min=1, max=1024, soft_max=64, update=ScNode.update_value)
+    prop_render_resolution = IntProperty(min=0, max=1024, soft_max=64, update=ScNode.update_value)
+    prop_fill = BoolProperty(default=True, update=ScNode.update_value)
+    prop_twisting = EnumProperty(name="Twisting", items=[("Z_UP", "Z-Up", ""), ("MINIMUM", "Minimum", ""), ("TANGENT", "Tangent", "")], default="MINIMUM", update=ScNode.update_value)
+    prop_smooth = FloatProperty(update=ScNode.update_value)
+    prop_radius = BoolProperty(default=True, update=ScNode.update_value)
+    prop_stretch = BoolProperty(update=ScNode.update_value)
+    prop_clamp = BoolProperty(update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScIntSocket", "Preview U").prop_prop = "prop_resolution"
+        self.inputs.new("ScIntSocket", "Render U").prop_prop = "prop_render_resolution"
+        self.inputs.new("ScBoolSocket", "Fill Deformed").prop_prop = "prop_fill"
+        self.inputs.new("ScFloatSocket", "Smooth").prop_prop = "prop_smooth"
+        self.inputs.new("ScBoolSocket", "Radius").prop_prop = "prop_radius"
+        self.inputs.new("ScBoolSocket", "Stretch").prop_prop = "prop_stretch"
+        self.inputs.new("ScBoolSocket", "Bounds Clamp").prop_prop = "prop_clamp"
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_dimensions", expand=True)
+        if (self.prop_dimensions == "2D"):
+            layout.prop(self, "prop_fill_mode_2d")
+        else:
+            layout.prop(self, "prop_fill_mode")
+        layout.prop(self, "prop_twisting")
+    
+    def functionality(self):
+        self.mesh.data.dimensions = self.prop_dimensions
+        if (self.prop_dimensions == "2D"):
+            self.mesh.data.fill_mode = self.prop_fill_mode_2d
+        else:
+            self.mesh.data.fill_mode = self.prop_fill_mode
+        self.mesh.data.resolution_u = self.inputs["Preview U"].execute()
+        self.mesh.data.render_resolution_u = self.inputs["Render U"].execute()
+        self.mesh.data.use_fill_deform = self.inputs["Fill Deformed"].execute()
+        self.mesh.data.twist_mode = self.prop_twisting
+        self.mesh.data.twist_smooth = self.inputs["Smooth"].execute()
+        self.mesh.data.use_radius = self.inputs["Radius"].execute()
+        self.mesh.data.use_stretch = self.inputs["Stretch"].execute()
+        self.mesh.data.use_deform_bounds = self.inputs["Bounds Clamp"].execute()
+class CurveGeometryNode(Node, ScCurveOperatorNode):
+    bl_idname = "CurveGeometryNode"
+    bl_label = "Curve Geometry"
+
+    prop_depth = FloatProperty(soft_min=0.0, update=ScNode.update_value)
+    prop_offset = FloatProperty(update=ScNode.update_value)
+    prop_extrude = FloatProperty(min=0.0, update=ScNode.update_value)
+    prop_resolution = IntProperty(min=0, max=32, update=ScNode.update_value)
+    prop_bevel_obj = PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    prop_taper_obj = PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    prop_bevel_mapping_start = EnumProperty(name="Start Mapping Type", items=[("RESOLUTION", "Resolution", ""), ("SEGMENTS", "Segments", ""), ("SPLINE", "Spline", "")], default="RESOLUTION", update=ScNode.update_value)
+    prop_bevel_mapping_end = EnumProperty(name="End Mapping Type", items=[("RESOLUTION", "Resolution", ""), ("SEGMENTS", "Segments", ""), ("SPLINE", "Spline", "")], default="RESOLUTION", update=ScNode.update_value)
+    prop_bevel_start = FloatProperty(min=0.0, max=1.0, update=ScNode.update_value)
+    prop_bevel_end = FloatProperty(default=1.0, min=0.0, max=1.0, update=ScNode.update_value)
+    prop_taper = BoolProperty(update=ScNode.update_value)
+    prop_fill = BoolProperty(update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatSocket", "Depth").prop_prop = "prop_depth"
+        self.inputs.new("ScFloatSocket", "Offset").prop_prop = "prop_offset"
+        self.inputs.new("ScFloatSocket", "Extrude").prop_prop = "prop_extrude"
+        self.inputs.new("ScIntSocket", "Resolution").prop_prop = "prop_resolution"
+        self.inputs.new("ScMeshRefSocket", "Bevel Object").prop_prop = "prop_bevel_obj"
+        self.inputs.new("ScMeshRefSocket", "Taper Object").prop_prop = "prop_taper_obj"
+        self.inputs.new("ScFloatSocket", "Start").prop_prop = "prop_bevel_start"
+        self.inputs.new("ScFloatSocket", "End").prop_prop = "prop_bevel_end"
+        self.inputs.new("ScBoolSocket", "Map Taper").prop_prop = "prop_taper"
+        self.inputs.new("ScBoolSocket", "Fill Caps").prop_prop = "prop_fill"
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_bevel_mapping_start")
+        layout.prop(self, "prop_bevel_mapping_end")
+    
+    def functionality(self):
+        self.mesh.data.bevel_depth = self.inputs["Depth"].execute()
+        self.mesh.data.offset = self.inputs["Offset"].execute()
+        self.mesh.data.extrude = self.inputs["Extrude"].execute()
+        self.mesh.data.bevel_resolution = self.inputs["Resolution"].execute()
+        self.mesh.data.bevel_object = self.inputs["Bevel Object"].execute()
+        self.mesh.data.taper_object = self.inputs["Taper Object"].execute()
+        self.mesh.data.bevel_factor_mapping_start = self.prop_bevel_mapping_start
+        self.mesh.data.bevel_factor_mapping_end = self.prop_bevel_mapping_end
+        self.mesh.data.bevel_factor_start = self.inputs["Start"].execute()
+        self.mesh.data.bevel_factor_end = self.inputs["End"].execute()
+        self.mesh.data.use_map_taper = self.inputs["Map Taper"].execute()
+        self.mesh.data.use_fill_caps = self.inputs["Fill Caps"].execute()
+class CurveSplineNode(Node, ScCurveOperatorNode):
+    bl_idname = "CurveSplineNode"
+    bl_label = "Curve Spline"
+
+    prop_tilt = EnumProperty(name="Tilt", items=[("LINEAR", "Linear", ""), ("CARDINAL", "Cardinal", ""), ("BSPLINE", "Bspline", ""), ("EASE", "Ease", "")], default="LINEAR", update=ScNode.update_value)
+    prop_radius = EnumProperty(name="Radius", items=[("LINEAR", "Linear", ""), ("CARDINAL", "Cardinal", ""), ("BSPLINE", "Bspline", ""), ("EASE", "Ease", "")], default="LINEAR", update=ScNode.update_value)
+    prop_resolution = IntProperty(default=12, min=1, max=1024, soft_max=64, update=ScNode.update_value)
+    prop_cyclic = BoolProperty(update=ScNode.update_value)
+    prop_smooth = BoolProperty(default=True, update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScIntSocket", "Resolution").prop_prop = "prop_resolution"
+        self.inputs.new("ScBoolSocket", "Cyclic").prop_prop = "prop_cyclic"
+        self.inputs.new("ScBoolSocket", "Smooth").prop_prop = "prop_smooth"
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_tilt")
+        layout.prop(self, "prop_radius")
+    
+    def functionality(self):
+        self.mesh.data.splines[0].tilt_interpolation = self.prop_tilt
+        self.mesh.data.splines[0].radius_interpolation = self.prop_radius
+        self.mesh.data.splines[0].resolution_u = self.inputs["Resolution"].execute()
+        self.mesh.data.splines[0].use_cyclic_u = self.inputs["Cyclic"].execute()
+        self.mesh.data.splines[0].use_smooth = self.inputs["Smooth"].execute()
 # Constants
 class FloatNode(Node, ScConstantNode):
     bl_idname = "FloatNode"
@@ -3493,7 +3711,7 @@ class StringNode(Node, ScConstantNode):
 # Utilities
 class AppendStringNode(Node, ScUtilityNode):
     bl_idname = "AppendStringNode"
-    bl_label = "AppendString"
+    bl_label = "Append String"
 
     prop_x = StringProperty(update=ScNode.update_value)
     prop_y = StringProperty(update=ScNode.update_value)
@@ -3639,6 +3857,114 @@ class TrigonometricOpNode(Node, ScUtilityNode):
                 return math.tanh(self.inputs["X"].execute())
             else:
                 return math.atan(self.inputs["X"].execute())
+class GetComponentInfoNode(Node, ScUtilityNode):
+    bl_idname = "GetComponentInfoNode"
+    bl_label = "Get Component Info"
+
+    prop_component = EnumProperty(name="Component", items=[("FACE", "Faces", ""), ("VERT", "Vertices", ""), ("EDGE", "Edges", "")], default="FACE", update=ScNode.update_value)
+    prop_data = EnumProperty(name="Data", items=[("LOC", "Location", ""), ("NOR", "Normal", "")], default="LOC", update=ScNode.update_value)
+    prop_average = BoolProperty(update=ScNode.update_value)
+    mesh = PointerProperty(type=bpy.types.Object)
+    data = FloatVectorProperty()
+    faces = []
+    vertices = []
+    edges = []
+
+    def init(self, context):
+        self.inputs.new("ScComponentSocket", "Component")
+        self.inputs.new("ScBoolSocket", "Average").prop_prop = "prop_average"
+        self.outputs.new("ScFloatVectorSocket", "Info")
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_component", expand=True)
+        layout.prop(self, "prop_data", expand=True)
+    
+    def execute(self):
+        if not self.pre_execute():
+            return (0, 0, 0)
+        self.functionality()
+        ret_data = self.post_execute()
+        if (self.first_time):
+            self.first_time = False
+        return ret_data
+    
+    def pre_execute(self):
+        node = self.inputs["Component"].links[0].from_node
+        if (node.first_time):
+            self.mesh = self.inputs["Component"].execute()
+        else:
+            self.mesh = node.mesh
+        if (self.mesh == None):
+            print("DEBUG: " + self.name + ": Empty object recieved")
+            return False
+        bpy.ops.object.mode_set(mode="OBJECT")
+        self.faces = [i for i in self.mesh.data.polygons if i.select]
+        self.vertices = [i for i in self.mesh.data.vertices if i.select]
+        self.edges = [i for i in self.mesh.data.edges if i.select]
+        bpy.ops.object.mode_set(mode="EDIT")
+        if (self.prop_component == "FACE"):
+            if (len(self.faces) == 0):
+                print("DEBUG: " + self.name + ": No faces selected")
+                return False
+        elif (self.prop_component == "VERT"):
+            if (len(self.vertices) == 0):
+                print("DEBUG: " + self.name + ": No vertices selected")
+                return False
+        else:
+            if (len(self.edges) == 0):
+                print("DEBUG: " + self.name + ": No edges selected")
+                return False
+        return True
+    
+    def functionality(self):
+        data = Vector((0, 0, 0))
+        if (self.inputs["Average"].execute()):
+            if (self.prop_data == "LOC"):
+                if (self.prop_component == "FACE"):
+                    for i in self.faces:
+                        data += i.center
+                    data /= len(self.faces)
+                elif (self.prop_component == "VERT"):
+                    for i in self.vertices:
+                        data += i.co
+                    data /= len(self.vertices)
+                else:
+                    for i in self.edges:
+                        data += (Vector(self.mesh.data.vertices[i.vertices[0]].co) + Vector(self.mesh.data.vertices[i.vertices[1]].co))/2
+                    data /= len(self.edges)
+            else:
+                if (self.prop_component == "FACE"):
+                    for i in self.faces:
+                        data += i.normal
+                    data /= len(self.faces)
+                elif (self.prop_component == "VERT"):
+                    for i in self.vertices:
+                        data += i.normal
+                    data /= len(self.vertices)
+                else:
+                    for i in self.edges:
+                        data += (Vector(self.mesh.data.vertices[i.vertices[0]].normal) + Vector(self.mesh.data.vertices[i.vertices[1]].normal))/2
+                    data /= len(self.edges)
+        else:
+            if (self.prop_data == "LOC"):
+                if (self.prop_component == "FACE"):
+                    data = self.faces[0].center
+                elif (self.prop_component == "VERT"):
+                    data = self.vertices[0].co
+                else:
+                    data = (Vector(self.mesh.data.vertices[self.edges[0].vertices[0]].co) + Vector(self.mesh.data.vertices[self.edges[0].vertices[1]].co))/2
+            else:
+                if (self.prop_component == "FACE"):
+                    data = self.faces[0].normal
+                elif (self.prop_component == "VERT"):
+                    data = self.vertices[0].normal
+                else:
+                    data = (Vector(self.mesh.data.vertices[self.edges[0].vertices[0]].normal) + Vector(self.mesh.data.vertices[self.edges[0].vertices[1]].normal))/2
+        self.data = data
+    
+    def post_execute(self):
+        return self.data
 class ClampNode(Node, ScUtilityNode):
     bl_idname = "ClampNode"
     bl_label = "Clamp"
@@ -3689,6 +4015,28 @@ class MapRangeNode(Node, ScUtilityNode):
         if (self.inputs["Clamp"].execute()):
             x = max(min(x, x_max), x_min)
         return (((x-x_min)*(y_max-y_min))/(x_max-x_min))+(y_min)
+class BreakVectorNode(Node, ScUtilityNode):
+    bl_idname = "BreakVectorNode"
+    bl_label = "Break Vector"
+
+    prop_element = EnumProperty(items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="X", update=ScNode.update_value)
+    prop_vector = FloatVectorProperty(update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatVectorSocket", "Vector").prop_prop = "prop_vector"
+        self.outputs.new("ScFloatSocket", "Float")
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_element", expand=True)
+    
+    def execute(self):
+        if (self.prop_element == "X"):
+            return self.inputs["Vector"].execute()[0]
+        if (self.prop_element == "Y"):
+            return self.inputs["Vector"].execute()[1]
+        if (self.prop_element == "Z"):
+            return self.inputs["Vector"].execute()[2]
 class PrintDataNode(Node, ScUtilityNode):
     bl_idname = "PrintDataNode"
     bl_label = "Print Data (Debug)"
@@ -3719,6 +4067,7 @@ class BeginForLoopNode(Node, ScControlNode):
     bl_label = "Begin For Loop"
 
     mesh = PointerProperty(type=bpy.types.Object)
+    unlocked = BoolProperty()
 
     def init(self, context):
         self.inputs.new("ScComponentSocket", "Component")
@@ -3730,7 +4079,8 @@ class BeginForLoopNode(Node, ScControlNode):
         if (not self.outputs[0].is_linked):
             print("DEBUG: " + self.name + ": End For Loop not found")
             return False
-        if (self.first_time):
+        if (self.first_time or self.unlocked):
+            self.unlocked = False
             self.mesh = self.inputs["Component"].execute()
             if (self.mesh == None):
                 print("DEBUG: " + self.name + ": Empty object recieved")
@@ -3769,6 +4119,7 @@ class EndForLoopNode(Node, ScControlNode):
             if (self.mesh == None):
                 print("DEBUG: " + self.name + ": Empty object recieved")
                 return
+        self.inputs[0].links[0].from_node.unlocked = True
     
     def post_execute(self):
         return self.mesh
@@ -4004,16 +4355,17 @@ class ExportMeshFBXNode(Node, ScOutputNode):
 ##############################################################
 
 
-inputs = [PlaneNode, CubeNode, CircleNode, UVSphereNode, IcoSphereNode, CylinderNode, ConeNode, GridNode, SuzanneNode, CustomMeshNode] # TorusNode
+inputs = [PlaneNode, CubeNode, CircleNode, UVSphereNode, IcoSphereNode, CylinderNode, ConeNode, GridNode, SuzanneNode, CustomMeshNode, CustomCurveNode] # TorusNode
 transform = [LocationNode, RotationNode, ScaleNode, TranslateNode, RotateNode, ResizeNode]
 modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CorrectiveSmoothModNode, CurveModNode, DecimateModNode, DisplaceModNode, EdgeSplitModNode, LaplacianSmoothModNode, MirrorModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, TriangulateModNode, WireframeModNode]
-conversion = [ToComponentNode, ToMeshNode, ChangeModeNode, ToStringNode, ToFloatNode, ToIntNode, ToBoolNode]
+conversion = [ToComponentNode, ToMeshNode, ChangeModeNode, ToStringNode, ToFloatNode, ToIntNode, ToBoolNode, CurveToMeshNode]
 selection = [SelectComponentsManuallyNode, SelectComponentByIndexNode, SelectFacesByMaterialNode, SelectFacesByNormalNode, SelectVerticesByVertexGroupNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLoopNode, SelectLoopRegionNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectAlternateFacesNode, SelectRandomNode, SelectRegionBoundaryNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectShortestPathNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
 deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode, DissolveVerticesNode, DissolveDegenerateNode, EdgeCollapseNode]
 edit_operators = [AddEdgeFaceNode, BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, ConvexHullNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, FlipNormalsNode, MakeNormalsConsistentNode, FlattenNode, FillEdgeLoopNode, FillGridNode, FillHolesBySidesNode, InsetNode, LoopCutNode, MaterialNode, MergeComponentsNode, OffsetEdgeLoopNode, PokeNode, RemoveDoublesNode, RotateEdgeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode, TriangulateFacesNode, UnSubdivideNode, VertexGroupNode] # ExtrudeRepeatNode
-object_operators = [ApplyTransformNode, CopyTransformNode, MakeLinksNode, MergeMeshesNode, OriginNode, ScatterNode, ShadingNode, ViewportDrawModeNode, CyclesDrawModeNode]
+object_operators = [ApplyTransformNode, CopyTransformNode, DuplicateMeshNode, MakeLinksNode, MergeMeshesNode, OriginNode, ScatterNode, ShadingNode, ViewportDrawModeNode, CyclesDrawModeNode]
+curve_operators = [CurveShapeNode, CurveGeometryNode, CurveSplineNode]
 constants = [FloatNode, IntNode, BoolNode, AngleNode, FloatVectorNode, AngleVectorNode, RandomFloatNode, RandomIntNode, RandomBoolNode, RandomAngleNode, StringNode]
-utilities = [AppendStringNode, BooleanOpNode, ComparisonOpNode, MathsOpNode, TrigonometricOpNode, ClampNode, MapRangeNode, PrintDataNode]
+utilities = [AppendStringNode, BooleanOpNode, ComparisonOpNode, MathsOpNode, TrigonometricOpNode, GetComponentInfoNode, ClampNode, MapRangeNode, BreakVectorNode, PrintDataNode]
 control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode, IfElseNode, SwitchNode]
 settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
 outputs = [RefreshMeshNode, ExportMeshFBXNode]
@@ -4026,6 +4378,7 @@ node_categories = [ScNodeCategory("sc.inputs", "Inputs", items=[NodeItem(i.bl_id
                    ScNodeCategory("sc.deletion", "Deletion", items=[NodeItem(i.bl_idname) for i in deletion]),
                    ScNodeCategory("sc.edit_operators", "Component Operators", items=[NodeItem(i.bl_idname) for i in edit_operators]),
                    ScNodeCategory("sc.object_operators", "Mesh Operators", items=[NodeItem(i.bl_idname) for i in object_operators]),
+                   ScNodeCategory("sc.curve_operators", "Curve Operators", items=[NodeItem(i.bl_idname) for i in curve_operators]),
                    ScNodeCategory("sc.constants", "Constants", items=[NodeItem(i.bl_idname) for i in constants]),
                    ScNodeCategory("sc.utilities", "Utilities", items=[NodeItem(i.bl_idname) for i in utilities]),
                    ScNodeCategory("sc.control", "Flow Control", items=[NodeItem(i.bl_idname) for i in control]),
