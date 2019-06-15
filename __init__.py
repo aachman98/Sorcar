@@ -714,7 +714,7 @@ class GridNode(Node, ScInputNode):
         bpy.ops.mesh.primitive_grid_add(x_subdivisions=self.inputs["X Subdivisions"].execute(), y_subdivisions=self.inputs["Y Subdivisions"].execute(), radius=self.inputs["Radius"].execute())
 class SuzanneNode(Node, ScInputNode):
     bl_idname = "SuzanneNode"
-    bl_label = "Suzanne (Monkey)"
+    bl_label = "Suzanne"
     
     prop_radius = FloatProperty(name="Radius", default=1.0, min=0.0, update=ScNode.update_value)
 
