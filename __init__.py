@@ -857,7 +857,7 @@ class ResizeNode(Node, ScTransformNode):
 # Modifiers
 class ArrayModNode(Node, ScModifierNode):
     bl_idname = "ArrayModNode"
-    bl_label = "Array Modifier"
+    bl_label = "Array"
 
     fit_type = EnumProperty(name="Fit Type", items=[("FIXED_COUNT", "Fixed Count", ""), ("FIT_LENGTH", "Fit Length", ""), ("FIT_CURVE", "Fit Curve", "")], default="FIXED_COUNT", update=ScNode.update_value)
     count = IntProperty(name="Count", default=2, min=1, max=1000, update=ScNode.update_value)
@@ -919,7 +919,7 @@ class ArrayModNode(Node, ScModifierNode):
         return super().post_execute()
 class BevelModNode(Node, ScModifierNode):
     bl_idname = "BevelModNode"
-    bl_label = "Bevel Modifier"
+    bl_label = "Bevel"
     
     width = FloatProperty(name="Width", default=0.1, min=0.0, update=ScNode.update_value)
     segments = IntProperty(name="Segments", default=1, min=0, max=100, update=ScNode.update_value)
@@ -965,7 +965,7 @@ class BevelModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].offset_type = self.offset_type
 class BooleanModNode(Node, ScModifierNode):
     bl_idname = "BooleanModNode"
-    bl_label = "Boolean Modifier"
+    bl_label = "Boolean"
     
     prop_op = EnumProperty(name="Operation", items=[("DIFFERENCE", "Difference", ""), ("UNION", "Union", ""), ("INTERSECT", "Intersect", "")], default="INTERSECT", update=ScNode.update_value)
     prop_obj = PointerProperty(name="Object", type=bpy.types.Object)
@@ -999,7 +999,7 @@ class BooleanModNode(Node, ScModifierNode):
         self.prop_obj.draw_type = self.prop_draw_mode
 class CastModNode(Node, ScModifierNode):
     bl_idname = "CastModNode"
-    bl_label = "Cast Modifier"
+    bl_label = "Cast"
 
     cast_type = EnumProperty(items=[("SPHERE", "Sphere", ""), ("CYLINDER", "Cylinder", ""), ("CUBOID", "Cuboid", "")], update=ScNode.update_value)
     use_x = BoolProperty(name="X", default=True, update=ScNode.update_value)
@@ -1051,7 +1051,7 @@ class CastModNode(Node, ScModifierNode):
         return super().post_execute()
 class CorrectiveSmoothModNode(Node, ScModifierNode):
     bl_idname = "CorrectiveSmoothModNode"
-    bl_label = "Corrective Smooth Modifier"
+    bl_label = "Corrective Smooth"
     
     factor = FloatProperty(default=0.5, soft_min=0.0, soft_max=1.0, update=ScNode.update_value)
     iterations = IntProperty(name="Repeat", default=5, min=-32768, max=32767, soft_min=0, soft_max=200, update=ScNode.update_value)
@@ -1089,7 +1089,7 @@ class CorrectiveSmoothModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].invert_vertex_group = self.invert_vertex_group
 class CurveModNode(Node, ScModifierNode):
     bl_idname = "CurveModNode"
-    bl_label = "Curve Modifier"
+    bl_label = "Curve"
     
     vertex_group = StringProperty(name="Vertex Group", update=ScNode.update_value)
     object = PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
@@ -1117,7 +1117,7 @@ class CurveModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].deform_axis = self.deform_axis
 class DecimateModNode(Node, ScModifierNode):
     bl_idname = "DecimateModNode"
-    bl_label = "Decimate Modifier"
+    bl_label = "Decimate"
 
     decimate_type = EnumProperty(items=[("COLLAPSE", "Collapse", ""), ("UNSUBDIV", "Un-Subdivide", ""), ("DISSOLVE", "Planar", "")], default="COLLAPSE", update=ScNode.update_value)
     vertex_group = StringProperty(update=ScNode.update_value)
@@ -1180,7 +1180,7 @@ class DecimateModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].delimit = self.delimit
 class DisplaceModNode(Node, ScModifierNode):
     bl_idname = "DisplaceModNode"
-    bl_label = "Displace Modifier"
+    bl_label = "Displace"
 
     texture = PointerProperty(type=bpy.types.Texture)
     direction = EnumProperty(items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", ""), ("NORMAL", "Normal", ""), ("CUSTOM_NORMAL", "Custom Normal", ""), ("RGB_TO_XYZ", "RGB to XYZ", "")], default="NORMAL", update=ScNode.update_value)
@@ -1236,7 +1236,7 @@ class DisplaceModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].strength = self.inputs["Strength"].execute()
 class EdgeSplitModNode(Node, ScModifierNode):
     bl_idname = "EdgeSplitModNode"
-    bl_label = "Edge Split Modifier"
+    bl_label = "Edge Split"
     
     split_angle = FloatProperty(name="Sharpness", default=0.523599, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
     use_edge_angle = BoolProperty(default=True, update=ScNode.update_value)
@@ -1255,7 +1255,7 @@ class EdgeSplitModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].use_edge_sharp = self.inputs["Sharp Edges"].execute()
 class LaplacianSmoothModNode(Node, ScModifierNode):
     bl_idname = "LaplacianSmoothModNode"
-    bl_label = "Laplacian Smooth Modifier"
+    bl_label = "Laplacian Smooth"
 
     iterations = IntProperty(name="Repeat", default=1, min=-32768, max=32767, soft_min=0, soft_max=200, update=ScNode.update_value)
     use_x = BoolProperty(name="X", default=True, update=ScNode.update_value)
@@ -1296,7 +1296,7 @@ class LaplacianSmoothModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].vertex_group = self.vertex_group
 class MirrorModNode(Node, ScModifierNode):
     bl_idname = "MirrorModNode"
-    bl_label = "Mirror Modifier"
+    bl_label = "Mirror"
     
     use_x = BoolProperty(name="X", default=True, update=ScNode.update_value)
     use_y = BoolProperty(name="Y", update=ScNode.update_value)
@@ -1346,7 +1346,7 @@ class MirrorModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].mirror_object = self.mirror_object
 class RemeshModNode(Node, ScModifierNode):
     bl_idname = "RemeshModNode"
-    bl_label = "Remesh Modifier"
+    bl_label = "Remesh"
     
     mode = EnumProperty(name="Mode", items=[("BLOCKS", "Blocks", ""), ("SMOOTH", "Smooth", ""), ("SHARP", "Sharp", "")], default="SHARP", update=ScNode.update_value)
     octree_depth = IntProperty(name="Octree Depth", default=4, min=1, max=12, update=ScNode.update_value)
@@ -1379,7 +1379,7 @@ class RemeshModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].threshold = self.inputs["Threshold"].execute()
 class ScrewModNode(Node, ScModifierNode):
     bl_idname = "ScrewModNode"
-    bl_label = "Screw Modifier"
+    bl_label = "Screw"
 
     axis = EnumProperty(name="Axis", items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="Z", update=ScNode.update_value)
     object = PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
@@ -1440,7 +1440,7 @@ class ScrewModNode(Node, ScModifierNode):
         return super().post_execute()
 class SimpleDeformModNode(Node, ScModifierNode):
     bl_idname = "SimpleDeformModNode"
-    bl_label = "Simple Deform Modifier"
+    bl_label = "Simple Deform"
 
     vertex_group = StringProperty(name="Vertex Group", update=ScNode.update_value)
     deform_method = EnumProperty(items=[("TWIST", "Twist", ""), ("BEND", "Bend", ""), ("TAPER", "Taper", ""), ("STRETCH", "Stretch", "")], default="TWIST", update=ScNode.update_value)
@@ -1492,7 +1492,7 @@ class SimpleDeformModNode(Node, ScModifierNode):
         return super().post_execute()
 class SkinModNode(Node, ScModifierNode):
     bl_idname = "SkinModNode"
-    bl_label = "Skin Modifier"
+    bl_label = "Skin"
 
     branch_smoothing = FloatProperty(name="Branch Smoothing", default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
     use_smooth_shade = BoolProperty(name="Smooth Shading", update=ScNode.update_value)
@@ -1531,7 +1531,7 @@ class SkinModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].use_z_symmetry = self.inputs["Z"].execute()
 class SmoothModNode(Node, ScModifierNode):
     bl_idname = "SmoothModNode"
-    bl_label = "Smooth Modifier"
+    bl_label = "Smooth"
 
     use_x = BoolProperty(name="X", default=True, update=ScNode.update_value)
     use_y = BoolProperty(name="Y", default=True, update=ScNode.update_value)
@@ -1562,7 +1562,7 @@ class SmoothModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].vertex_group = self.vertex_group
 class SolidifyModNode(Node, ScModifierNode):
     bl_idname = "SolidifyModNode"
-    bl_label = "Solidify Modifier"
+    bl_label = "Solidify"
     
     thickness = FloatProperty(name="Thickness", default=0.01, update=ScNode.update_value)
     thickness_clamp = FloatProperty(name="Clamp", default=0.0, min=0.0, max=100.0, update=ScNode.update_value)
@@ -1628,7 +1628,7 @@ class SolidifyModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].material_offset_rim = self.inputs["Material Offset Rim"].execute()
 class SubdivideModNode(Node, ScModifierNode):
     bl_idname = "SubdivideModNode"
-    bl_label = "Subdivision Surface Modifier"
+    bl_label = "Subdivision Surface"
     
     subdivision_type = EnumProperty(items=[("CATMULL_CLARK", "Catmull-Clark", ""), ("SIMPLE", "Simple", "")], default="CATMULL_CLARK", update=ScNode.update_value)
     levels = IntProperty(default=1, min=0, max=11, soft_max=6, update=ScNode.update_value)
@@ -1662,7 +1662,7 @@ class SubdivideModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].show_only_control_edges = self.inputs["Optimal Display"].execute()
 class TriangulateModNode(Node, ScModifierNode):
     bl_idname = "TriangulateModNode"
-    bl_label = "Triangulate Modifier"
+    bl_label = "Triangulate"
     
     quad_method = EnumProperty(items=[("BEAUTY", "Beauty", ""), ("FIXED", "Fixed", ""), ("FIXED_ALTERNATE", "Fixed Alternate", ""), ("SHORTEST_DIAGONAL", "Shortest Diagonal", "")], default="SHORTEST_DIAGONAL", update=ScNode.update_value)
     ngon_method = EnumProperty(items=[("BEAUTY", "Beauty", ""), ("CLIP", "Clip", "")], default="BEAUTY", update=ScNode.update_value)
@@ -1679,7 +1679,7 @@ class TriangulateModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].ngon_method = self.ngon_method
 class WireframeModNode(Node, ScModifierNode):
     bl_idname = "WireframeModNode"
-    bl_label = "Wireframe Modifier"
+    bl_label = "Wireframe"
 
     thickness = FloatProperty(update=ScNode.update_value)
     vertex_group = StringProperty(update=ScNode.update_value)
