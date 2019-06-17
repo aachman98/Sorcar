@@ -1,0 +1,1 @@
+This directory contains all the icons used in Sorcar (added in v2.0.4).
