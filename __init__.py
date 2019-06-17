@@ -4440,6 +4440,7 @@ def register_menu_icons():
     global menu_icons
     menu_icons = bpy.utils.previews.new()
     icons_dir = bpy.utils.user_resource('SCRIPTS', "addons/") + __name__ + "/icons/"
+    menu_icons.load("sc.icon_search", icons_dir + "000_red_white_search.png", 'IMAGE')
     menu_icons.load("sc.icon_inputs", icons_dir + "001_red_white_inputs.png", 'IMAGE')
     menu_icons.load("sc.icon_transform", icons_dir + "002_red_white_transform.png", 'IMAGE')
     menu_icons.load("sc.icons_conversion", icons_dir + "003_red_white_conversion.png", 'IMAGE')
@@ -4490,6 +4491,19 @@ node_categories = [(ScNodeCategory("sc.inputs", "Mesh", items=[NodeItem(i.bl_idn
                    (ScNodeCategory("sc.control", "Flow Control", items=[NodeItem(i.bl_idname) for i in control]), "sc.icons_control"),
                    (ScNodeCategory("sc.settings", "Settings", items=[NodeItem(i.bl_idname) for i in settings]), "sc.icons_settings"),
                    (ScNodeCategory("sc.outputs", "Outputs", items=[NodeItem(i.bl_idname) for i in outputs]), "sc.icons_outputs")]
+class NODE_MT_add(bpy.types.Menu):
+    bl_space_type = 'NODE_EDITOR'
+    bl_label = "Add"
+
+    def draw(self, context):
+        global menu_icons
+        layout = self.layout
+        layout.operator_context = 'INVOKE_DEFAULT'
+        props = layout.operator("node.add_search", text="Search...", icon_value=menu_icons["sc.icon_search"].icon_id)
+        props.use_transform = True
+        layout.separator()
+        # actual node submenus are defined by draw functions from node categories
+        nodeitems_utils.draw_node_categories_menu(self, context)
 ##############################################################
 
 def register_node_categories(identifier, cat_list_icon):
@@ -4532,7 +4546,6 @@ def register_node_categories(identifier, cat_list_icon):
     def draw_add_menu(self, context):
         global menu_icons
         layout = self.layout
-        layout.separator()
         for cat in cat_list_icon:
             if (not cat == "---"):
                 if cat[0].poll(context):
