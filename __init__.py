@@ -2,14 +2,14 @@ print("______________________________________________________")
 bl_info = {
     "name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (2, 0, 4),
+    "version": (2, 0, 5),
     "blender": (2, 79, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
     "category": "Node"}
 
 import bpy
-import bmesh
+import bpy.utils.previews
 import nodeitems_utils
 import random
 import requests
@@ -17,7 +17,7 @@ import math
 
 from bpy.types import NodeTree, Node, NodeSocket, Operator
 from bpy.props import IntProperty, FloatProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, PointerProperty, BoolVectorProperty
-from nodeitems_utils import NodeCategory, NodeItem
+from nodeitems_utils import NodeCategory, NodeItem, NodeItemCustom, _node_categories
 from mathutils import Vector
 
 ######################### ADDON UPDATER ######################
@@ -714,7 +714,7 @@ class GridNode(Node, ScInputNode):
         bpy.ops.mesh.primitive_grid_add(x_subdivisions=self.inputs["X Subdivisions"].execute(), y_subdivisions=self.inputs["Y Subdivisions"].execute(), radius=self.inputs["Radius"].execute())
 class SuzanneNode(Node, ScInputNode):
     bl_idname = "SuzanneNode"
-    bl_label = "Suzanne"
+    bl_label = "Suzanne (Monkey)"
     
     prop_radius = FloatProperty(name="Radius", default=1.0, min=0.0, update=ScNode.update_value)
 
@@ -857,7 +857,7 @@ class ResizeNode(Node, ScTransformNode):
 # Modifiers
 class ArrayModNode(Node, ScModifierNode):
     bl_idname = "ArrayModNode"
-    bl_label = "Array"
+    bl_label = "Array Modifier"
 
     fit_type = EnumProperty(name="Fit Type", items=[("FIXED_COUNT", "Fixed Count", ""), ("FIT_LENGTH", "Fit Length", ""), ("FIT_CURVE", "Fit Curve", "")], default="FIXED_COUNT", update=ScNode.update_value)
     count = IntProperty(name="Count", default=2, min=1, max=1000, update=ScNode.update_value)
@@ -919,7 +919,7 @@ class ArrayModNode(Node, ScModifierNode):
         return super().post_execute()
 class BevelModNode(Node, ScModifierNode):
     bl_idname = "BevelModNode"
-    bl_label = "Bevel"
+    bl_label = "Bevel Modifier"
     
     width = FloatProperty(name="Width", default=0.1, min=0.0, update=ScNode.update_value)
     segments = IntProperty(name="Segments", default=1, min=0, max=100, update=ScNode.update_value)
@@ -965,7 +965,7 @@ class BevelModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].offset_type = self.offset_type
 class BooleanModNode(Node, ScModifierNode):
     bl_idname = "BooleanModNode"
-    bl_label = "Boolean"
+    bl_label = "Boolean Modifier"
     
     prop_op = EnumProperty(name="Operation", items=[("DIFFERENCE", "Difference", ""), ("UNION", "Union", ""), ("INTERSECT", "Intersect", "")], default="INTERSECT", update=ScNode.update_value)
     prop_obj = PointerProperty(name="Object", type=bpy.types.Object)
@@ -999,7 +999,7 @@ class BooleanModNode(Node, ScModifierNode):
         self.prop_obj.draw_type = self.prop_draw_mode
 class CastModNode(Node, ScModifierNode):
     bl_idname = "CastModNode"
-    bl_label = "Cast"
+    bl_label = "Cast Modifier"
 
     cast_type = EnumProperty(items=[("SPHERE", "Sphere", ""), ("CYLINDER", "Cylinder", ""), ("CUBOID", "Cuboid", "")], update=ScNode.update_value)
     use_x = BoolProperty(name="X", default=True, update=ScNode.update_value)
@@ -1051,7 +1051,7 @@ class CastModNode(Node, ScModifierNode):
         return super().post_execute()
 class CorrectiveSmoothModNode(Node, ScModifierNode):
     bl_idname = "CorrectiveSmoothModNode"
-    bl_label = "Corrective Smooth"
+    bl_label = "Corrective Smooth Modifier"
     
     factor = FloatProperty(default=0.5, soft_min=0.0, soft_max=1.0, update=ScNode.update_value)
     iterations = IntProperty(name="Repeat", default=5, min=-32768, max=32767, soft_min=0, soft_max=200, update=ScNode.update_value)
@@ -1089,7 +1089,7 @@ class CorrectiveSmoothModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].invert_vertex_group = self.invert_vertex_group
 class CurveModNode(Node, ScModifierNode):
     bl_idname = "CurveModNode"
-    bl_label = "Curve"
+    bl_label = "Curve Modifier"
     
     vertex_group = StringProperty(name="Vertex Group", update=ScNode.update_value)
     object = PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
@@ -1117,7 +1117,7 @@ class CurveModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].deform_axis = self.deform_axis
 class DecimateModNode(Node, ScModifierNode):
     bl_idname = "DecimateModNode"
-    bl_label = "Decimate"
+    bl_label = "Decimate Modifier"
 
     decimate_type = EnumProperty(items=[("COLLAPSE", "Collapse", ""), ("UNSUBDIV", "Un-Subdivide", ""), ("DISSOLVE", "Planar", "")], default="COLLAPSE", update=ScNode.update_value)
     vertex_group = StringProperty(update=ScNode.update_value)
@@ -1180,7 +1180,7 @@ class DecimateModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].delimit = self.delimit
 class DisplaceModNode(Node, ScModifierNode):
     bl_idname = "DisplaceModNode"
-    bl_label = "Displace"
+    bl_label = "Displace Modifier"
 
     texture = PointerProperty(type=bpy.types.Texture)
     direction = EnumProperty(items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", ""), ("NORMAL", "Normal", ""), ("CUSTOM_NORMAL", "Custom Normal", ""), ("RGB_TO_XYZ", "RGB to XYZ", "")], default="NORMAL", update=ScNode.update_value)
@@ -1236,7 +1236,7 @@ class DisplaceModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].strength = self.inputs["Strength"].execute()
 class EdgeSplitModNode(Node, ScModifierNode):
     bl_idname = "EdgeSplitModNode"
-    bl_label = "Edge Split"
+    bl_label = "Edge Split Modifier"
     
     split_angle = FloatProperty(name="Sharpness", default=0.523599, min=0.0, max=3.14159, subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
     use_edge_angle = BoolProperty(default=True, update=ScNode.update_value)
@@ -1255,7 +1255,7 @@ class EdgeSplitModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].use_edge_sharp = self.inputs["Sharp Edges"].execute()
 class LaplacianSmoothModNode(Node, ScModifierNode):
     bl_idname = "LaplacianSmoothModNode"
-    bl_label = "Laplacian Smooth"
+    bl_label = "Laplacian Smooth Modifier"
 
     iterations = IntProperty(name="Repeat", default=1, min=-32768, max=32767, soft_min=0, soft_max=200, update=ScNode.update_value)
     use_x = BoolProperty(name="X", default=True, update=ScNode.update_value)
@@ -1296,7 +1296,7 @@ class LaplacianSmoothModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].vertex_group = self.vertex_group
 class MirrorModNode(Node, ScModifierNode):
     bl_idname = "MirrorModNode"
-    bl_label = "Mirror"
+    bl_label = "Mirror Modifier"
     
     use_x = BoolProperty(name="X", default=True, update=ScNode.update_value)
     use_y = BoolProperty(name="Y", update=ScNode.update_value)
@@ -1346,7 +1346,7 @@ class MirrorModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].mirror_object = self.mirror_object
 class RemeshModNode(Node, ScModifierNode):
     bl_idname = "RemeshModNode"
-    bl_label = "Remesh"
+    bl_label = "Remesh Modifier"
     
     mode = EnumProperty(name="Mode", items=[("BLOCKS", "Blocks", ""), ("SMOOTH", "Smooth", ""), ("SHARP", "Sharp", "")], default="SHARP", update=ScNode.update_value)
     octree_depth = IntProperty(name="Octree Depth", default=4, min=1, max=12, update=ScNode.update_value)
@@ -1379,7 +1379,7 @@ class RemeshModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].threshold = self.inputs["Threshold"].execute()
 class ScrewModNode(Node, ScModifierNode):
     bl_idname = "ScrewModNode"
-    bl_label = "Screw"
+    bl_label = "Screw Modifier"
 
     axis = EnumProperty(name="Axis", items=[("X", "X", ""), ("Y", "Y", ""), ("Z", "Z", "")], default="Z", update=ScNode.update_value)
     object = PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
@@ -1440,7 +1440,7 @@ class ScrewModNode(Node, ScModifierNode):
         return super().post_execute()
 class SimpleDeformModNode(Node, ScModifierNode):
     bl_idname = "SimpleDeformModNode"
-    bl_label = "Simple Deform"
+    bl_label = "Simple Deform Modifier"
 
     vertex_group = StringProperty(name="Vertex Group", update=ScNode.update_value)
     deform_method = EnumProperty(items=[("TWIST", "Twist", ""), ("BEND", "Bend", ""), ("TAPER", "Taper", ""), ("STRETCH", "Stretch", "")], default="TWIST", update=ScNode.update_value)
@@ -1492,7 +1492,7 @@ class SimpleDeformModNode(Node, ScModifierNode):
         return super().post_execute()
 class SkinModNode(Node, ScModifierNode):
     bl_idname = "SkinModNode"
-    bl_label = "Skin"
+    bl_label = "Skin Modifier"
 
     branch_smoothing = FloatProperty(name="Branch Smoothing", default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
     use_smooth_shade = BoolProperty(name="Smooth Shading", update=ScNode.update_value)
@@ -1531,7 +1531,7 @@ class SkinModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].use_z_symmetry = self.inputs["Z"].execute()
 class SmoothModNode(Node, ScModifierNode):
     bl_idname = "SmoothModNode"
-    bl_label = "Smooth"
+    bl_label = "Smooth Modifier"
 
     use_x = BoolProperty(name="X", default=True, update=ScNode.update_value)
     use_y = BoolProperty(name="Y", default=True, update=ScNode.update_value)
@@ -1562,7 +1562,7 @@ class SmoothModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].vertex_group = self.vertex_group
 class SolidifyModNode(Node, ScModifierNode):
     bl_idname = "SolidifyModNode"
-    bl_label = "Solidify"
+    bl_label = "Solidify Modifier"
     
     thickness = FloatProperty(name="Thickness", default=0.01, update=ScNode.update_value)
     thickness_clamp = FloatProperty(name="Clamp", default=0.0, min=0.0, max=100.0, update=ScNode.update_value)
@@ -1628,7 +1628,7 @@ class SolidifyModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].material_offset_rim = self.inputs["Material Offset Rim"].execute()
 class SubdivideModNode(Node, ScModifierNode):
     bl_idname = "SubdivideModNode"
-    bl_label = "Subdivision Surface"
+    bl_label = "Subdivision Surface Modifier"
     
     subdivision_type = EnumProperty(items=[("CATMULL_CLARK", "Catmull-Clark", ""), ("SIMPLE", "Simple", "")], default="CATMULL_CLARK", update=ScNode.update_value)
     levels = IntProperty(default=1, min=0, max=11, soft_max=6, update=ScNode.update_value)
@@ -1662,7 +1662,7 @@ class SubdivideModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].show_only_control_edges = self.inputs["Optimal Display"].execute()
 class TriangulateModNode(Node, ScModifierNode):
     bl_idname = "TriangulateModNode"
-    bl_label = "Triangulate"
+    bl_label = "Triangulate Modifier"
     
     quad_method = EnumProperty(items=[("BEAUTY", "Beauty", ""), ("FIXED", "Fixed", ""), ("FIXED_ALTERNATE", "Fixed Alternate", ""), ("SHORTEST_DIAGONAL", "Shortest Diagonal", "")], default="SHORTEST_DIAGONAL", update=ScNode.update_value)
     ngon_method = EnumProperty(items=[("BEAUTY", "Beauty", ""), ("CLIP", "Clip", "")], default="BEAUTY", update=ScNode.update_value)
@@ -1679,7 +1679,7 @@ class TriangulateModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].ngon_method = self.ngon_method
 class WireframeModNode(Node, ScModifierNode):
     bl_idname = "WireframeModNode"
-    bl_label = "Wireframe"
+    bl_label = "Wireframe Modifier"
 
     thickness = FloatProperty(update=ScNode.update_value)
     vertex_group = StringProperty(update=ScNode.update_value)
@@ -3257,6 +3257,9 @@ class ScatterNode(Node, ScObjectOperatorNode):
                 if ("Z" in  self.prop_rotation):
                     mesh.rotation_axis_angle[3] = ((self.obj.data.vertices[i.vertices[0]].normal[2]+self.obj.data.vertices[i.vertices[1]].normal[2])/2)+1
                 mesh.rotation_mode = 'XYZ'
+            mesh.rotation_mode = 'AXIS_ANGLE'
+            mesh.rotation_axis_angle[0] = 3.14159
+            mesh.rotation_mode = 'XYZ'
             meshes.append(mesh)
             if (re_evaluate):
                 self.mesh = self.inputs["Mesh"].execute()
@@ -3620,20 +3623,26 @@ class RandomFloatNode(Node, ScConstantNode):
     prop_min = FloatProperty(name="Min", update=ScNode.update_value)
     prop_max = FloatProperty(name="Max", default=1.0, update=ScNode.update_value)
     prop_seed = IntProperty(name="Seed", update=ScNode.update_value)
+    prop_once = BoolProperty(update=ScNode.update_value)
+    val = FloatProperty()
 
     def init(self, context):
         self.inputs.new("ScFloatSocket", "Min").prop_prop = "prop_min"
         self.inputs.new("ScFloatSocket", "Max").prop_prop = "prop_max"
         self.inputs.new("ScIntSocket", "Seed").prop_prop = "prop_seed"
+        self.inputs.new("ScBoolSocket", "Once").prop_prop = "prop_once"
         self.outputs.new("ScFloatSocket", "Value")
         super().init(context)
     
     def functionality(self):
         if (self.first_time):
             random.seed(self.inputs["Seed"].execute())
+            self.val = random.uniform(self.inputs["Min"].execute(), self.inputs["Max"].execute())
+        elif (not self.inputs["Once"].execute()):
+            self.val = random.uniform(self.inputs["Min"].execute(), self.inputs["Max"].execute())
     
     def post_execute(self):
-        return random.uniform(self.inputs["Min"].execute(), self.inputs["Max"].execute())
+        return self.val
 class RandomIntNode(Node, ScConstantNode):
     bl_idname = "RandomIntNode"
     bl_label = "Random Integer"
@@ -3641,37 +3650,48 @@ class RandomIntNode(Node, ScConstantNode):
     prop_min = IntProperty(name="Min", default=1, update=ScNode.update_value)
     prop_max = IntProperty(name="Max", default=5, update=ScNode.update_value)
     prop_seed = IntProperty(name="Seed", update=ScNode.update_value)
+    prop_once = BoolProperty(update=ScNode.update_value)
+    val = IntProperty()
 
     def init(self, context):
         self.inputs.new("ScIntSocket", "Min").prop_prop = "prop_min"
         self.inputs.new("ScIntSocket", "Max").prop_prop = "prop_max"
         self.inputs.new("ScIntSocket", "Seed").prop_prop = "prop_seed"
+        self.inputs.new("ScBoolSocket", "Once").prop_prop = "prop_once"
         self.outputs.new("ScIntSocket", "Value")
         super().init(context)
     
     def functionality(self):
         if (self.first_time):
             random.seed(self.inputs["Seed"].execute())
-    
+            self.val = random.randint(self.inputs["Min"].execute(), self.inputs["Max"].execute())
+        elif (not self.inputs["Once"].execute()):
+            self.val = random.randint(self.inputs["Min"].execute(), self.inputs["Max"].execute())
     def post_execute(self):
-        return random.randint(self.inputs["Min"].execute(), self.inputs["Max"].execute())
+        return self.val
 class RandomBoolNode(Node, ScConstantNode):
     bl_idname = "RandomBoolNode"
     bl_label = "Random Boolean"
 
     prop_seed = IntProperty(name="Seed", update=ScNode.update_value)
+    prop_once = BoolProperty(update=ScNode.update_value)
+    val = BoolProperty()
 
     def init(self, context):
         self.inputs.new("ScIntSocket", "Seed").prop_prop = "prop_seed"
+        self.inputs.new("ScBoolSocket", "Once").prop_prop = "prop_once"
         self.outputs.new("ScBoolSocket", "Value")
         super().init(context)
     
     def functionality(self):
         if (self.first_time):
             random.seed(self.inputs["Seed"].execute())
-    
+            self.val = bool(random.getrandbits(1))
+        elif (not self.inputs["Once"].execute()):
+            self.val = bool(random.getrandbits(1))
+        
     def post_execute(self):
-        return bool(random.getrandbits(1))
+        return self.val
 class RandomAngleNode(Node, ScConstantNode):
     bl_idname = "RandomAngleNode"
     bl_label = "Random Angle"
@@ -3679,20 +3699,26 @@ class RandomAngleNode(Node, ScConstantNode):
     prop_min = FloatProperty(name="Min", subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
     prop_max = FloatProperty(name="Max", subtype="ANGLE", unit="ROTATION", default=3.14159, update=ScNode.update_value)
     prop_seed = IntProperty(name="Seed", update=ScNode.update_value)
+    prop_once = BoolProperty(update=ScNode.update_value)
+    val = FloatProperty()
 
     def init(self, context):
         self.inputs.new("ScAngleSocket", "Min").prop_prop = "prop_min"
         self.inputs.new("ScAngleSocket", "Max").prop_prop = "prop_max"
         self.inputs.new("ScIntSocket", "Seed").prop_prop = "prop_seed"
+        self.inputs.new("ScBoolSocket", "Once").prop_prop = "prop_once"
         self.outputs.new("ScAngleSocket", "Value")
         super().init(context)
     
     def functionality(self):
         if (self.first_time):
             random.seed(self.inputs["Seed"].execute())
+            self.val = random.uniform(self.inputs["Min"].execute(), self.inputs["Max"].execute())
+        elif (not self.inputs["Once"].execute()):
+            self.val = random.uniform(self.inputs["Min"].execute(), self.inputs["Max"].execute())
     
     def post_execute(self):
-        return random.uniform(self.inputs["Min"].execute(), self.inputs["Max"].execute())
+        return self.val
 class StringNode(Node, ScConstantNode):
     bl_idname = "StringNode"
     bl_label = "String"
@@ -3857,6 +3883,30 @@ class TrigonometricOpNode(Node, ScUtilityNode):
                 return math.tanh(self.inputs["X"].execute())
             else:
                 return math.atan(self.inputs["X"].execute())
+class VectorOpNode(Node, ScUtilityNode):
+    bl_idname = "VectorOpNode"
+    bl_label = "Vector Operation"
+
+    prop_op = EnumProperty(name="Opertion", items=[("ADD", "X + Y", "Addition"), ("SUB", "X - Y", "Subtraction"), ("MULT", "X * Y", "Cross Product")], default="ADD", update=ScNode.update_value)
+    prop_x = FloatVectorProperty(name="X", update=ScNode.update_value)
+    prop_y = FloatVectorProperty(name="Y", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatVectorSocket", "X").prop_prop = "prop_x"
+        self.inputs.new("ScFloatVectorSocket", "Y").prop_prop = "prop_y"
+        self.outputs.new("ScFloatVectorSocket", "")
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_op")
+    
+    def execute(self):
+        if (self.prop_op == "ADD"):
+            return Vector(self.inputs["X"].execute())+Vector(self.inputs["Y"].execute())
+        elif (self.prop_op == "SUB"):
+            return Vector(self.inputs["X"].execute())-Vector(self.inputs["Y"].execute())
+        else:
+            return Vector(self.inputs["X"].execute()).cross(Vector(self.inputs["Y"].execute()))
 class GetComponentInfoNode(Node, ScUtilityNode):
     bl_idname = "GetComponentInfoNode"
     bl_label = "Get Component Info"
@@ -4250,6 +4300,34 @@ class SwitchNode(Node, ScControlNode):
     
     def post_execute(self):
         return self.inputs[max(min(self.inputs["Integer"].execute(), 10), 0)+1].execute()
+class SequenceNode(Node, ScControlNode):
+    bl_idname = "SequenceNode"
+    bl_label = "Sequence"
+
+    data = None
+
+    def init(self, context):
+        self.inputs.new("ScUniversalSocket", "1")
+        self.inputs.new("ScUniversalSocket", "2")
+        self.inputs.new("ScUniversalSocket", "3")
+        self.inputs.new("ScUniversalSocket", "4")
+        self.inputs.new("ScUniversalSocket", "5")
+        self.inputs.new("ScUniversalSocket", "6")
+        self.inputs.new("ScUniversalSocket", "7")
+        self.inputs.new("ScUniversalSocket", "8")
+        self.inputs.new("ScUniversalSocket", "9")
+        self.inputs.new("ScUniversalSocket", "10")
+        self.outputs.new("ScUniversalSocket", "")
+        super().init(context)
+    
+    def functionality(self):
+        for i in self.inputs:
+            data = i.execute()
+            if (not data == None):
+                self.data = data
+    
+    def post_execute(self):
+        return self.data
 # Settings
 class CursorLocationNode(Node, ScSettingNode):
     bl_idname = "CursorLocationNode"
@@ -4355,39 +4433,120 @@ class ExportMeshFBXNode(Node, ScOutputNode):
 ##############################################################
 
 
+########################### MENU #############################
+# Icons
+menu_icons = None
+def register_menu_icons():
+    global menu_icons
+    menu_icons = bpy.utils.previews.new()
+    icons_dir = bpy.utils.user_resource('SCRIPTS', "addons/") + __name__ + "/icons/"
+    menu_icons.load("sc.icon_inputs", icons_dir + "001_red_white_inputs.png", 'IMAGE')
+    menu_icons.load("sc.icon_transform", icons_dir + "002_red_white_transform.png", 'IMAGE')
+    menu_icons.load("sc.icons_conversion", icons_dir + "003_red_white_conversion.png", 'IMAGE')
+    menu_icons.load("sc.icons_selection", icons_dir + "004_red_white_selection.png", 'IMAGE')
+    menu_icons.load("sc.icons_deletion", icons_dir + "005_red_white_deletion.png", 'IMAGE')
+    menu_icons.load("sc.icons_edit_operators", icons_dir + "006_red_white_component operators.png", 'IMAGE')
+    menu_icons.load("sc.icons_object_operators", icons_dir + "007_red_white_mesh operators.png", 'IMAGE')
+    menu_icons.load("sc.icons_curve_operators", icons_dir + "008_red_white_curve operators.png", 'IMAGE')
+    menu_icons.load("sc.icons_modifiers", icons_dir + "009_red_white_modifiers.png", 'IMAGE')
+    menu_icons.load("sc.icons_constants", icons_dir + "010_red_white_constants.png", 'IMAGE')
+    menu_icons.load("sc.icons_utilities", icons_dir + "011_red_white_utilities.png", 'IMAGE')
+    menu_icons.load("sc.icons_control", icons_dir + "012_red_white_flow control.png", 'IMAGE')
+    menu_icons.load("sc.icons_settings", icons_dir + "013_red_white_settings.png", 'IMAGE')
+    menu_icons.load("sc.icons_outputs", icons_dir + "014_red_white_outputs.png", 'IMAGE')
+def unregister_menu_icons():
+    global menu_icons
+    bpy.utils.previews.remove(menu_icons)
+# Sub-menus
 inputs = [PlaneNode, CubeNode, CircleNode, UVSphereNode, IcoSphereNode, CylinderNode, ConeNode, GridNode, SuzanneNode, CustomMeshNode, CustomCurveNode] # TorusNode
 transform = [LocationNode, RotationNode, ScaleNode, TranslateNode, RotateNode, ResizeNode]
-modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CorrectiveSmoothModNode, CurveModNode, DecimateModNode, DisplaceModNode, EdgeSplitModNode, LaplacianSmoothModNode, MirrorModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, TriangulateModNode, WireframeModNode]
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode, ToStringNode, ToFloatNode, ToIntNode, ToBoolNode, CurveToMeshNode]
 selection = [SelectComponentsManuallyNode, SelectComponentByIndexNode, SelectFacesByMaterialNode, SelectFacesByNormalNode, SelectVerticesByVertexGroupNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLoopNode, SelectLoopRegionNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectAlternateFacesNode, SelectRandomNode, SelectRegionBoundaryNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectShortestPathNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
 deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode, DissolveVerticesNode, DissolveDegenerateNode, EdgeCollapseNode]
 edit_operators = [AddEdgeFaceNode, BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, ConvexHullNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, FlipNormalsNode, MakeNormalsConsistentNode, FlattenNode, FillEdgeLoopNode, FillGridNode, FillHolesBySidesNode, InsetNode, LoopCutNode, MaterialNode, MergeComponentsNode, OffsetEdgeLoopNode, PokeNode, RemoveDoublesNode, RotateEdgeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode, TriangulateFacesNode, UnSubdivideNode, VertexGroupNode] # ExtrudeRepeatNode
 object_operators = [ApplyTransformNode, CopyTransformNode, DuplicateMeshNode, MakeLinksNode, MergeMeshesNode, OriginNode, ScatterNode, ShadingNode, ViewportDrawModeNode, CyclesDrawModeNode]
 curve_operators = [CurveShapeNode, CurveGeometryNode, CurveSplineNode]
+modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CorrectiveSmoothModNode, CurveModNode, DecimateModNode, DisplaceModNode, EdgeSplitModNode, LaplacianSmoothModNode, MirrorModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, TriangulateModNode, WireframeModNode]
 constants = [FloatNode, IntNode, BoolNode, AngleNode, FloatVectorNode, AngleVectorNode, RandomFloatNode, RandomIntNode, RandomBoolNode, RandomAngleNode, StringNode]
-utilities = [AppendStringNode, BooleanOpNode, ComparisonOpNode, MathsOpNode, TrigonometricOpNode, GetComponentInfoNode, ClampNode, MapRangeNode, BreakVectorNode, PrintDataNode]
-control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode, IfElseNode, SwitchNode]
+utilities = [AppendStringNode, BooleanOpNode, ComparisonOpNode, MathsOpNode, TrigonometricOpNode, VectorOpNode, GetComponentInfoNode, ClampNode, MapRangeNode, BreakVectorNode]
+control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode, IfElseNode, SwitchNode, SequenceNode]
 settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
-outputs = [RefreshMeshNode, ExportMeshFBXNode]
+outputs = [RefreshMeshNode, ExportMeshFBXNode, PrintDataNode]
+# Main menu
+node_categories = [(ScNodeCategory("sc.inputs", "Mesh", items=[NodeItem(i.bl_idname) for i in inputs]), "sc.icon_inputs"),
+                   (ScNodeCategory("sc.transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]), "sc.icon_transform"),
+                   (ScNodeCategory("sc.conversion", "Conversion", items=[NodeItem(i.bl_idname) for i in conversion]), "sc.icons_conversion"),
+                   (ScNodeCategory("sc.selection", "Selection", items=[NodeItem(i.bl_idname) for i in selection]), "sc.icons_selection"),
+                   (ScNodeCategory("sc.deletion", "Deletion", items=[NodeItem(i.bl_idname) for i in deletion]), "sc.icons_deletion"),
+                   "---",
+                   (ScNodeCategory("sc.edit_operators", "Component Operators", items=[NodeItem(i.bl_idname) for i in edit_operators]), "sc.icons_edit_operators"),
+                   (ScNodeCategory("sc.object_operators", "Mesh Operators", items=[NodeItem(i.bl_idname) for i in object_operators]), "sc.icons_object_operators"),
+                   (ScNodeCategory("sc.curve_operators", "Curve Operators", items=[NodeItem(i.bl_idname) for i in curve_operators]), "sc.icons_curve_operators"),
+                   (ScNodeCategory("sc.modifiers", "Modifiers", items=[NodeItem(i.bl_idname) for i in modifiers]), "sc.icons_modifiers"),
+                   "---",
+                   (ScNodeCategory("sc.constants", "Constants", items=[NodeItem(i.bl_idname) for i in constants]), "sc.icons_constants"),
+                   (ScNodeCategory("sc.utilities", "Utilities", items=[NodeItem(i.bl_idname) for i in utilities]), "sc.icons_utilities"),
+                   "---",
+                   (ScNodeCategory("sc.control", "Flow Control", items=[NodeItem(i.bl_idname) for i in control]), "sc.icons_control"),
+                   (ScNodeCategory("sc.settings", "Settings", items=[NodeItem(i.bl_idname) for i in settings]), "sc.icons_settings"),
+                   (ScNodeCategory("sc.outputs", "Outputs", items=[NodeItem(i.bl_idname) for i in outputs]), "sc.icons_outputs")]
+##############################################################
 
-node_categories = [ScNodeCategory("sc.inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
-                   ScNodeCategory("sc.transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
-                   ScNodeCategory("sc.modifiers", "Modifiers", items=[NodeItem(i.bl_idname) for i in modifiers]),
-                   ScNodeCategory("sc.conversion", "Conversion", items=[NodeItem(i.bl_idname) for i in conversion]),
-                   ScNodeCategory("sc.selection", "Selection", items=[NodeItem(i.bl_idname) for i in selection]),
-                   ScNodeCategory("sc.deletion", "Deletion", items=[NodeItem(i.bl_idname) for i in deletion]),
-                   ScNodeCategory("sc.edit_operators", "Component Operators", items=[NodeItem(i.bl_idname) for i in edit_operators]),
-                   ScNodeCategory("sc.object_operators", "Mesh Operators", items=[NodeItem(i.bl_idname) for i in object_operators]),
-                   ScNodeCategory("sc.curve_operators", "Curve Operators", items=[NodeItem(i.bl_idname) for i in curve_operators]),
-                   ScNodeCategory("sc.constants", "Constants", items=[NodeItem(i.bl_idname) for i in constants]),
-                   ScNodeCategory("sc.utilities", "Utilities", items=[NodeItem(i.bl_idname) for i in utilities]),
-                   ScNodeCategory("sc.control", "Flow Control", items=[NodeItem(i.bl_idname) for i in control]),
-                   ScNodeCategory("sc.settings", "Settings", items=[NodeItem(i.bl_idname) for i in settings]),
-                   ScNodeCategory("sc.outputs", "Outputs", items=[NodeItem(i.bl_idname) for i in outputs])]
+def register_node_categories(identifier, cat_list_icon):
+    if identifier in _node_categories:
+        raise KeyError("Node categories list '%s' already registered" % identifier)
+        return
 
+    # works as draw function for both menus and panels
+    def draw_node_item(self, context):
+        layout = self.layout
+        col = layout.column()
+        for item in self.category.items(context):
+            item.draw(item, col, context)
+    
+    menu_types = []
+    panel_types = []
+    for cat in cat_list_icon:
+        if (not cat == "---"):
+            menu_type = type("NODE_MT_category_" + cat[0].identifier, (bpy.types.Menu,), {
+                "bl_space_type": 'NODE_EDITOR',
+                "bl_label": cat[0].name,
+                "category": cat[0],
+                "poll": cat[0].poll,
+                "draw": draw_node_item,
+                })
+            panel_type = type("NODE_PT_category_" + cat[0].identifier, (bpy.types.Panel,), {
+                "bl_space_type": 'NODE_EDITOR',
+                "bl_region_type": 'TOOLS',
+                "bl_label": cat[0].name,
+                "bl_category": cat[0].name,
+                "category": cat[0],
+                "poll": cat[0].poll,
+                "draw": draw_node_item,
+                })
+            menu_types.append(menu_type)
+            panel_types.append(panel_type)
+            bpy.utils.register_class(menu_type)
+            bpy.utils.register_class(panel_type)
+    
+    def draw_add_menu(self, context):
+        global menu_icons
+        layout = self.layout
+        layout.separator()
+        for cat in cat_list_icon:
+            if (not cat == "---"):
+                if cat[0].poll(context):
+                    layout.menu("NODE_MT_category_%s" % cat[0].identifier, icon_value=menu_icons[cat[1]].icon_id)
+            else:
+                layout.separator()
+    
+    # stores: (categories list, menu draw function, submenu types, panel types)
+    _node_categories[identifier] = ([i[0] for i in cat_list_icon if not i=="---"], draw_add_menu, menu_types, panel_types)
 def register():
-    nodeitems_utils.register_node_categories("ScNodeCategories", node_categories)
+    register_menu_icons()
+    register_node_categories("ScNodeCategories", node_categories)
     bpy.utils.register_module(__name__)
 def unregister():
+    unregister_menu_icons()
     nodeitems_utils.unregister_node_categories("ScNodeCategories")
     bpy.utils.unregister_module(__name__)
