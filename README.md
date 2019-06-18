@@ -1,5 +1,5 @@
 # Sorcar (formerly ProcGenMod)
-Procedural modeling in Blender using Node Editor (Latest version: v2.0.4)
+Procedural modeling in Blender using Node Editor (Latest version: v2.0.5)
 ![alt text](https://github.com/aachman98/Sorcar/raw/master/sorcar.png "Sorcar in action")
 
 Introduction Video: https://www.youtube.com/watch?v=nKEeGVtGdlk (outdated)
@@ -28,3 +28,6 @@ _NOTE: Re-run the operator if encountered any error/exception. To stop realtime 
 6. Add a "Refresh Mesh" node (from the Output category) and select it to display an option to refresh geometry (for cases when not using realtime preview).
 
 Open blender using a command prompt to view degub logs and errors, if encountered.
+
+## Contributors
+Mark Andrianov (@SevenNeumann) - Icons for Sorcar & layout design for main menu
