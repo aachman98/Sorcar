@@ -49,23 +49,6 @@ class ScAddonUpdater(Operator):
 ##############################################################
 
 
-########################## NODE-TREE #########################
-class ScNodeTree(NodeTree):
-    bl_idname = 'ScNodeTree'
-    bl_label = 'Sorcar'
-    bl_icon = 'MESH_CUBE'
-
-    def update(self):
-        for link in self.links:
-            if not (link.from_socket.rna_type == link.to_socket.rna_type or link.from_socket.rna_type.name in link.to_socket.friends or link.to_socket.rna_type.name in link.from_socket.friends):
-                self.links.remove(link)
-class ScNodeCategory(NodeCategory):
-    @classmethod
-    def poll(cls, context):
-        return context.space_data.tree_type == 'ScNodeTree'
-##############################################################
-
-
 ########################### SOCKETS ##########################
 # Socket base class
 class ScNodeSocket:
@@ -180,7 +163,7 @@ class ScNode:
         bpy.ops.sc.execute_node_op()
         return None
     def init(self, context):
-        self.hide = True
+        self.hide = self.id_data.prop_collapse
         self.use_custom_color = True
         self.color = self.node_color
     def override(self, mesh=False, edit=False):
@@ -447,10 +430,13 @@ class ScRealtimeMeshOp(Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     node = None
+    node_tree = None
 
     @classmethod
     def poll(cls, context):
-        return context.space_data.type == "NODE_EDITOR"
+        if (context.space_data.type == "NODE_EDITOR"):
+            return context.space_data.tree_type == "ScNodeTree"
+        return False
 
     def execute(self, context):
         bpy.ops.sc.execute_node_op()
@@ -461,10 +447,7 @@ class ScRealtimeMeshOp(Operator):
             print("DEBUG: ScRealtimeMeshOp: STOP")
             return {'FINISHED'}
         elif (event.type == "LEFTMOUSE"):
-            try:
-                node = context.active_node
-            except:
-                return {'PASS_THROUGH'}
+            node = context.space_data.node_tree.nodes.active
             if (not node == self.node):
                 print("DEBUG: ScRealtimeMeshOp: Active node changed")
                 self.node = node
@@ -477,15 +460,17 @@ class ScRealtimeMeshOp(Operator):
         return {'RUNNING_MODAL'}
 class ScSaveSelectionOp(Operator):
     bl_idname = "sc.save_selection_op"
-    bl_label = "Execute MeshNode"
+    bl_label = "Save Selection"
     bl_options = {"REGISTER", "UNDO"}
 
     @classmethod
     def poll(cls, context):
-        return context.space_data.type == "NODE_EDITOR"
+        if (context.space_data.type == "NODE_EDITOR"):
+            return context.space_data.tree_type == "ScNodeTree"
+        return False
     
     def execute(self, context):
-        node = context.active_node
+        node = context.space_data.node_tree.nodes.active
         if (node == None):
             print("DEBUG: ScSaveSelectionOp: No Active Node")
             return {'CANCELLED'}
@@ -498,10 +483,12 @@ class ScExecuteNodeOp(Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.space_data.type == "NODE_EDITOR"
+        if (context.space_data.type == "NODE_EDITOR"):
+            return context.space_data.tree_type == "ScNodeTree"
+        return False
 
     def execute(self, context):
-        node = context.active_node
+        node = context.space_data.node_tree.nodes.active
         if (not node == None):
             print("--- EXECUTE NODE: " + node.name + " ---")
             for group in bpy.data.node_groups:
@@ -1787,8 +1774,11 @@ class ToStringNode(Node, ScConversionNode):
         self.outputs.new("ScStringSocket", "String")
         super().init(context)
     
-    def post_execute(self):
-        return str(self.inputs["In"].execute())
+    def execute(self):
+        data = self.inputs["In"].execute()
+        if (not data == None):
+            return str(data)
+        return ""
 class ToFloatNode(Node, ScConversionNode):
     bl_idname = "ToFloatNode"
     bl_label = "To Float"
@@ -1800,11 +1790,11 @@ class ToFloatNode(Node, ScConversionNode):
         self.outputs.new("ScFloatSocket", "Float")
         super().init(context)
     
-    def pre_execute(self):
-        return True
-    
-    def post_execute(self):
-        return float(self.inputs["In"].execute())
+    def execute(self):
+        data = self.inputs["In"].execute()
+        if (not data == None):
+            return float(data)
+        return 0.0
 class ToIntNode(Node, ScConversionNode):
     bl_idname = "ToIntNode"
     bl_label = "To Integer"
@@ -1816,11 +1806,11 @@ class ToIntNode(Node, ScConversionNode):
         self.outputs.new("ScIntSocket", "Integer")
         super().init(context)
     
-    def pre_execute(self):
-        return True
-    
-    def post_execute(self):
-        return int(self.inputs["In"].execute())
+    def execute(self):
+        data = self.inputs["In"].execute()
+        if (not data == None):
+            return int(data)
+        return 0
 class ToBoolNode(Node, ScConversionNode):
     bl_idname = "ToBoolNode"
     bl_label = "To Boolean"
@@ -1832,11 +1822,11 @@ class ToBoolNode(Node, ScConversionNode):
         self.outputs.new("ScBoolSocket", "Boolean")
         super().init(context)
     
-    def pre_execute(self):
-        return True
-    
-    def post_execute(self):
-        return bool(self.inputs["In"].execute())
+    def execute(self):
+        data = self.inputs["In"].execute()
+        if (not data == None):
+            return bool(data)
+        return False
 class CurveToMeshNode(Node, ScConversionNode):
     bl_idname = "CurveToMeshNode"
     bl_label = "Curve To Mesh"
@@ -4435,29 +4425,24 @@ class ExportMeshFBXNode(Node, ScOutputNode):
 
 ########################### MENU #############################
 # Icons
-menu_icons = None
-def register_menu_icons():
-    global menu_icons
-    menu_icons = bpy.utils.previews.new()
-    icons_dir = bpy.utils.user_resource('SCRIPTS', "addons/") + __name__ + "/icons/"
-    menu_icons.load("sc.icon_search", icons_dir + "000_red_white_search.png", 'IMAGE')
-    menu_icons.load("sc.icon_inputs", icons_dir + "001_red_white_inputs.png", 'IMAGE')
-    menu_icons.load("sc.icon_transform", icons_dir + "002_red_white_transform.png", 'IMAGE')
-    menu_icons.load("sc.icons_conversion", icons_dir + "003_red_white_conversion.png", 'IMAGE')
-    menu_icons.load("sc.icons_selection", icons_dir + "004_red_white_selection.png", 'IMAGE')
-    menu_icons.load("sc.icons_deletion", icons_dir + "005_red_white_deletion.png", 'IMAGE')
-    menu_icons.load("sc.icons_edit_operators", icons_dir + "006_red_white_component operators.png", 'IMAGE')
-    menu_icons.load("sc.icons_object_operators", icons_dir + "007_red_white_mesh operators.png", 'IMAGE')
-    menu_icons.load("sc.icons_curve_operators", icons_dir + "008_red_white_curve operators.png", 'IMAGE')
-    menu_icons.load("sc.icons_modifiers", icons_dir + "009_red_white_modifiers.png", 'IMAGE')
-    menu_icons.load("sc.icons_constants", icons_dir + "010_red_white_constants.png", 'IMAGE')
-    menu_icons.load("sc.icons_utilities", icons_dir + "011_red_white_utilities.png", 'IMAGE')
-    menu_icons.load("sc.icons_control", icons_dir + "012_red_white_flow control.png", 'IMAGE')
-    menu_icons.load("sc.icons_settings", icons_dir + "013_red_white_settings.png", 'IMAGE')
-    menu_icons.load("sc.icons_outputs", icons_dir + "014_red_white_outputs.png", 'IMAGE')
-def unregister_menu_icons():
-    global menu_icons
-    bpy.utils.previews.remove(menu_icons)
+menu_icons = bpy.utils.previews.new()
+icons_dir = bpy.utils.user_resource('SCRIPTS', "addons/") + __name__ + "/icons/"
+menu_icons.load("sc.icon_sorcar", icons_dir + "sorcar_icon.png", 'IMAGE')
+menu_icons.load("sc.icon_search", icons_dir + "000_red_white_search.png", 'IMAGE')
+menu_icons.load("sc.icon_inputs", icons_dir + "001_red_white_inputs.png", 'IMAGE')
+menu_icons.load("sc.icon_transform", icons_dir + "002_red_white_transform.png", 'IMAGE')
+menu_icons.load("sc.icons_conversion", icons_dir + "003_red_white_conversion.png", 'IMAGE')
+menu_icons.load("sc.icons_selection", icons_dir + "004_red_white_selection.png", 'IMAGE')
+menu_icons.load("sc.icons_deletion", icons_dir + "005_red_white_deletion.png", 'IMAGE')
+menu_icons.load("sc.icons_edit_operators", icons_dir + "006_red_white_component operators.png", 'IMAGE')
+menu_icons.load("sc.icons_object_operators", icons_dir + "007_red_white_mesh operators.png", 'IMAGE')
+menu_icons.load("sc.icons_curve_operators", icons_dir + "008_red_white_curve operators.png", 'IMAGE')
+menu_icons.load("sc.icons_modifiers", icons_dir + "009_red_white_modifiers.png", 'IMAGE')
+menu_icons.load("sc.icons_constants", icons_dir + "010_red_white_constants.png", 'IMAGE')
+menu_icons.load("sc.icons_utilities", icons_dir + "011_red_white_utilities.png", 'IMAGE')
+menu_icons.load("sc.icons_control", icons_dir + "012_red_white_flow control.png", 'IMAGE')
+menu_icons.load("sc.icons_settings", icons_dir + "013_red_white_settings.png", 'IMAGE')
+menu_icons.load("sc.icons_outputs", icons_dir + "014_red_white_outputs.png", 'IMAGE')
 # Sub-menus
 inputs = [PlaneNode, CubeNode, CircleNode, UVSphereNode, IcoSphereNode, CylinderNode, ConeNode, GridNode, SuzanneNode, CustomMeshNode, CustomCurveNode] # TorusNode
 transform = [LocationNode, RotationNode, ScaleNode, TranslateNode, RotateNode, ResizeNode]
@@ -4473,7 +4458,25 @@ utilities = [AppendStringNode, BooleanOpNode, ComparisonOpNode, MathsOpNode, Tri
 control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode, IfElseNode, SwitchNode, SequenceNode]
 settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
 outputs = [RefreshMeshNode, ExportMeshFBXNode, PrintDataNode]
-# Main menu
+##############################################################
+
+
+########################## NODE-TREE #########################
+class ScNodeTree(NodeTree):
+    bl_idname = 'ScNodeTree'
+    bl_label = 'Sorcar'
+    bl_icon = 'MESH_CUBE'
+
+    prop_collapse = BoolProperty(name="Collapse Nodes")
+
+    def update(self):
+        for link in self.links:
+            if not (link.from_socket.rna_type == link.to_socket.rna_type or link.from_socket.rna_type.name in link.to_socket.friends or link.to_socket.rna_type.name in link.from_socket.friends):
+                self.links.remove(link)
+class ScNodeCategory(NodeCategory):
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.tree_type == 'ScNodeTree'
 node_categories = [(ScNodeCategory("sc.inputs", "Mesh", items=[NodeItem(i.bl_idname) for i in inputs]), "sc.icon_inputs"),
                    (ScNodeCategory("sc.transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]), "sc.icon_transform"),
                    (ScNodeCategory("sc.conversion", "Conversion", items=[NodeItem(i.bl_idname) for i in conversion]), "sc.icons_conversion"),
@@ -4499,12 +4502,130 @@ class NODE_MT_add(bpy.types.Menu):
         global menu_icons
         layout = self.layout
         layout.operator_context = 'INVOKE_DEFAULT'
-        props = layout.operator("node.add_search", text="Search...", icon_value=menu_icons["sc.icon_search"].icon_id)
-        props.use_transform = True
+        layout.operator("node.add_search", text="Search...", icon_value=menu_icons["sc.icon_search"].icon_id).use_transform = True
         layout.separator()
         # actual node submenus are defined by draw functions from node categories
         nodeitems_utils.draw_node_categories_menu(self, context)
+class NODE_MT_editor_menus(bpy.types.Menu):
+    bl_idname = "NODE_MT_editor_menus"
+    bl_label = ""
+
+    def draw(self, context):
+        self.draw_menus(self.layout, context)
+
+    @staticmethod
+    def draw_menus(layout, context):
+        layout.menu("NODE_MT_view")
+        layout.menu("NODE_MT_select")
+        layout.menu("NODE_MT_add")
+        layout.menu("NODE_MT_node")
+class NODE_HT_header(bpy.types.Header):
+    bl_space_type = 'NODE_EDITOR'
+
+    def draw(self, context):
+        layout = self.layout
+
+        scene = context.scene
+        snode = context.space_data
+        snode_id = snode.id
+        id_from = snode.id_from
+        toolsettings = context.tool_settings
+
+        row = layout.row(align=True)
+        row.template_header()
+
+        NODE_MT_editor_menus.draw_collapsible(context, layout)
+
+        layout.prop(snode, "tree_type", text="", expand=True)
+
+        if snode.tree_type == 'ShaderNodeTree':
+            if scene.render.use_shading_nodes:
+                layout.prop(snode, "shader_type", text="", expand=True)
+
+            ob = context.object
+            if (not scene.render.use_shading_nodes or snode.shader_type == 'OBJECT') and ob:
+                row = layout.row()
+                # disable material slot buttons when pinned, cannot find correct slot within id_from (#36589)
+                row.enabled = not snode.pin
+                # Show material.new when no active ID/slot exists
+                if not id_from and ob.type in {'MESH', 'CURVE', 'SURFACE', 'FONT', 'METABALL'}:
+                    row.template_ID(ob, "active_material", new="material.new")
+                # Material ID, but not for Lamps
+                if id_from and ob.type != 'LAMP':
+                    row.template_ID(id_from, "active_material", new="material.new")
+
+                # Don't show "Use Nodes" Button when Engine is BI for Lamps
+                if snode_id and not (scene.render.use_shading_nodes == 0 and ob.type == 'LAMP'):
+                    layout.prop(snode_id, "use_nodes")
+
+            if scene.render.use_shading_nodes and snode.shader_type == 'WORLD':
+                row = layout.row()
+                row.enabled = not snode.pin
+                row.template_ID(scene, "world", new="world.new")
+                if snode_id:
+                    row.prop(snode_id, "use_nodes")
+
+            if scene.render.use_shading_nodes and snode.shader_type == 'LINESTYLE':
+                rl = context.scene.render.layers.active
+                lineset = rl.freestyle_settings.linesets.active
+                if lineset is not None:
+                    row = layout.row()
+                    row.enabled = not snode.pin
+                    row.template_ID(lineset, "linestyle", new="scene.freestyle_linestyle_new")
+                    if snode_id:
+                        row.prop(snode_id, "use_nodes")
+
+        elif snode.tree_type == 'TextureNodeTree':
+            layout.prop(snode, "texture_type", text="", expand=True)
+
+            if id_from:
+                if snode.texture_type == 'BRUSH':
+                    layout.template_ID(id_from, "texture", new="texture.new")
+                else:
+                    layout.template_ID(id_from, "active_texture", new="texture.new")
+            if snode_id:
+                layout.prop(snode_id, "use_nodes")
+
+        elif snode.tree_type == 'CompositorNodeTree':
+            if snode_id:
+                layout.prop(snode_id, "use_nodes")
+            layout.prop(snode, "show_backdrop")
+            if snode.show_backdrop:
+                row = layout.row(align=True)
+                row.prop(snode, "backdrop_channels", text="", expand=True)
+            layout.prop(snode, "use_auto_render")
+        
+        elif snode.tree_type == 'ScNodeTree':
+            layout.template_ID(snode, "node_tree", new="node.new_node_tree")
+            if (not snode.node_tree == None):
+                layout.prop(snode.node_tree, "prop_collapse")
+        
+        else:
+            # Custom node tree is edited as independent ID block
+            layout.template_ID(snode, "node_tree", new="node.new_node_tree")
+
+        layout.prop(snode, "pin", text="")
+        layout.operator("node.tree_path_parent", text="", icon='FILE_PARENT')
+
+        layout.separator()
+
+        # Auto-offset nodes (called "insert_offset" in code)
+        layout.prop(snode, "use_insert_offset", text="")
+
+        # Snap
+        row = layout.row(align=True)
+        row.prop(toolsettings, "use_snap", text="")
+        row.prop(toolsettings, "snap_node_element", icon_only=True)
+        if toolsettings.snap_node_element != 'GRID':
+            row.prop(toolsettings, "snap_target", text="")
+
+        row = layout.row(align=True)
+        row.operator("node.clipboard_copy", text="", icon='COPYDOWN')
+        row.operator("node.clipboard_paste", text="", icon='PASTEDOWN')
+
+        layout.template_running_jobs()
 ##############################################################
+
 
 def register_node_categories(identifier, cat_list_icon):
     if identifier in _node_categories:
@@ -4556,10 +4677,10 @@ def register_node_categories(identifier, cat_list_icon):
     # stores: (categories list, menu draw function, submenu types, panel types)
     _node_categories[identifier] = ([i[0] for i in cat_list_icon if not i=="---"], draw_add_menu, menu_types, panel_types)
 def register():
-    register_menu_icons()
     register_node_categories("ScNodeCategories", node_categories)
     bpy.utils.register_module(__name__)
 def unregister():
-    unregister_menu_icons()
+    global menu_icons
+    bpy.utils.previews.remove(menu_icons)
     nodeitems_utils.unregister_node_categories("ScNodeCategories")
     bpy.utils.unregister_module(__name__)
