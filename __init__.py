@@ -2,14 +2,14 @@ print("______________________________________________________")
 bl_info = {
     "name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (2, 0, 4),
+    "version": (2, 0, 5),
     "blender": (2, 79, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
     "category": "Node"}
 
 import bpy
-import bmesh
+import bpy.utils.previews
 import nodeitems_utils
 import random
 import requests
@@ -17,7 +17,7 @@ import math
 
 from bpy.types import NodeTree, Node, NodeSocket, Operator
 from bpy.props import IntProperty, FloatProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, PointerProperty, BoolVectorProperty
-from nodeitems_utils import NodeCategory, NodeItem
+from nodeitems_utils import NodeCategory, NodeItem, NodeItemCustom, _node_categories
 from mathutils import Vector
 
 ######################### ADDON UPDATER ######################
@@ -46,23 +46,6 @@ class ScAddonUpdater(Operator):
         print("DEBUG: Sorcar: Data Written! Addon successfully updated.")
         f.close()
         return {'FINISHED'}
-##############################################################
-
-
-########################## NODE-TREE #########################
-class ScNodeTree(NodeTree):
-    bl_idname = 'ScNodeTree'
-    bl_label = 'Sorcar'
-    bl_icon = 'MESH_CUBE'
-
-    def update(self):
-        for link in self.links:
-            if not (link.from_socket.rna_type == link.to_socket.rna_type or link.from_socket.rna_type.name in link.to_socket.friends or link.to_socket.rna_type.name in link.from_socket.friends):
-                self.links.remove(link)
-class ScNodeCategory(NodeCategory):
-    @classmethod
-    def poll(cls, context):
-        return context.space_data.tree_type == 'ScNodeTree'
 ##############################################################
 
 
@@ -180,7 +163,7 @@ class ScNode:
         bpy.ops.sc.execute_node_op()
         return None
     def init(self, context):
-        self.hide = True
+        self.hide = self.id_data.prop_collapse
         self.use_custom_color = True
         self.color = self.node_color
     def override(self, mesh=False, edit=False):
@@ -447,10 +430,13 @@ class ScRealtimeMeshOp(Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     node = None
+    node_tree = None
 
     @classmethod
     def poll(cls, context):
-        return context.space_data.type == "NODE_EDITOR"
+        if (context.space_data.type == "NODE_EDITOR"):
+            return context.space_data.tree_type == "ScNodeTree"
+        return False
 
     def execute(self, context):
         bpy.ops.sc.execute_node_op()
@@ -461,10 +447,7 @@ class ScRealtimeMeshOp(Operator):
             print("DEBUG: ScRealtimeMeshOp: STOP")
             return {'FINISHED'}
         elif (event.type == "LEFTMOUSE"):
-            try:
-                node = context.active_node
-            except:
-                return {'PASS_THROUGH'}
+            node = context.space_data.node_tree.nodes.active
             if (not node == self.node):
                 print("DEBUG: ScRealtimeMeshOp: Active node changed")
                 self.node = node
@@ -477,15 +460,17 @@ class ScRealtimeMeshOp(Operator):
         return {'RUNNING_MODAL'}
 class ScSaveSelectionOp(Operator):
     bl_idname = "sc.save_selection_op"
-    bl_label = "Execute MeshNode"
+    bl_label = "Save Selection"
     bl_options = {"REGISTER", "UNDO"}
 
     @classmethod
     def poll(cls, context):
-        return context.space_data.type == "NODE_EDITOR"
+        if (context.space_data.type == "NODE_EDITOR"):
+            return context.space_data.tree_type == "ScNodeTree"
+        return False
     
     def execute(self, context):
-        node = context.active_node
+        node = context.space_data.node_tree.nodes.active
         if (node == None):
             print("DEBUG: ScSaveSelectionOp: No Active Node")
             return {'CANCELLED'}
@@ -498,10 +483,12 @@ class ScExecuteNodeOp(Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.space_data.type == "NODE_EDITOR"
+        if (context.space_data.type == "NODE_EDITOR"):
+            return context.space_data.tree_type == "ScNodeTree"
+        return False
 
     def execute(self, context):
-        node = context.active_node
+        node = context.space_data.node_tree.nodes.active
         if (not node == None):
             print("--- EXECUTE NODE: " + node.name + " ---")
             for group in bpy.data.node_groups:
@@ -1787,8 +1774,11 @@ class ToStringNode(Node, ScConversionNode):
         self.outputs.new("ScStringSocket", "String")
         super().init(context)
     
-    def post_execute(self):
-        return str(self.inputs["In"].execute())
+    def execute(self):
+        data = self.inputs["In"].execute()
+        if (not data == None):
+            return str(data)
+        return ""
 class ToFloatNode(Node, ScConversionNode):
     bl_idname = "ToFloatNode"
     bl_label = "To Float"
@@ -1800,11 +1790,11 @@ class ToFloatNode(Node, ScConversionNode):
         self.outputs.new("ScFloatSocket", "Float")
         super().init(context)
     
-    def pre_execute(self):
-        return True
-    
-    def post_execute(self):
-        return float(self.inputs["In"].execute())
+    def execute(self):
+        data = self.inputs["In"].execute()
+        if (not data == None):
+            return float(data)
+        return 0.0
 class ToIntNode(Node, ScConversionNode):
     bl_idname = "ToIntNode"
     bl_label = "To Integer"
@@ -1816,11 +1806,11 @@ class ToIntNode(Node, ScConversionNode):
         self.outputs.new("ScIntSocket", "Integer")
         super().init(context)
     
-    def pre_execute(self):
-        return True
-    
-    def post_execute(self):
-        return int(self.inputs["In"].execute())
+    def execute(self):
+        data = self.inputs["In"].execute()
+        if (not data == None):
+            return int(data)
+        return 0
 class ToBoolNode(Node, ScConversionNode):
     bl_idname = "ToBoolNode"
     bl_label = "To Boolean"
@@ -1832,11 +1822,11 @@ class ToBoolNode(Node, ScConversionNode):
         self.outputs.new("ScBoolSocket", "Boolean")
         super().init(context)
     
-    def pre_execute(self):
-        return True
-    
-    def post_execute(self):
-        return bool(self.inputs["In"].execute())
+    def execute(self):
+        data = self.inputs["In"].execute()
+        if (not data == None):
+            return bool(data)
+        return False
 class CurveToMeshNode(Node, ScConversionNode):
     bl_idname = "CurveToMeshNode"
     bl_label = "Curve To Mesh"
@@ -3257,6 +3247,9 @@ class ScatterNode(Node, ScObjectOperatorNode):
                 if ("Z" in  self.prop_rotation):
                     mesh.rotation_axis_angle[3] = ((self.obj.data.vertices[i.vertices[0]].normal[2]+self.obj.data.vertices[i.vertices[1]].normal[2])/2)+1
                 mesh.rotation_mode = 'XYZ'
+            mesh.rotation_mode = 'AXIS_ANGLE'
+            mesh.rotation_axis_angle[0] = 3.14159
+            mesh.rotation_mode = 'XYZ'
             meshes.append(mesh)
             if (re_evaluate):
                 self.mesh = self.inputs["Mesh"].execute()
@@ -3620,20 +3613,26 @@ class RandomFloatNode(Node, ScConstantNode):
     prop_min = FloatProperty(name="Min", update=ScNode.update_value)
     prop_max = FloatProperty(name="Max", default=1.0, update=ScNode.update_value)
     prop_seed = IntProperty(name="Seed", update=ScNode.update_value)
+    prop_once = BoolProperty(update=ScNode.update_value)
+    val = FloatProperty()
 
     def init(self, context):
         self.inputs.new("ScFloatSocket", "Min").prop_prop = "prop_min"
         self.inputs.new("ScFloatSocket", "Max").prop_prop = "prop_max"
         self.inputs.new("ScIntSocket", "Seed").prop_prop = "prop_seed"
+        self.inputs.new("ScBoolSocket", "Once").prop_prop = "prop_once"
         self.outputs.new("ScFloatSocket", "Value")
         super().init(context)
     
     def functionality(self):
         if (self.first_time):
             random.seed(self.inputs["Seed"].execute())
+            self.val = random.uniform(self.inputs["Min"].execute(), self.inputs["Max"].execute())
+        elif (not self.inputs["Once"].execute()):
+            self.val = random.uniform(self.inputs["Min"].execute(), self.inputs["Max"].execute())
     
     def post_execute(self):
-        return random.uniform(self.inputs["Min"].execute(), self.inputs["Max"].execute())
+        return self.val
 class RandomIntNode(Node, ScConstantNode):
     bl_idname = "RandomIntNode"
     bl_label = "Random Integer"
@@ -3641,37 +3640,48 @@ class RandomIntNode(Node, ScConstantNode):
     prop_min = IntProperty(name="Min", default=1, update=ScNode.update_value)
     prop_max = IntProperty(name="Max", default=5, update=ScNode.update_value)
     prop_seed = IntProperty(name="Seed", update=ScNode.update_value)
+    prop_once = BoolProperty(update=ScNode.update_value)
+    val = IntProperty()
 
     def init(self, context):
         self.inputs.new("ScIntSocket", "Min").prop_prop = "prop_min"
         self.inputs.new("ScIntSocket", "Max").prop_prop = "prop_max"
         self.inputs.new("ScIntSocket", "Seed").prop_prop = "prop_seed"
+        self.inputs.new("ScBoolSocket", "Once").prop_prop = "prop_once"
         self.outputs.new("ScIntSocket", "Value")
         super().init(context)
     
     def functionality(self):
         if (self.first_time):
             random.seed(self.inputs["Seed"].execute())
-    
+            self.val = random.randint(self.inputs["Min"].execute(), self.inputs["Max"].execute())
+        elif (not self.inputs["Once"].execute()):
+            self.val = random.randint(self.inputs["Min"].execute(), self.inputs["Max"].execute())
     def post_execute(self):
-        return random.randint(self.inputs["Min"].execute(), self.inputs["Max"].execute())
+        return self.val
 class RandomBoolNode(Node, ScConstantNode):
     bl_idname = "RandomBoolNode"
     bl_label = "Random Boolean"
 
     prop_seed = IntProperty(name="Seed", update=ScNode.update_value)
+    prop_once = BoolProperty(update=ScNode.update_value)
+    val = BoolProperty()
 
     def init(self, context):
         self.inputs.new("ScIntSocket", "Seed").prop_prop = "prop_seed"
+        self.inputs.new("ScBoolSocket", "Once").prop_prop = "prop_once"
         self.outputs.new("ScBoolSocket", "Value")
         super().init(context)
     
     def functionality(self):
         if (self.first_time):
             random.seed(self.inputs["Seed"].execute())
-    
+            self.val = bool(random.getrandbits(1))
+        elif (not self.inputs["Once"].execute()):
+            self.val = bool(random.getrandbits(1))
+        
     def post_execute(self):
-        return bool(random.getrandbits(1))
+        return self.val
 class RandomAngleNode(Node, ScConstantNode):
     bl_idname = "RandomAngleNode"
     bl_label = "Random Angle"
@@ -3679,20 +3689,26 @@ class RandomAngleNode(Node, ScConstantNode):
     prop_min = FloatProperty(name="Min", subtype="ANGLE", unit="ROTATION", update=ScNode.update_value)
     prop_max = FloatProperty(name="Max", subtype="ANGLE", unit="ROTATION", default=3.14159, update=ScNode.update_value)
     prop_seed = IntProperty(name="Seed", update=ScNode.update_value)
+    prop_once = BoolProperty(update=ScNode.update_value)
+    val = FloatProperty()
 
     def init(self, context):
         self.inputs.new("ScAngleSocket", "Min").prop_prop = "prop_min"
         self.inputs.new("ScAngleSocket", "Max").prop_prop = "prop_max"
         self.inputs.new("ScIntSocket", "Seed").prop_prop = "prop_seed"
+        self.inputs.new("ScBoolSocket", "Once").prop_prop = "prop_once"
         self.outputs.new("ScAngleSocket", "Value")
         super().init(context)
     
     def functionality(self):
         if (self.first_time):
             random.seed(self.inputs["Seed"].execute())
+            self.val = random.uniform(self.inputs["Min"].execute(), self.inputs["Max"].execute())
+        elif (not self.inputs["Once"].execute()):
+            self.val = random.uniform(self.inputs["Min"].execute(), self.inputs["Max"].execute())
     
     def post_execute(self):
-        return random.uniform(self.inputs["Min"].execute(), self.inputs["Max"].execute())
+        return self.val
 class StringNode(Node, ScConstantNode):
     bl_idname = "StringNode"
     bl_label = "String"
@@ -3857,6 +3873,30 @@ class TrigonometricOpNode(Node, ScUtilityNode):
                 return math.tanh(self.inputs["X"].execute())
             else:
                 return math.atan(self.inputs["X"].execute())
+class VectorOpNode(Node, ScUtilityNode):
+    bl_idname = "VectorOpNode"
+    bl_label = "Vector Operation"
+
+    prop_op = EnumProperty(name="Opertion", items=[("ADD", "X + Y", "Addition"), ("SUB", "X - Y", "Subtraction"), ("MULT", "X * Y", "Cross Product")], default="ADD", update=ScNode.update_value)
+    prop_x = FloatVectorProperty(name="X", update=ScNode.update_value)
+    prop_y = FloatVectorProperty(name="Y", update=ScNode.update_value)
+
+    def init(self, context):
+        self.inputs.new("ScFloatVectorSocket", "X").prop_prop = "prop_x"
+        self.inputs.new("ScFloatVectorSocket", "Y").prop_prop = "prop_y"
+        self.outputs.new("ScFloatVectorSocket", "")
+        super().init(context)
+    
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "prop_op")
+    
+    def execute(self):
+        if (self.prop_op == "ADD"):
+            return Vector(self.inputs["X"].execute())+Vector(self.inputs["Y"].execute())
+        elif (self.prop_op == "SUB"):
+            return Vector(self.inputs["X"].execute())-Vector(self.inputs["Y"].execute())
+        else:
+            return Vector(self.inputs["X"].execute()).cross(Vector(self.inputs["Y"].execute()))
 class GetComponentInfoNode(Node, ScUtilityNode):
     bl_idname = "GetComponentInfoNode"
     bl_label = "Get Component Info"
@@ -4250,6 +4290,34 @@ class SwitchNode(Node, ScControlNode):
     
     def post_execute(self):
         return self.inputs[max(min(self.inputs["Integer"].execute(), 10), 0)+1].execute()
+class SequenceNode(Node, ScControlNode):
+    bl_idname = "SequenceNode"
+    bl_label = "Sequence"
+
+    data = None
+
+    def init(self, context):
+        self.inputs.new("ScUniversalSocket", "1")
+        self.inputs.new("ScUniversalSocket", "2")
+        self.inputs.new("ScUniversalSocket", "3")
+        self.inputs.new("ScUniversalSocket", "4")
+        self.inputs.new("ScUniversalSocket", "5")
+        self.inputs.new("ScUniversalSocket", "6")
+        self.inputs.new("ScUniversalSocket", "7")
+        self.inputs.new("ScUniversalSocket", "8")
+        self.inputs.new("ScUniversalSocket", "9")
+        self.inputs.new("ScUniversalSocket", "10")
+        self.outputs.new("ScUniversalSocket", "")
+        super().init(context)
+    
+    def functionality(self):
+        for i in self.inputs:
+            data = i.execute()
+            if (not data == None):
+                self.data = data
+    
+    def post_execute(self):
+        return self.data
 # Settings
 class CursorLocationNode(Node, ScSettingNode):
     bl_idname = "CursorLocationNode"
@@ -4355,39 +4423,264 @@ class ExportMeshFBXNode(Node, ScOutputNode):
 ##############################################################
 
 
+########################### MENU #############################
+# Icons
+menu_icons = bpy.utils.previews.new()
+icons_dir = bpy.utils.user_resource('SCRIPTS', "addons/") + __name__ + "/icons/"
+menu_icons.load("sc.icon_sorcar", icons_dir + "sorcar_icon.png", 'IMAGE')
+menu_icons.load("sc.icon_search", icons_dir + "000_red_white_search.png", 'IMAGE')
+menu_icons.load("sc.icon_inputs", icons_dir + "001_red_white_inputs.png", 'IMAGE')
+menu_icons.load("sc.icon_transform", icons_dir + "002_red_white_transform.png", 'IMAGE')
+menu_icons.load("sc.icons_conversion", icons_dir + "003_red_white_conversion.png", 'IMAGE')
+menu_icons.load("sc.icons_selection", icons_dir + "004_red_white_selection.png", 'IMAGE')
+menu_icons.load("sc.icons_deletion", icons_dir + "005_red_white_deletion.png", 'IMAGE')
+menu_icons.load("sc.icons_edit_operators", icons_dir + "006_red_white_component operators.png", 'IMAGE')
+menu_icons.load("sc.icons_object_operators", icons_dir + "007_red_white_mesh operators.png", 'IMAGE')
+menu_icons.load("sc.icons_curve_operators", icons_dir + "008_red_white_curve operators.png", 'IMAGE')
+menu_icons.load("sc.icons_modifiers", icons_dir + "009_red_white_modifiers.png", 'IMAGE')
+menu_icons.load("sc.icons_constants", icons_dir + "010_red_white_constants.png", 'IMAGE')
+menu_icons.load("sc.icons_utilities", icons_dir + "011_red_white_utilities.png", 'IMAGE')
+menu_icons.load("sc.icons_control", icons_dir + "012_red_white_flow control.png", 'IMAGE')
+menu_icons.load("sc.icons_settings", icons_dir + "013_red_white_settings.png", 'IMAGE')
+menu_icons.load("sc.icons_outputs", icons_dir + "014_red_white_outputs.png", 'IMAGE')
+# Sub-menus
 inputs = [PlaneNode, CubeNode, CircleNode, UVSphereNode, IcoSphereNode, CylinderNode, ConeNode, GridNode, SuzanneNode, CustomMeshNode, CustomCurveNode] # TorusNode
 transform = [LocationNode, RotationNode, ScaleNode, TranslateNode, RotateNode, ResizeNode]
-modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CorrectiveSmoothModNode, CurveModNode, DecimateModNode, DisplaceModNode, EdgeSplitModNode, LaplacianSmoothModNode, MirrorModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, TriangulateModNode, WireframeModNode]
 conversion = [ToComponentNode, ToMeshNode, ChangeModeNode, ToStringNode, ToFloatNode, ToIntNode, ToBoolNode, CurveToMeshNode]
 selection = [SelectComponentsManuallyNode, SelectComponentByIndexNode, SelectFacesByMaterialNode, SelectFacesByNormalNode, SelectVerticesByVertexGroupNode, SelectAllNode, SelectAxisNode, SelectFaceBySidesNode, SelectInteriorFaces, SelectLessNode, SelectMoreNode, SelectLinkedNode, SelectLoopNode, SelectLoopRegionNode, SelectLooseNode, SelectMirrorNode, SelectNextItemNode, SelectPrevItemNode, SelectNonManifoldNode, SelectNthNode, SelectAlternateFacesNode, SelectRandomNode, SelectRegionBoundaryNode, SelectSharpEdgesNode, SelectSimilarNode, SelectSimilarRegionNode, SelectShortestPathNode, SelectUngroupedNode, SelectFacesLinkedFlatNode] # SelectEdgeRingNode
 deletion = [DeleteNode, DeleteEdgeLoopNode, DissolveFacesNode, DissolveEdgesNode, DissolveVerticesNode, DissolveDegenerateNode, EdgeCollapseNode]
 edit_operators = [AddEdgeFaceNode, BeautifyFillNode, BevelNode, BridgeEdgeLoopsNode, ConvexHullNode, DecimateNode, ExtrudeFacesNode, ExtrudeEdgesNode, ExtrudeVerticesNode, ExtrudeRegionNode, FlipNormalsNode, MakeNormalsConsistentNode, FlattenNode, FillEdgeLoopNode, FillGridNode, FillHolesBySidesNode, InsetNode, LoopCutNode, MaterialNode, MergeComponentsNode, OffsetEdgeLoopNode, PokeNode, RemoveDoublesNode, RotateEdgeNode, ScrewNode, SolidifyNode, SpinNode, SplitNode, SubdivideNode, SymmetrizeNode, TriangulateFacesNode, UnSubdivideNode, VertexGroupNode] # ExtrudeRepeatNode
 object_operators = [ApplyTransformNode, CopyTransformNode, DuplicateMeshNode, MakeLinksNode, MergeMeshesNode, OriginNode, ScatterNode, ShadingNode, ViewportDrawModeNode, CyclesDrawModeNode]
 curve_operators = [CurveShapeNode, CurveGeometryNode, CurveSplineNode]
+modifiers = [ArrayModNode, BevelModNode, BooleanModNode, CastModNode, CorrectiveSmoothModNode, CurveModNode, DecimateModNode, DisplaceModNode, EdgeSplitModNode, LaplacianSmoothModNode, MirrorModNode, RemeshModNode, ScrewModNode, SimpleDeformModNode, SkinModNode, SmoothModNode, SolidifyModNode, SubdivideModNode, TriangulateModNode, WireframeModNode]
 constants = [FloatNode, IntNode, BoolNode, AngleNode, FloatVectorNode, AngleVectorNode, RandomFloatNode, RandomIntNode, RandomBoolNode, RandomAngleNode, StringNode]
-utilities = [AppendStringNode, BooleanOpNode, ComparisonOpNode, MathsOpNode, TrigonometricOpNode, GetComponentInfoNode, ClampNode, MapRangeNode, BreakVectorNode, PrintDataNode]
-control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode, IfElseNode, SwitchNode]
+utilities = [AppendStringNode, BooleanOpNode, ComparisonOpNode, MathsOpNode, TrigonometricOpNode, VectorOpNode, GetComponentInfoNode, ClampNode, MapRangeNode, BreakVectorNode]
+control = [BeginForLoopNode, EndForLoopNode, BeginForEachLoopNode, EndForEachLoopNode, IfElseNode, SwitchNode, SequenceNode]
 settings = [CursorLocationNode, OrientationNode, PivotNode, CustomPythonNode]
-outputs = [RefreshMeshNode, ExportMeshFBXNode]
+outputs = [RefreshMeshNode, ExportMeshFBXNode, PrintDataNode]
+##############################################################
 
-node_categories = [ScNodeCategory("sc.inputs", "Inputs", items=[NodeItem(i.bl_idname) for i in inputs]),
-                   ScNodeCategory("sc.transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]),
-                   ScNodeCategory("sc.modifiers", "Modifiers", items=[NodeItem(i.bl_idname) for i in modifiers]),
-                   ScNodeCategory("sc.conversion", "Conversion", items=[NodeItem(i.bl_idname) for i in conversion]),
-                   ScNodeCategory("sc.selection", "Selection", items=[NodeItem(i.bl_idname) for i in selection]),
-                   ScNodeCategory("sc.deletion", "Deletion", items=[NodeItem(i.bl_idname) for i in deletion]),
-                   ScNodeCategory("sc.edit_operators", "Component Operators", items=[NodeItem(i.bl_idname) for i in edit_operators]),
-                   ScNodeCategory("sc.object_operators", "Mesh Operators", items=[NodeItem(i.bl_idname) for i in object_operators]),
-                   ScNodeCategory("sc.curve_operators", "Curve Operators", items=[NodeItem(i.bl_idname) for i in curve_operators]),
-                   ScNodeCategory("sc.constants", "Constants", items=[NodeItem(i.bl_idname) for i in constants]),
-                   ScNodeCategory("sc.utilities", "Utilities", items=[NodeItem(i.bl_idname) for i in utilities]),
-                   ScNodeCategory("sc.control", "Flow Control", items=[NodeItem(i.bl_idname) for i in control]),
-                   ScNodeCategory("sc.settings", "Settings", items=[NodeItem(i.bl_idname) for i in settings]),
-                   ScNodeCategory("sc.outputs", "Outputs", items=[NodeItem(i.bl_idname) for i in outputs])]
 
+########################## NODE-TREE #########################
+class ScNodeTree(NodeTree):
+    bl_idname = 'ScNodeTree'
+    bl_label = 'Sorcar'
+    bl_icon = 'MESH_CUBE'
+
+    prop_collapse = BoolProperty(name="Collapse Nodes")
+
+    def update(self):
+        for link in self.links:
+            if not (link.from_socket.rna_type == link.to_socket.rna_type or link.from_socket.rna_type.name in link.to_socket.friends or link.to_socket.rna_type.name in link.from_socket.friends):
+                self.links.remove(link)
+class ScNodeCategory(NodeCategory):
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.tree_type == 'ScNodeTree'
+node_categories = [(ScNodeCategory("sc.inputs", "Mesh", items=[NodeItem(i.bl_idname) for i in inputs]), "sc.icon_inputs"),
+                   (ScNodeCategory("sc.transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]), "sc.icon_transform"),
+                   (ScNodeCategory("sc.conversion", "Conversion", items=[NodeItem(i.bl_idname) for i in conversion]), "sc.icons_conversion"),
+                   (ScNodeCategory("sc.selection", "Selection", items=[NodeItem(i.bl_idname) for i in selection]), "sc.icons_selection"),
+                   (ScNodeCategory("sc.deletion", "Deletion", items=[NodeItem(i.bl_idname) for i in deletion]), "sc.icons_deletion"),
+                   "---",
+                   (ScNodeCategory("sc.edit_operators", "Component Operators", items=[NodeItem(i.bl_idname) for i in edit_operators]), "sc.icons_edit_operators"),
+                   (ScNodeCategory("sc.object_operators", "Mesh Operators", items=[NodeItem(i.bl_idname) for i in object_operators]), "sc.icons_object_operators"),
+                   (ScNodeCategory("sc.curve_operators", "Curve Operators", items=[NodeItem(i.bl_idname) for i in curve_operators]), "sc.icons_curve_operators"),
+                   (ScNodeCategory("sc.modifiers", "Modifiers", items=[NodeItem(i.bl_idname) for i in modifiers]), "sc.icons_modifiers"),
+                   "---",
+                   (ScNodeCategory("sc.constants", "Constants", items=[NodeItem(i.bl_idname) for i in constants]), "sc.icons_constants"),
+                   (ScNodeCategory("sc.utilities", "Utilities", items=[NodeItem(i.bl_idname) for i in utilities]), "sc.icons_utilities"),
+                   "---",
+                   (ScNodeCategory("sc.control", "Flow Control", items=[NodeItem(i.bl_idname) for i in control]), "sc.icons_control"),
+                   (ScNodeCategory("sc.settings", "Settings", items=[NodeItem(i.bl_idname) for i in settings]), "sc.icons_settings"),
+                   (ScNodeCategory("sc.outputs", "Outputs", items=[NodeItem(i.bl_idname) for i in outputs]), "sc.icons_outputs")]
+class NODE_MT_add(bpy.types.Menu):
+    bl_space_type = 'NODE_EDITOR'
+    bl_label = "Add"
+
+    def draw(self, context):
+        global menu_icons
+        layout = self.layout
+        layout.operator_context = 'INVOKE_DEFAULT'
+        layout.operator("node.add_search", text="Search...", icon_value=menu_icons["sc.icon_search"].icon_id).use_transform = True
+        layout.separator()
+        # actual node submenus are defined by draw functions from node categories
+        nodeitems_utils.draw_node_categories_menu(self, context)
+class NODE_MT_editor_menus(bpy.types.Menu):
+    bl_idname = "NODE_MT_editor_menus"
+    bl_label = ""
+
+    def draw(self, context):
+        self.draw_menus(self.layout, context)
+
+    @staticmethod
+    def draw_menus(layout, context):
+        layout.menu("NODE_MT_view")
+        layout.menu("NODE_MT_select")
+        layout.menu("NODE_MT_add")
+        layout.menu("NODE_MT_node")
+class NODE_HT_header(bpy.types.Header):
+    bl_space_type = 'NODE_EDITOR'
+
+    def draw(self, context):
+        layout = self.layout
+
+        scene = context.scene
+        snode = context.space_data
+        snode_id = snode.id
+        id_from = snode.id_from
+        toolsettings = context.tool_settings
+
+        row = layout.row(align=True)
+        row.template_header()
+
+        NODE_MT_editor_menus.draw_collapsible(context, layout)
+
+        layout.prop(snode, "tree_type", text="", expand=True)
+
+        if snode.tree_type == 'ShaderNodeTree':
+            if scene.render.use_shading_nodes:
+                layout.prop(snode, "shader_type", text="", expand=True)
+
+            ob = context.object
+            if (not scene.render.use_shading_nodes or snode.shader_type == 'OBJECT') and ob:
+                row = layout.row()
+                # disable material slot buttons when pinned, cannot find correct slot within id_from (#36589)
+                row.enabled = not snode.pin
+                # Show material.new when no active ID/slot exists
+                if not id_from and ob.type in {'MESH', 'CURVE', 'SURFACE', 'FONT', 'METABALL'}:
+                    row.template_ID(ob, "active_material", new="material.new")
+                # Material ID, but not for Lamps
+                if id_from and ob.type != 'LAMP':
+                    row.template_ID(id_from, "active_material", new="material.new")
+
+                # Don't show "Use Nodes" Button when Engine is BI for Lamps
+                if snode_id and not (scene.render.use_shading_nodes == 0 and ob.type == 'LAMP'):
+                    layout.prop(snode_id, "use_nodes")
+
+            if scene.render.use_shading_nodes and snode.shader_type == 'WORLD':
+                row = layout.row()
+                row.enabled = not snode.pin
+                row.template_ID(scene, "world", new="world.new")
+                if snode_id:
+                    row.prop(snode_id, "use_nodes")
+
+            if scene.render.use_shading_nodes and snode.shader_type == 'LINESTYLE':
+                rl = context.scene.render.layers.active
+                lineset = rl.freestyle_settings.linesets.active
+                if lineset is not None:
+                    row = layout.row()
+                    row.enabled = not snode.pin
+                    row.template_ID(lineset, "linestyle", new="scene.freestyle_linestyle_new")
+                    if snode_id:
+                        row.prop(snode_id, "use_nodes")
+
+        elif snode.tree_type == 'TextureNodeTree':
+            layout.prop(snode, "texture_type", text="", expand=True)
+
+            if id_from:
+                if snode.texture_type == 'BRUSH':
+                    layout.template_ID(id_from, "texture", new="texture.new")
+                else:
+                    layout.template_ID(id_from, "active_texture", new="texture.new")
+            if snode_id:
+                layout.prop(snode_id, "use_nodes")
+
+        elif snode.tree_type == 'CompositorNodeTree':
+            if snode_id:
+                layout.prop(snode_id, "use_nodes")
+            layout.prop(snode, "show_backdrop")
+            if snode.show_backdrop:
+                row = layout.row(align=True)
+                row.prop(snode, "backdrop_channels", text="", expand=True)
+            layout.prop(snode, "use_auto_render")
+        
+        elif snode.tree_type == 'ScNodeTree':
+            layout.template_ID(snode, "node_tree", new="node.new_node_tree")
+            if (not snode.node_tree == None):
+                layout.prop(snode.node_tree, "prop_collapse")
+        
+        else:
+            # Custom node tree is edited as independent ID block
+            layout.template_ID(snode, "node_tree", new="node.new_node_tree")
+
+        layout.prop(snode, "pin", text="")
+        layout.operator("node.tree_path_parent", text="", icon='FILE_PARENT')
+
+        layout.separator()
+
+        # Auto-offset nodes (called "insert_offset" in code)
+        layout.prop(snode, "use_insert_offset", text="")
+
+        # Snap
+        row = layout.row(align=True)
+        row.prop(toolsettings, "use_snap", text="")
+        row.prop(toolsettings, "snap_node_element", icon_only=True)
+        if toolsettings.snap_node_element != 'GRID':
+            row.prop(toolsettings, "snap_target", text="")
+
+        row = layout.row(align=True)
+        row.operator("node.clipboard_copy", text="", icon='COPYDOWN')
+        row.operator("node.clipboard_paste", text="", icon='PASTEDOWN')
+
+        layout.template_running_jobs()
+##############################################################
+
+
+def register_node_categories(identifier, cat_list_icon):
+    if identifier in _node_categories:
+        raise KeyError("Node categories list '%s' already registered" % identifier)
+        return
+
+    # works as draw function for both menus and panels
+    def draw_node_item(self, context):
+        layout = self.layout
+        col = layout.column()
+        for item in self.category.items(context):
+            item.draw(item, col, context)
+    
+    menu_types = []
+    panel_types = []
+    for cat in cat_list_icon:
+        if (not cat == "---"):
+            menu_type = type("NODE_MT_category_" + cat[0].identifier, (bpy.types.Menu,), {
+                "bl_space_type": 'NODE_EDITOR',
+                "bl_label": cat[0].name,
+                "category": cat[0],
+                "poll": cat[0].poll,
+                "draw": draw_node_item,
+                })
+            panel_type = type("NODE_PT_category_" + cat[0].identifier, (bpy.types.Panel,), {
+                "bl_space_type": 'NODE_EDITOR',
+                "bl_region_type": 'TOOLS',
+                "bl_label": cat[0].name,
+                "bl_category": cat[0].name,
+                "category": cat[0],
+                "poll": cat[0].poll,
+                "draw": draw_node_item,
+                })
+            menu_types.append(menu_type)
+            panel_types.append(panel_type)
+            bpy.utils.register_class(menu_type)
+            bpy.utils.register_class(panel_type)
+    
+    def draw_add_menu(self, context):
+        global menu_icons
+        layout = self.layout
+        for cat in cat_list_icon:
+            if (not cat == "---"):
+                if cat[0].poll(context):
+                    layout.menu("NODE_MT_category_%s" % cat[0].identifier, icon_value=menu_icons[cat[1]].icon_id)
+            else:
+                layout.separator()
+    
+    # stores: (categories list, menu draw function, submenu types, panel types)
+    _node_categories[identifier] = ([i[0] for i in cat_list_icon if not i=="---"], draw_add_menu, menu_types, panel_types)
 def register():
-    nodeitems_utils.register_node_categories("ScNodeCategories", node_categories)
+    register_node_categories("ScNodeCategories", node_categories)
     bpy.utils.register_module(__name__)
 def unregister():
+    global menu_icons
+    bpy.utils.previews.remove(menu_icons)
     nodeitems_utils.unregister_node_categories("ScNodeCategories")
     bpy.utils.unregister_module(__name__)
