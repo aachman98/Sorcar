@@ -3,7 +3,7 @@ bl_info = {
     "name": "Sorcar",
     "author": "Punya Aachman",
     "version": (2, 0, 5),
-    "blender": (2, 79, 0),
+    "blender": (2, 80, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
     "category": "Node"}
@@ -14,6 +14,7 @@ import nodeitems_utils
 import random
 import requests
 import math
+import sys, inspect
 
 from bpy.types import NodeTree, Node, NodeSocket, Operator
 from bpy.props import IntProperty, FloatProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, PointerProperty, BoolVectorProperty
@@ -62,7 +63,7 @@ class ScNodeSocket:
         if (not self.is_output) and (not self.is_linked) and (self.mirror_prop):
             layout.prop(node, self.prop_prop, text=self.name)
         else:
-            layout.label(self.name)
+            layout.label(text=self.name)
     def execute(self):
         if (self.is_output):
             return self.node.execute()
@@ -4395,7 +4396,7 @@ class RefreshMeshNode(Node, ScOutputNode):
     
     def draw_buttons(self, context, layout):
         if (self == self.id_data.nodes.active):
-            layout.operator("sc.execute_node_op", "Refresh Mesh")
+            layout.operator("sc.execute_node_op", text="Refresh Mesh")
         layout.column().prop(self, "print_output")
     
     def functionality(self):
@@ -4652,7 +4653,7 @@ def register_node_categories(identifier, cat_list_icon):
                 })
             panel_type = type("NODE_PT_category_" + cat[0].identifier, (bpy.types.Panel,), {
                 "bl_space_type": 'NODE_EDITOR',
-                "bl_region_type": 'TOOLS',
+                "bl_region_type": 'UI',
                 "bl_label": cat[0].name,
                 "bl_category": cat[0].name,
                 "category": cat[0],
@@ -4676,11 +4677,23 @@ def register_node_categories(identifier, cat_list_icon):
     
     # stores: (categories list, menu draw function, submenu types, panel types)
     _node_categories[identifier] = ([i[0] for i in cat_list_icon if not i=="---"], draw_add_menu, menu_types, panel_types)
+
+def make_class_list():
+    result = []
+    classes = [x[1] for x in inspect.getmembers(sys.modules[__name__], lambda x: inspect.isclass(x) and x.__module__ == __name__)]
+    for cls in classes:
+        baseClasses = inspect.getmro(cls)
+        if bpy.types.Node in baseClasses or bpy.types.NodeTree in baseClasses or bpy.types.NodeSocket in baseClasses or bpy.types.Operator in baseClasses or bpy.types.AddonPreferences in baseClasses or bpy.types.Menu in baseClasses or bpy.types.Header in baseClasses:
+            result.append(cls)
+    return result
 def register():
     register_node_categories("ScNodeCategories", node_categories)
-    bpy.utils.register_module(__name__)
+    for cls in make_class_list():
+        print(cls)
+        bpy.utils.register_class(cls)
 def unregister():
     global menu_icons
     bpy.utils.previews.remove(menu_icons)
     nodeitems_utils.unregister_node_categories("ScNodeCategories")
-    bpy.utils.unregister_module(__name__)
+    for cls in reversed(make_class_list()):
+        bpy.utils.unregister_class(cls)
