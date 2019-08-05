@@ -4478,23 +4478,23 @@ class ScNodeCategory(NodeCategory):
     @classmethod
     def poll(cls, context):
         return context.space_data.tree_type == 'ScNodeTree'
-node_categories = [(ScNodeCategory("sc.inputs", "Mesh", items=[NodeItem(i.bl_idname) for i in inputs]), "sc.icon_inputs"),
-                   (ScNodeCategory("sc.transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]), "sc.icon_transform"),
-                   (ScNodeCategory("sc.conversion", "Conversion", items=[NodeItem(i.bl_idname) for i in conversion]), "sc.icons_conversion"),
-                   (ScNodeCategory("sc.selection", "Selection", items=[NodeItem(i.bl_idname) for i in selection]), "sc.icons_selection"),
-                   (ScNodeCategory("sc.deletion", "Deletion", items=[NodeItem(i.bl_idname) for i in deletion]), "sc.icons_deletion"),
+node_categories = [(ScNodeCategory("sc_inputs", "Mesh", items=[NodeItem(i.bl_idname) for i in inputs]), "sc.icon_inputs"),
+                   (ScNodeCategory("sc_transform", "Transform", items=[NodeItem(i.bl_idname) for i in transform]), "sc.icon_transform"),
+                   (ScNodeCategory("sc_conversion", "Conversion", items=[NodeItem(i.bl_idname) for i in conversion]), "sc.icons_conversion"),
+                   (ScNodeCategory("sc_selection", "Selection", items=[NodeItem(i.bl_idname) for i in selection]), "sc.icons_selection"),
+                   (ScNodeCategory("sc_deletion", "Deletion", items=[NodeItem(i.bl_idname) for i in deletion]), "sc.icons_deletion"),
                    "---",
-                   (ScNodeCategory("sc.edit_operators", "Component Operators", items=[NodeItem(i.bl_idname) for i in edit_operators]), "sc.icons_edit_operators"),
-                   (ScNodeCategory("sc.object_operators", "Mesh Operators", items=[NodeItem(i.bl_idname) for i in object_operators]), "sc.icons_object_operators"),
-                   (ScNodeCategory("sc.curve_operators", "Curve Operators", items=[NodeItem(i.bl_idname) for i in curve_operators]), "sc.icons_curve_operators"),
-                   (ScNodeCategory("sc.modifiers", "Modifiers", items=[NodeItem(i.bl_idname) for i in modifiers]), "sc.icons_modifiers"),
+                   (ScNodeCategory("sc_edit_operators", "Component Operators", items=[NodeItem(i.bl_idname) for i in edit_operators]), "sc.icons_edit_operators"),
+                   (ScNodeCategory("sc_object_operators", "Mesh Operators", items=[NodeItem(i.bl_idname) for i in object_operators]), "sc.icons_object_operators"),
+                   (ScNodeCategory("sc_curve_operators", "Curve Operators", items=[NodeItem(i.bl_idname) for i in curve_operators]), "sc.icons_curve_operators"),
+                   (ScNodeCategory("sc_modifiers", "Modifiers", items=[NodeItem(i.bl_idname) for i in modifiers]), "sc.icons_modifiers"),
                    "---",
-                   (ScNodeCategory("sc.constants", "Constants", items=[NodeItem(i.bl_idname) for i in constants]), "sc.icons_constants"),
-                   (ScNodeCategory("sc.utilities", "Utilities", items=[NodeItem(i.bl_idname) for i in utilities]), "sc.icons_utilities"),
+                   (ScNodeCategory("sc_constants", "Constants", items=[NodeItem(i.bl_idname) for i in constants]), "sc.icons_constants"),
+                   (ScNodeCategory("sc_utilities", "Utilities", items=[NodeItem(i.bl_idname) for i in utilities]), "sc.icons_utilities"),
                    "---",
-                   (ScNodeCategory("sc.control", "Flow Control", items=[NodeItem(i.bl_idname) for i in control]), "sc.icons_control"),
-                   (ScNodeCategory("sc.settings", "Settings", items=[NodeItem(i.bl_idname) for i in settings]), "sc.icons_settings"),
-                   (ScNodeCategory("sc.outputs", "Outputs", items=[NodeItem(i.bl_idname) for i in outputs]), "sc.icons_outputs")]
+                   (ScNodeCategory("sc_control", "Flow Control", items=[NodeItem(i.bl_idname) for i in control]), "sc.icons_control"),
+                   (ScNodeCategory("sc_settings", "Settings", items=[NodeItem(i.bl_idname) for i in settings]), "sc.icons_settings"),
+                   (ScNodeCategory("sc_outputs", "Outputs", items=[NodeItem(i.bl_idname) for i in outputs]), "sc.icons_outputs")]
 class NODE_MT_add(bpy.types.Menu):
     bl_space_type = 'NODE_EDITOR'
     bl_label = "Add"
