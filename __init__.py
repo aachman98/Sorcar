@@ -3293,27 +3293,27 @@ class ViewportDrawModeNode(Node, ScObjectOperatorNode):
 
     prop_name: BoolProperty(name="Name", update=ScNode.update_value)
     prop_wire: BoolProperty(name="Wire", update=ScNode.update_value)
-    prop_xray: BoolProperty(name="X-Ray", update=ScNode.update_value)
+    prop_in_front: BoolProperty(name="Show in Front", update=ScNode.update_value)
     prop_transparency: BoolProperty(name="Transparency", update=ScNode.update_value)
-    prop_max_draw_type: EnumProperty(name="Maximum Draw Type", items=[("SOLID", "Solid", ""), ("WIRE", "Wire", ""), ("BOUNDS", "Bounds", "")], default="SOLID", update=ScNode.update_value)
+    prop_display_type: EnumProperty(name="Display Type", items=[("SOLID", "Solid", ""), ("WIRE", "Wire", ""), ("BOUNDS", "Bounds", "")], default="SOLID", update=ScNode.update_value)
 
     def init(self, context):
         self.inputs.new("ScBoolSocket", "Name").prop_prop = "prop_name"
         self.inputs.new("ScBoolSocket", "Wire").prop_prop = "prop_wire"
-        self.inputs.new("ScBoolSocket", "X-Ray").prop_prop = "prop_xray"
+        self.inputs.new("ScBoolSocket", "Show in Front").prop_prop = "prop_in_front"
         self.inputs.new("ScBoolSocket", "Transparency").prop_prop = "prop_transparency"
         super().init(context)
     
     def draw_buttons(self, context, layout):
-        layout.label("Maximum Draw Type:")
-        layout.prop(self, "prop_max_draw_type", expand=True)
+        layout.label(text="Display Type:")
+        layout.prop(self, "prop_display_type", expand=True)
     
     def functionality(self):
         self.mesh.show_name = self.inputs["Name"].execute()
         self.mesh.show_wire = self.inputs["Wire"].execute()
-        self.mesh.show_x_ray = self.inputs["X-Ray"].execute()
+        self.mesh.show_in_front = self.inputs["Show in Front"].execute()
         self.mesh.show_transparent = self.inputs["Transparency"].execute()
-        self.mesh.draw_type = self.prop_max_draw_type
+        self.mesh.display_type = self.prop_display_type
 class CyclesDrawModeNode(Node, ScObjectOperatorNode):
     bl_idname = "CyclesDrawModeNode"
     bl_label = "Cycles Draw Mode"
