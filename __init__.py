@@ -260,7 +260,7 @@ class ScModifierNode(ScNode):
         if (self.mesh == None):
             print("DEBUG: " + self.name + ": Empty object recieved")
             return False
-        bpy.context.scene.objects.active = self.mesh
+        bpy.context.view_layer.objects.active = self.mesh
         return True
     
     def post_execute(self):
