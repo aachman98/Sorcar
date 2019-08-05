@@ -172,9 +172,10 @@ class ScNode:
         screen = window.screen
         area = [i for i in screen.areas if i.type == 'VIEW_3D'][0]
         space = area.spaces[0]
+        orientation = bpy.context.scene.transform_orientation_slots[0].type
         scene = bpy.data.scenes[0]
         region = [i for i in area.regions if i.type == 'WINDOW'][0]
-        ret = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'region':region, 'gpencil_data':bpy.context.gpencil_data}
+        ret = {'window':window, 'screen':screen, 'area': area, 'space':space, 'scene':scene, 'region':region, 'gpencil_data':bpy.context.gpencil_data, 'orientation':orientation}
         if (mesh):
             try:
                 ret['active_object'] = self.mesh
@@ -238,7 +239,7 @@ class ScTransformNode(ScNode):
         if (self.mesh == None):
             print("DEBUG: " + self.name + ": Empty object recieved")
             return False
-        bpy.context.scene.objects.active = self.mesh
+        bpy.context.view_layer.objects.active = self.mesh
         return True
     
     def post_execute(self):
@@ -809,7 +810,7 @@ class TranslateNode(Node, ScTransformNode):
         layout.prop(self, "prop_constraint_axis")
 
     def functionality(self):
-        bpy.ops.transform.translate(self.override(), value=self.inputs["Value"].execute(), constraint_axis=self.prop_constraint_axis, constraint_orientation=self.override()["space"].transform_orientation)
+        bpy.ops.transform.translate(self.override(), value=self.inputs["Value"].execute(), constraint_axis=self.prop_constraint_axis, orient_type=self.override()["orientation"])
 class RotateNode(Node, ScTransformNode):
     bl_idname = "RotateNode"
     bl_label = "Rotate"
