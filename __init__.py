@@ -4352,7 +4352,7 @@ class PivotNode(Node, ScSettingNode):
         layout.column().prop(self, "prop_pivot", expand=True)
     
     def functionality(self):
-        self.override()['space'].pivot_point = self.prop_pivot
+        self.override()['scene'].tool_settings.transform_pivot_point = self.prop_pivot
 class CustomPythonNode(Node, ScSettingNode):
     bl_idname = "CustomPythonNode"
     bl_label = "Custom Python Script"
