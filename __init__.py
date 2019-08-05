@@ -705,14 +705,14 @@ class SuzanneNode(Node, ScInputNode):
     bl_idname = "SuzanneNode"
     bl_label = "Suzanne (Monkey)"
     
-    prop_radius: FloatProperty(name="Radius", default=1.0, min=0.0, update=ScNode.update_value)
+    prop_size: FloatProperty(name="Size", default=1.0, min=0.0, update=ScNode.update_value)
 
     def init(self, context):
-        self.inputs.new("ScFloatSocket", "Radius").prop_prop = "prop_radius"
+        self.inputs.new("ScFloatSocket", "Size").prop_prop = "prop_size"
         super().init(context)
     
     def functionality(self):
-        bpy.ops.mesh.primitive_monkey_add(radius=self.inputs["Radius"].execute())
+        bpy.ops.mesh.primitive_monkey_add(size=self.inputs["Size"].execute())
 class CustomMeshNode(Node, ScInputNode):
     bl_idname = "CustomMeshNode"
     bl_label = "Custom Mesh"
