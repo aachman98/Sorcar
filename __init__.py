@@ -2958,7 +2958,7 @@ class SubdivideNode(Node, ScEditOperatorNode):
 
     prop_number_cuts: IntProperty(name="Number of Cuts", default=1, min=1, max=100, update=ScNode.update_value)
     prop_smoothness: FloatProperty(name="Smoothness", default=0.0, min=0.0, max=1000.0, update=ScNode.update_value)
-    prop_quadtri: BoolProperty(name="Quad/Tri Mode", update=ScNode.update_value)
+    prop_ngon: BoolProperty(name="N-Gon Mode", update=ScNode.update_value)
     prop_quadcorner: EnumProperty(name="Quad Corner Type", items=[("INNERVERT", "Inner Vertices", ""), ("PATH", "Path", ""), ("STRAIGHT_CUT", "Straight Cut", ""), ("FAN", "Fan", "")], default="STRAIGHT_CUT", update=ScNode.update_value)
     prop_fractal: FloatProperty(name="Fractal", default=0.0, min=0.0, max=1000000, update=ScNode.update_value)
     prop_fractal_along_normal: FloatProperty(name="Along Normal", default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
@@ -2967,7 +2967,7 @@ class SubdivideNode(Node, ScEditOperatorNode):
     def init(self, context):
         self.inputs.new("ScIntSocket", "Number of Cuts").prop_prop = "prop_number_cuts"
         self.inputs.new("ScFloatSocket", "Smoothness").prop_prop = "prop_smoothness"
-        self.inputs.new("ScBoolSocket", "Quad/Tri Mode").prop_prop = "prop_quadtri"
+        self.inputs.new("ScBoolSocket", "N-Gon Mode").prop_prop = "prop_ngon"
         self.inputs.new("ScFloatSocket", "Fractal").prop_prop = "prop_fractal"
         self.inputs.new("ScFloatSocket", "Along Normal").prop_prop = "prop_fractal_along_normal"
         self.inputs.new("ScIntSocket", "Random Seed").prop_prop = "prop_seed"
@@ -2977,7 +2977,7 @@ class SubdivideNode(Node, ScEditOperatorNode):
         layout.prop(self, "prop_quadcorner")
     
     def functionality(self):
-        bpy.ops.mesh.subdivide(number_cuts=self.inputs["Number of Cuts"].execute(), smoothness=self.inputs["Smoothness"].execute(), quadtri=self.inputs["Quad/Tri Mode"].execute(), quadcorner=self.prop_quadcorner, fractal=self.inputs["Fractal"].execute(), fractal_along_normal=self.inputs["Along Normal"].execute(), seed=self.inputs["Random Seed"].execute())
+        bpy.ops.mesh.subdivide(number_cuts=self.inputs["Number of Cuts"].execute(), smoothness=self.inputs["Smoothness"].execute(), ngon=self.inputs["N-Gon Mode"].execute(), quadcorner=self.prop_quadcorner, fractal=self.inputs["Fractal"].execute(), fractal_along_normal=self.inputs["Along Normal"].execute(), seed=self.inputs["Random Seed"].execute())
 class SymmetrizeNode(Node, ScEditOperatorNode):
     bl_idname = "SymmetrizeNode"
     bl_label = "Symmetrize"
