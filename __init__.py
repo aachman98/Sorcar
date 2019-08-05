@@ -609,15 +609,15 @@ class IcoSphereNode(Node, ScInputNode):
     bl_label = "Ico Sphere"
     
     prop_subdivisions: IntProperty(name="Subdivisions", default=2, min=1, max=10, update=ScNode.update_value)
-    prop_size: FloatProperty(name="Size", default=1.0, min=0.0, update=ScNode.update_value)
+    prop_radius: FloatProperty(name="Radius", default=1.0, min=0.0, update=ScNode.update_value)
 
     def init(self, context):
         self.inputs.new("ScIntSocket", "Subdivisions").prop_prop = "prop_subdivisions"
-        self.inputs.new("ScFloatSocket", "Size").prop_prop = "prop_size"
+        self.inputs.new("ScFloatSocket", "Radius").prop_prop = "prop_radius"
         super().init(context)
     
     def functionality(self):
-        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=self.inputs["Subdivisions"].execute(), size=self.inputs["Size"].execute())
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=self.inputs["Subdivisions"].execute(), radius=self.inputs["Radius"].execute())
 class CylinderNode(Node, ScInputNode):
     bl_idname = "CylinderNode"
     bl_label = "Cylinder"
