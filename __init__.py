@@ -4341,7 +4341,7 @@ class OrientationNode(Node, ScSettingNode):
         layout.column().prop(self, "prop_orientation", expand=True)
     
     def functionality(self):
-        self.override()["space"].transform_orientation = self.prop_orientation
+        self.override()["scene"].transform_orientation_slots[0].type = self.prop_orientation
 class PivotNode(Node, ScSettingNode):
     bl_idname = "PivotNode"
     bl_label = "Pivot Center"
