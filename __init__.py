@@ -842,7 +842,7 @@ class ResizeNode(Node, ScTransformNode):
         layout.prop(self, "prop_constraint_axis")
     
     def functionality(self):
-        bpy.ops.transform.resize(self.override(), value=self.inputs["Value"].execute(), constraint_axis=self.prop_constraint_axis, constraint_orientation=self.override()["space"].transform_orientation)
+        bpy.ops.transform.resize(self.override(), value=self.inputs["Value"].execute(), constraint_axis=self.prop_constraint_axis, orient_type=self.override()["orientation"])
 # Modifiers
 class ArrayModNode(Node, ScModifierNode):
     bl_idname = "ArrayModNode"
