@@ -276,7 +276,7 @@ class ScConversionNode(ScNode):
         if (self.mesh == None):
             print("DEBUG: " + self.name + ": Empty object recieved")
             return False
-        bpy.context.scene.objects.active = self.mesh
+        bpy.context.view_layer.objects.active = self.mesh
         return True
     
     def post_execute(self):
@@ -512,7 +512,7 @@ def toList(string):
             return [int(i) for i in list_string]
         return []
 def focusMesh(mesh, deselect=True, meshes=None):
-    active = bpy.context.scene.objects.active
+    active = bpy.context.view_layer.objects.active
     if not active == None:
         if not active.mode == "OBJECT":
             bpy.ops.object.mode_set(mode="OBJECT")
@@ -520,9 +520,9 @@ def focusMesh(mesh, deselect=True, meshes=None):
         bpy.ops.object.select_all(action="DESELECT")
     if not meshes == None:
         for m in meshes:
-            m.select = True
-    bpy.context.scene.objects.active = mesh
-    mesh.select = True
+            m.select_set(True)
+    bpy.context.view_layer.objects.active = mesh
+    mesh.select_set(True)
 def removeMesh(mesh, remove_object=True):
     if (not mesh == None):
         try:
