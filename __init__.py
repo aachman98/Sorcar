@@ -968,7 +968,7 @@ class BooleanModNode(Node, ScModifierNode):
     
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_op")
-        layout.label("Set Secondary Object Display Mode:")
+        layout.label(text="Set Secondary Object Display Mode:")
         layout.prop(self, "prop_draw_mode", expand=True)
     
     def pre_execute(self):
@@ -1147,7 +1147,7 @@ class DecimateModNode(Node, ScModifierNode):
             row.prop(self, "vertex_group_factor")
             layout.prop(self, "symmetry_axis")
         elif decimate_type == 'DISSOLVE':
-            layout.label("Delimit:")
+            layout.label(text="Delimit:")
             row = layout.row()
             row.prop(self, "delimit", expand=True)
         if (not self.mesh == None):
@@ -3172,9 +3172,9 @@ class ScatterNode(Node, ScObjectOperatorNode):
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "prop_component", expand=True)
-        layout.label("Align Location:")
+        layout.label(text="Align Location:")
         layout.prop(self, "prop_location", expand=True)
-        layout.label("Align Rotation:")
+        layout.label(text="Align Rotation:")
         layout.prop(self, "prop_rotation", expand=True)
     
     def pre_execute(self):
