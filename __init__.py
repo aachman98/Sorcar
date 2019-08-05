@@ -2849,7 +2849,7 @@ class PokeNode(Node, ScEditOperatorNode):
 
     prop_offset: FloatProperty(name="Poke Offset", default=0.0, min=-1000.0, max=1000.0, update=ScNode.update_value)
     prop_use_relative_offset: BoolProperty(name="Relative Offset", update=ScNode.update_value)
-    prop_center_mode: EnumProperty(name="Poke Center", items=[("MEAN_WEIGHTED", "Mean Weighted", ""), ("MEAN", "Mean", ""), ("BOUNDS", "Bounds", "")], default="MEAN_WEIGHTED", update=ScNode.update_value)
+    prop_center_mode: EnumProperty(name="Poke Center", items=[("MEDIAN_WEIGHTED", "Median Weighted", ""), ("MEDIAN", "Median", ""), ("BOUNDS", "Bounds", "")], default="MEDIAN_WEIGHTED", update=ScNode.update_value)
 
     def init(self, context):
         self.inputs.new("ScFloatSocket", "Poke Offset").prop_prop = "prop_offset"
