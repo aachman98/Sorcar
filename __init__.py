@@ -826,7 +826,7 @@ class RotateNode(Node, ScTransformNode):
         layout.prop(self, "prop_constraint_axis", expand=True)
     
     def functionality(self):
-        bpy.ops.transform.rotate(self.override(), value=self.inputs["Value"].execute(), axis=(1.0, 1.0, 1.0), constraint_axis=(self.prop_constraint_axis=="X", self.prop_constraint_axis=="Y", self.prop_constraint_axis=="Z"))
+        bpy.ops.transform.rotate(self.override(), value=self.inputs["Value"].execute(), orient_axis=self.prop_constraint_axis, constraint_axis=(self.prop_constraint_axis=="X", self.prop_constraint_axis=="Y", self.prop_constraint_axis=="Z"))
 class ResizeNode(Node, ScTransformNode):
     bl_idname = "ResizeNode"
     bl_label = "Resize"
