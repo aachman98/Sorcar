@@ -1860,7 +1860,7 @@ class SelectComponentsManuallyNode(Node, ScSelectionNode):
     def draw_buttons(self, context, layout):
         if (self.mesh):
             if (self == self.id_data.nodes.active):
-                layout.operator("sc.save_selection_op", "Save Selection")
+                layout.operator("sc.save_selection_op", text="Save Selection")
             layout.label(text="Faces: " + str(len([i for i in self.mesh.data.polygons if i.select])) + "/" + str(len(self.mesh.data.polygons)))
             layout.label(text="Vertices: " + str(len([i for i in self.mesh.data.vertices if i.select])) + "/" + str(len(self.mesh.data.vertices)))
             layout.label(text="Edges: " + str(len([i for i in self.mesh.data.edges if i.select])) + "/" + str(len(self.mesh.data.edges)))
