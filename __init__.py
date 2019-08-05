@@ -4092,7 +4092,7 @@ class PrintDataNode(Node, ScUtilityNode):
     
     def draw_buttons(self, context, layout):
         if (self == self.id_data.nodes.active):
-            layout.operator("sc.execute_node_op", "Print")
+            layout.operator("sc.execute_node_op", text="Print")
 
     def execute(self):
         temp = self.inputs["Value"].execute()
@@ -4416,7 +4416,7 @@ class ExportMeshFBXNode(Node, ScOutputNode):
     
     def draw_buttons(self, context, layout):
         if (self == self.id_data.nodes.active):
-            layout.operator("sc.execute_node_op", "Export Mesh")
+            layout.operator("sc.execute_node_op", text="Export Mesh")
 
     def functionality(self):
         bpy.ops.export_scene.fbx(filepath=self.inputs["File Path"].execute()+self.inputs["File Name"].execute()+".fbx", use_selection=True, use_tspace=True)
