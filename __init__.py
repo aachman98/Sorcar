@@ -4689,7 +4689,6 @@ def make_class_list():
 def register():
     register_node_categories("ScNodeCategories", node_categories)
     for cls in make_class_list():
-        print(cls)
         bpy.utils.register_class(cls)
 def unregister():
     global menu_icons
