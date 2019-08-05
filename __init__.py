@@ -691,16 +691,16 @@ class GridNode(Node, ScInputNode):
     
     prop_x: IntProperty(name="X Subdivisions", default=10, min=2, max=10000000, update=ScNode.update_value)
     prop_y: IntProperty(name="Y Subdivisions", default=10, min=2, max=10000000, update=ScNode.update_value)
-    prop_radius: FloatProperty(name="Radius", default=1.0, min=0.0, update=ScNode.update_value)
+    prop_size: FloatProperty(name="Size", default=1.0, min=0.0, update=ScNode.update_value)
 
     def init(self, context):
         self.inputs.new("ScIntSocket", "X Subdivisions").prop_prop = "prop_x"
         self.inputs.new("ScIntSocket", "Y Subdivisions").prop_prop = "prop_y"
-        self.inputs.new("ScFloatSocket", "Radius").prop_prop = "prop_radius"
+        self.inputs.new("ScFloatSocket", "Size").prop_prop = "prop_size"
         super().init(context)
     
     def functionality(self):
-        bpy.ops.mesh.primitive_grid_add(x_subdivisions=self.inputs["X Subdivisions"].execute(), y_subdivisions=self.inputs["Y Subdivisions"].execute(), radius=self.inputs["Radius"].execute())
+        bpy.ops.mesh.primitive_grid_add(x_subdivisions=self.inputs["X Subdivisions"].execute(), y_subdivisions=self.inputs["Y Subdivisions"].execute(), size=self.inputs["Size"].execute())
 class SuzanneNode(Node, ScInputNode):
     bl_idname = "SuzanneNode"
     bl_label = "Suzanne (Monkey)"
