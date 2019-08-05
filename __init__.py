@@ -594,16 +594,16 @@ class UVSphereNode(Node, ScInputNode):
     
     prop_segments: IntProperty(name="Segments", default=32, min=3, max=10000, update=ScNode.update_value)
     prop_rings: IntProperty(name="Ring Count", default=16, min=3, max=10000, update=ScNode.update_value)
-    prop_size: FloatProperty(name="Size", default=1.0, min=0.0, update=ScNode.update_value)
+    prop_radius: FloatProperty(name="Radius", default=1.0, min=0.0, update=ScNode.update_value)
 
     def init(self, context):
         self.inputs.new("ScIntSocket", "Segments").prop_prop = "prop_segments"
         self.inputs.new("ScIntSocket", "Rings").prop_prop = "prop_rings"
-        self.inputs.new("ScFloatSocket", "Size").prop_prop = "prop_size"
+        self.inputs.new("ScFloatSocket", "Radius").prop_prop = "prop_radius"
         super().init(context)
     
     def functionality(self):
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=self.inputs["Segments"].execute(), ring_count=self.inputs["Rings"].execute(), size=self.inputs["Size"].execute())
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=self.inputs["Segments"].execute(), ring_count=self.inputs["Rings"].execute(), radius=self.inputs["Radius"].execute())
 class IcoSphereNode(Node, ScInputNode):
     bl_idname = "IcoSphereNode"
     bl_label = "Ico Sphere"
