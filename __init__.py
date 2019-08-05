@@ -1622,14 +1622,14 @@ class SubdivideModNode(Node, ScModifierNode):
     subdivision_type: EnumProperty(items=[("CATMULL_CLARK", "Catmull-Clark", ""), ("SIMPLE", "Simple", "")], default="CATMULL_CLARK", update=ScNode.update_value)
     levels: IntProperty(default=1, min=0, max=11, soft_max=6, update=ScNode.update_value)
     render_levels: IntProperty(default=2, min=0, max=11, soft_max=6, update=ScNode.update_value)
-    use_subsurf_uv: BoolProperty(name="Subdivide UVs", default=True, update=ScNode.update_value)
+    uv_smooth: BoolProperty(name="Subdivide UVs", default=True, update=ScNode.update_value)
     show_only_control_edges: BoolProperty(name="Optimal Display", update=ScNode.update_value)
     prop_levels: IntProperty()
 
     def init(self, context):
         self.inputs.new("ScIntSocket", "View").prop_prop = "levels"
         self.inputs.new("ScIntSocket", "Render").prop_prop = "render_levels"
-        self.inputs.new("ScBoolSocket", "Subdivide UVs").prop_prop = "use_subsurf_uv"
+        self.inputs.new("ScBoolSocket", "Subdivide UVs").prop_prop = "uv_smooth"
         self.inputs.new("ScBoolSocket", "Optimal Display").prop_prop = "show_only_control_edges"
         super().init(context)
     
@@ -1647,7 +1647,7 @@ class SubdivideModNode(Node, ScModifierNode):
         self.mesh.modifiers[0].subdivision_type = self.subdivision_type
         self.mesh.modifiers[0].levels = self.prop_levels
         self.mesh.modifiers[0].render_levels = self.inputs["Render"].execute()
-        self.mesh.modifiers[0].use_subsurf_uv = self.inputs["Subdivide UVs"].execute()
+        self.mesh.modifiers[0].uv_smooth = 'PRESERVE_CORNERS' if self.inputs["Subdivide UVs"].execute() else 'NONE'
         self.mesh.modifiers[0].show_only_control_edges = self.inputs["Optimal Display"].execute()
 class TriangulateModNode(Node, ScModifierNode):
     bl_idname = "TriangulateModNode"
