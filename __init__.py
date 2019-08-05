@@ -4330,7 +4330,7 @@ class CursorLocationNode(Node, ScSettingNode):
         super().init(context)
     
     def functionality(self):
-        self.override()["space"].cursor_location = self.inputs["Location"].execute()
+        self.override()["scene"].cursor.location = self.inputs["Location"].execute()
 class OrientationNode(Node, ScSettingNode):
     bl_idname = "OrientationNode"
     bl_label = "Transform Orientation"
