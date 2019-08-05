@@ -1321,9 +1321,7 @@ class MirrorModNode(Node, ScModifierNode):
     
     def functionality(self):
         bpy.ops.object.modifier_add(type="MIRROR")
-        self.mesh.modifiers[0].use_x = self.inputs["X"].execute()
-        self.mesh.modifiers[0].use_y = self.inputs["Y"].execute()
-        self.mesh.modifiers[0].use_z = self.inputs["Z"].execute()
+        self.mesh.modifiers[0].use_axis = (self.inputs["X"].execute(), self.inputs["Y"].execute(), self.inputs["Z"].execute())
         self.mesh.modifiers[0].use_mirror_merge = self.inputs["Merge"].execute()
         self.mesh.modifiers[0].use_clip = self.inputs["Clipping"].execute()
         self.mesh.modifiers[0].use_mirror_vertex_groups = self.inputs["Vertex Groups"].execute()
