@@ -2,7 +2,7 @@ print("______________________________________________________")
 bl_info = {
     "name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (2, 0, 5),
+    "version": (2, 1, 0),
     "blender": (2, 80, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
