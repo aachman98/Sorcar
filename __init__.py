@@ -12,7 +12,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 bl_info = {
-	"name": "Sorcar",
+	"name": "Sorcar v3 (alpha)",
     "author": "Punya Aachman",
     "version": (3, 0, 0),
     "blender": (2, 80, 0),
