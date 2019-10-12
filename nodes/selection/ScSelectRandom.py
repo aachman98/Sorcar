@@ -17,7 +17,7 @@ class ScSelectRandom(Node, ScSelectionNode):
         super().init(context)
         self.inputs.new("ScNodeSocketNumber", "Percent").init("in_percent", True)
         self.inputs.new("ScNodeSocketNumber", "Seed").init("in_seed", True)
-        self.inputs.new("ScNodeSocketString", "Action").init("in_action")
+        self.inputs.new("ScNodeSocketString", "Action").init("in_action", True)
     
     def error_condition(self):
         return(

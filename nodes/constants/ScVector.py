@@ -1,5 +1,4 @@
 import bpy
-import mathutils
 
 from bpy.props import EnumProperty, FloatProperty
 from bpy.types import Node

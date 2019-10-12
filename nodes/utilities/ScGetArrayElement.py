@@ -1,9 +1,7 @@
 import bpy
-import mathutils
 
 from bpy.props import EnumProperty, IntProperty
 from bpy.types import Node
-from mathutils import Vector
 from .._base.node_base import ScNode
 
 class ScGetArrayElement(Node, ScNode):

@@ -1,3 +1,6 @@
+# Copyright (C) 2019 Punya Aachman
+# aachman98@gmail.com
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -12,9 +15,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 bl_info = {
-	"name": "Sorcar v3 (alpha)",
+	"name": "Sorcar v3 (alpha-2)",
     "author": "Punya Aachman",
-    "version": (3, 0, 0),
+    "version": (3, 0, 1),
     "blender": (2, 80, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
@@ -22,6 +25,7 @@ bl_info = {
 
 import bpy
 import nodeitems_utils
+import addon_utils
 import importlib
 import os
 
@@ -34,25 +38,25 @@ from .tree.ScNodeCategory import ScNodeCategory
 def import_tree():
     return getattr(importlib.import_module(".tree.ScNodeTree", __name__), "ScNodeTree")
 
-def import_ops():
+def import_ops(path="./"):
     out = []
-    for i in bpy.path.module_names(bpy.utils.user_resource("SCRIPTS", "addons/" + __name__ + "/operators/")):
+    for i in bpy.path.module_names(path + "operators"):
         out.append(getattr(importlib.import_module(".operators." + i[0], __name__), i[0]))
         print_log("IMPORT OP", msg=i[0])
     return out
 
-def import_sockets():
+def import_sockets(path="./"):
     out = []
-    for i in bpy.path.module_names(bpy.utils.user_resource("SCRIPTS", "addons/" + __name__ + "/sockets/")):
+    for i in bpy.path.module_names(path + "sockets"):
         out.append(getattr(importlib.import_module(".sockets." + i[0], __name__), i[0]))
         print_log("IMPORT SOCKET", msg=i[0])
     return out
 
-def import_nodes():
+def import_nodes(path="./"):
     out = {}
-    for cat in [i for i in os.listdir(bpy.utils.user_resource("SCRIPTS", "addons/" + __name__ + "/nodes/")) if not i.startswith("_")]:
+    for cat in [i for i in os.listdir(path + "nodes") if not i.startswith("_")]:
         out[cat] = []
-        for i in bpy.path.module_names(bpy.utils.user_resource("SCRIPTS", "addons/" + __name__ + "/nodes/" + cat + "/")):
+        for i in bpy.path.module_names(path + "nodes/" + cat):
             out[cat].append(getattr(importlib.import_module(".nodes." + cat + "." + i[0], __name__), i[0]))
             print_log("IMPORT NODE", bpy.path.display_name(cat), msg=i[0])
     return out
@@ -60,10 +64,11 @@ def import_nodes():
 all_classes = []
 
 def register():
-    print("_____________REGISTER SORCAR_________________")
-    classes_ops = import_ops()
-    classes_sockets = import_sockets()
-    classes_nodes = import_nodes()
+    print("-------------REGISTER SORCAR-------------")
+    path = repr([i for i in addon_utils.modules() if i.bl_info['name'] == bpy.path.display_name(__name__)][0]).split("from '")[1].split("__init__.py'>")[0]
+    classes_ops = import_ops(path)
+    classes_sockets = import_sockets(path)
+    classes_nodes = import_nodes(path)
 
     global all_classes
     all_classes = [import_tree()]
