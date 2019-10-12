@@ -1,6 +1,8 @@
 # Sorcar
 Procedural modeling in Blender using Node Editor
 
+![alt text](https://github.com/aachman98/Sorcar/raw/v3.0-alpha/sorcar.png "Sorcar v3 (alpha)")
+
 BlenderArtist thread: https://blenderartists.org/t/procgenmod-procedural-modeling-in-blender-using-node-editor/1156769</br>
 
 ## About

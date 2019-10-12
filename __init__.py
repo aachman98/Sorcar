@@ -65,7 +65,7 @@ all_classes = []
 
 def register():
     print("-------------REGISTER SORCAR-------------")
-    path = repr([i for i in addon_utils.modules() if i.bl_info['name'] == bpy.path.display_name(__name__)][0]).split("from '")[1].split("__init__.py'>")[0]
+    path = repr([i for i in addon_utils.modules() if i.bl_info['name'] == "Sorcar v3 (alpha-2)"][0]).split("from '")[1].split("__init__.py'>")[0]
     classes_ops = import_ops(path)
     classes_sockets = import_sockets(path)
     classes_nodes = import_nodes(path)
