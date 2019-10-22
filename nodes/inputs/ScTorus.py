@@ -3,7 +3,7 @@ import bpy
 from bpy.props import PointerProperty, EnumProperty, StringProperty, IntProperty, FloatProperty, BoolProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
-from .._base.node_inputs import ScInputNode
+from .._base.node_input import ScInputNode
 
 class ScTorus(Node, ScInputNode):
     bl_idname = "ScTorus"

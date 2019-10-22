@@ -9,23 +9,23 @@ class ScArrayMod(Node, ScModifierNode):
     bl_idname = "ScArrayMod"
     bl_label = "Array Modifier"
     
-    in_fit_type: EnumProperty(name="Fit Type", items=[("FIXED_COUNT", "Fixed Count", ""), ("FIT_LENGTH", "Fit Length", ""), ("FIT_CURVE", "Fit Curve", "")], default="FIXED_COUNT", update=ScNode.update_value)
-    in_count: IntProperty(name="Count", default=2, min=1, max=1000, update=ScNode.update_value)
-    in_fit_length: FloatProperty(name="Length", default=0.0, min=0.0, update=ScNode.update_value)
-    in_curve: PointerProperty(name="Curve", type=bpy.types.Object, update=ScNode.update_value)
-    in_use_constant_offset: BoolProperty(name="Constant Offset", update=ScNode.update_value)
-    in_constant_offset_displace: FloatVectorProperty(name="Offset", update=ScNode.update_value)
+    in_fit_type: EnumProperty(items=[("FIXED_COUNT", "Fixed Count", ""), ("FIT_LENGTH", "Fit Length", ""), ("FIT_CURVE", "Fit Curve", "")], default="FIXED_COUNT", update=ScNode.update_value)
+    in_count: IntProperty(default=2, min=1, max=1000, update=ScNode.update_value)
+    in_fit_length: FloatProperty(default=0.0, min=0.0, update=ScNode.update_value)
+    in_curve: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    in_use_constant_offset: BoolProperty(update=ScNode.update_value)
+    in_constant_offset_displace: FloatVectorProperty(update=ScNode.update_value)
     in_use_merge_vertices: BoolProperty(name="Merge", update=ScNode.update_value)
-    in_use_merge_vertices_cap: BoolProperty(name="First Last", update=ScNode.update_value)
-    in_merge_threshold: FloatProperty(name="Threshold", default=0.01, min=0.0, max=1.0, update=ScNode.update_value)
-    in_use_relative_offset: BoolProperty(name="Use Relative Offset", default=True, update=ScNode.update_value)
-    in_relative_offset_displace: FloatVectorProperty(name="Relative Offset", default=(1.0, 0.0, 0.0), update=ScNode.update_value)
-    in_use_object_offset: BoolProperty(name="Object Offset", update=ScNode.update_value)
+    in_use_merge_vertices_cap: BoolProperty(update=ScNode.update_value)
+    in_merge_threshold: FloatProperty(default=0.01, min=0.0, max=1.0, update=ScNode.update_value)
+    in_use_relative_offset: BoolProperty(default=True, update=ScNode.update_value)
+    in_relative_offset_displace: FloatVectorProperty(default=(1.0, 0.0, 0.0), update=ScNode.update_value)
+    in_use_object_offset: BoolProperty(update=ScNode.update_value)
     in_offset_object: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
     in_offset_u: FloatProperty(default=0.0, min=-1, max=1, update=ScNode.update_value)
     in_offset_v: FloatProperty(default=0.0, min=-1, max=1, update=ScNode.update_value)
-    in_start_cap: PointerProperty(name="Start Cap", type=bpy.types.Object, update=ScNode.update_value)
-    in_end_cap: PointerProperty(name="End Cap", type=bpy.types.Object, update=ScNode.update_value)
+    in_start_cap: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    in_end_cap: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
     
     def init(self, context):
         super().init(context)
@@ -52,6 +52,11 @@ class ScArrayMod(Node, ScModifierNode):
         return (
             super().error_condition()
             or (not self.inputs["Fit Type"].default_value in ["FIXED_COUNT", "FIT_LENGTH", "FIT_CURVE"])
+            or (int(self.inputs["Count"].default_value) < 1 or int(self.inputs["Count"].default_value) > 1000)
+            or self.inputs["Length"].default_value < 0.0
+            or (self.inputs["Distance"].default_value < 0.0 or self.inputs["Distance"].default_value > 1.0)
+            or (self.inputs["U Offset"].default_value < -1.0 or self.inputs["U Offset"].default_value > 1.0)
+            or (self.inputs["V Offset"].default_value < -1.0 or self.inputs["V Offset"].default_value > 1.0)
         )
     
     def functionality(self):

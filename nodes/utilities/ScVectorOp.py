@@ -47,7 +47,7 @@ class ScVectorOp(Node, ScNode):
         elif (self.inputs["Operation"].default_value == 'REFL'):
             out["Value"] = Vector(self.inputs["X"].default_value).reflect(Vector(self.inputs["Y"].default_value))
         elif (self.inputs["Operation"].default_value == 'ROT'):
-            out["Value"] = Vector(self.inputs["X"].default_value).rotation_difference(Vector(self.inputs["Y"].default_value)).to_axis_angle()[0]
+            out["Value"] = Vector(self.inputs["X"].default_value).rotation_difference(Vector(self.inputs["Y"].default_value)).to_euler()
         elif (self.inputs["Operation"].default_value == 'NORM'):
             out["Value"] = Vector(self.inputs["X"].default_value).normalized()
         elif (self.inputs["Operation"].default_value == 'ORTHO'):
