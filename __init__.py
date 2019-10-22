@@ -15,9 +15,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 bl_info = {
-	"name": "Sorcar v3 (alpha-2)",
+	"name": "Sorcar v3 (beta)",
     "author": "Punya Aachman",
-    "version": (3, 0, 1),
+    "version": (3, 0, 2),
     "blender": (2, 80, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
@@ -65,7 +65,7 @@ all_classes = []
 
 def register():
     print("-------------REGISTER SORCAR-------------")
-    path = repr([i for i in addon_utils.modules() if i.bl_info['name'] == "Sorcar v3 (alpha-2)"][0]).split("from '")[1].split("__init__.py'>")[0]
+    path = repr([i for i in addon_utils.modules() if i.bl_info['name'] == "Sorcar v3 (beta)"][0]).split("from '")[1].split("__init__.py'>")[0]
     classes_ops = import_ops(path)
     classes_sockets = import_sockets(path)
     classes_nodes = import_nodes(path)
