@@ -29,5 +29,5 @@ _NOTE: Re-run the operator if encountered any error/exception. To stop realtime 
 Open blender using a command prompt to view degub logs and errors, if encountered.
 
 ## Contributors
-Mark Andrianov (@SevenNeumann) - Icons for Sorcar & layout design for main menu
-</br>Kim Christensen (@kichristensen) - Port Sorcar (v2) to Blender 2.80
+- [Mark Andrianov](@SevenNeumann) - [Icons for Sorcar & layout design for main menu](aachman98/pull/Sorcar#46)
+- [Kim Christensen](@kichristensen) - [Port Sorcar (v2) to Blender 2.80](aachman98/pull/Sorcar#54)
