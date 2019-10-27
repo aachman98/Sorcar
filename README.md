@@ -11,11 +11,11 @@ Sorcar is a procedural modeling node-based system which utilises Blender and its
 ## Instructions 
 1. Download the zip file and install it as a Blender addon (Edit -> Preferences... -> Add-ons-> Install...)
 
-_NOTE: Built and tested only for Blender 2.80_
+    > NOTE: Built and tested only for Blender 2.80_
 
-2. Open Sorcar Node Editor (__Do not__ remove the 3D viewport as it is required by some operations like extrude, transform, ...)
+2. Open Sorcar Node Editor (__Do NOT__ remove the 3D viewport as it is required by some operations like extrude, transform, ...)
 3. Create a new tree
 4. Press Shift+A to open the nodes menu. Alternatively, navigate through tabs on the Right panel in the node editor
-6. Select the desired node and press "Set Preview"
+5. Select the desired node and press "Set Preview"
 
 Open blender using a command prompt to view logs and errors, if encountered.
