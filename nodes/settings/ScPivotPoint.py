@@ -15,7 +15,7 @@ class ScPivotPoint(Node, ScSettingNode):
     def init(self, context):
         super().init(context)
         self.inputs.new("ScNodeSocketString", "Pivot Point").init("in_pivot", True)
-        self.inputs.new("ScNodeSocketString", "Only Origins").init("in_origin")
+        self.inputs.new("ScNodeSocketBool", "Only Origins").init("in_origin")
     
     def error_condition(self):
         return (

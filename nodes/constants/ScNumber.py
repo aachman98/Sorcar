@@ -1,9 +1,10 @@
 import bpy
-import mathutils
+import numpy
 
-from bpy.props import EnumProperty, FloatProperty, IntProperty, BoolProperty
+from bpy.props import EnumProperty, FloatProperty, IntProperty, BoolProperty, StringProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
+from numpy import array, uint32
 
 class ScNumber(Node, ScNode):
     bl_idname = "ScNumber"
@@ -13,8 +14,9 @@ class ScNumber(Node, ScNode):
     prop_float: FloatProperty(name="Float", update=ScNode.update_value)
     prop_int: IntProperty(name="Integer", update=ScNode.update_value)
     prop_angle: FloatProperty(name="Angle", unit="ROTATION", update=ScNode.update_value)
+    prop_random_state: StringProperty()
     in_random: BoolProperty(update=ScNode.update_value)
-    in_seed: IntProperty(update=ScNode.update_value)
+    in_seed: IntProperty(min=0, update=ScNode.update_value)
 
     def init(self, context):
         super().init(context)
@@ -33,13 +35,20 @@ class ScNumber(Node, ScNode):
             elif (self.prop_type == "ANGLE"):
                 layout.prop(self, "prop_angle")
     
+    def error_condition(self):
+        return (
+            super().error_condition()
+            or int(self.inputs["Seed"].default_value) < 0
+        )
+    
     def post_execute(self):
         out = {}
         if (self.inputs["Random"].default_value):
-            if (not int(self.inputs["Seed"].default_value) == 0):
-                if (self.first_time):
-                    mathutils.noise.seed_set(int(self.inputs["Seed"].default_value))
-            out["Value"] = mathutils.noise.random()
+            rs = numpy.random.RandomState(int(self.inputs["Seed"].default_value))
+            if (not self.first_time):
+                rs.set_state(eval(self.prop_random_state))
+            out["Value"] = rs.rand()
+            self.prop_random_state = repr(rs.get_state())
         else:
             if (self.prop_type == "FLOAT"):
                 out["Value"] = self.prop_float

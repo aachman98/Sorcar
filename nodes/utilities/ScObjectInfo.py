@@ -25,7 +25,8 @@ class ScObjectInfo(Node, ScNode):
         self.outputs.new("ScNodeSocketArray", "Total Faces")
     
     def pre_execute(self):
-        focus_on_object(self.inputs["Object"].default_value)
+        focus_on_object(self.inputs["Object"].default_value, True)
+        bpy.ops.object.mode_set(mode='OBJECT')
     
     def error_condition(self):
         return (

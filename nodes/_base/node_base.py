@@ -15,9 +15,10 @@ class ScNode:
         context.space_data.edit_tree.execute_node()
         return None
     
-    def reset(self):
+    def reset(self, execute):
         # Reset node for next execution
-        self.first_time = True
+        if (execute):
+            self.first_time = True
         self.set_color()
     
     def set_color(self):

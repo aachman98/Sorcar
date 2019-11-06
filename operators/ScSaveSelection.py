@@ -10,6 +10,6 @@ class ScSaveSelection(Operator):
     def poll(cls, context):
         return context.space_data.tree_type == "ScNodeTree"
 
-    def execute(Self, context):
+    def execute(self, context):
         context.space_data.edit_tree.nodes.active.save_selection()
         return {"FINISHED"}

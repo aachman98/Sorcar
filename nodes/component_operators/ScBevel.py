@@ -10,7 +10,7 @@ class ScBevel(Node, ScEditOperatorNode):
     bl_label = "Bevel"
 
     in_offset_type: EnumProperty(items=[("OFFSET", "Offset", ""), ("WIDTH", "Width", ""), ("PERCENT", "Percent", ""), ("DEPTH", "Depth", "")], default="OFFSET", update=ScNode.update_value)
-    in_offset: FloatProperty(default=0.0, min=-1000000.0, max=1000000.0, update=ScNode.update_value)
+    in_offset: FloatProperty(min=0.0, max=1000000.0, update=ScNode.update_value)
     in_segments: IntProperty(default=1, min=1, max=1000, update=ScNode.update_value)
     in_profile: FloatProperty(default=0.5, min=0.15, max=1.0, update=ScNode.update_value)
     in_vertex_only: BoolProperty(update=ScNode.update_value)
@@ -47,7 +47,8 @@ class ScBevel(Node, ScEditOperatorNode):
         return(
             super().error_condition()
             or (not self.inputs["Offset Type"].default_value in ['OFFSET', 'WIDTH', 'DEPTH', 'PERCENT'])
-            or (self.inputs["Offset"].default_value < -1000000 or self.inputs["Offset"].default_value > 1000000)
+            or (self.inputs["Offset Type"].default_value == 'PERCENT' and (self.inputs["Offset"].default_value < 0.0 or self.inputs["Offset"].default_value > 100.0))
+            or (self.inputs["Offset"].default_value < 0.0 or self.inputs["Offset"].default_value > 1000000.0)
             or (int(self.inputs["Segments"].default_value) < 1 or int(self.inputs["Segments"].default_value) > 1000)
             or (self.inputs["Profile"].default_value < 0.15 or self.inputs["Profile"].default_value > 1)
             or int(self.inputs["Material"].default_value) < -1
@@ -61,6 +62,7 @@ class ScBevel(Node, ScEditOperatorNode):
         bpy.ops.mesh.bevel(
             offset_type = self.inputs["Offset Type"].default_value,
             offset = self.inputs["Offset"].default_value,
+            offset_pct = self.inputs["Offset"].default_value,
             segments = int(self.inputs["Segments"].default_value),
             profile = self.inputs["Profile"].default_value,
             vertex_only = self.inputs["Vertex Only"].default_value,

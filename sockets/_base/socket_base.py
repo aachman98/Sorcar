@@ -45,7 +45,7 @@ class ScNodeSocket:
                     layout.label(text=text)
                 else:
                     layout.prop(self, "hide", icon='RADIOBUT_OFF', icon_only=True, invert_checkbox=True)
-                    layout.prop(node, self.default_prop, text=text)
+                    layout.column().prop(node, self.default_prop, text=text)
     
     def execute(self, forced):
         # Execute node socket to get/set default_value

@@ -9,17 +9,17 @@ class ScVectorOp(Node, ScNode):
     bl_idname = "ScVectorOp"
     bl_label = "Vector Operation"
 
-    in_op: EnumProperty(name="Operation", items=[("ADD", "X + Y", "Addition"), ("SUB", "X - Y", "Subtraction"), ("MULT", "K * X", "Multiplication by Scalar"), ("CROSS", "X * Y", "Cross Product"), ("DOT", "X . Y", "Dot Product"), ("ANGLE", "Angle", ""), ("PROJ", "Project", ""), ("REFL", "Reflect", "Mirror"), ("ROT", "Rotation Difference", "Rotation Difference"), ("NORM", "Normalise X", "Unit Vector"), ("ORTHO", "Orthogonal X", "Perpendicular"), ("LERP", "Lerp", "Linear Interpolate"), ("SLERP", "S-Lerp", "Spherical Interpolate")], default="ADD", update=ScNode.update_value)
     in_x: FloatVectorProperty(update=ScNode.update_value)
     in_y: FloatVectorProperty(update=ScNode.update_value)
     in_k: FloatProperty(update=ScNode.update_value)
+    in_op: EnumProperty(name="Operation", items=[("ADD", "X + Y", "Addition"), ("SUB", "X - Y", "Subtraction"), ("MULT", "K * X", "Multiplication by Scalar"), ("CROSS", "X * Y", "Cross Product"), ("DOT", "X . Y", "Dot Product"), ("ANGLE", "Angle", ""), ("PROJ", "Project", ""), ("REFL", "Reflect", "Mirror"), ("ROT", "Rotation Difference", "Rotation Difference"), ("NORM", "Normalise X", "Unit Vector"), ("ORTHO", "Orthogonal X", "Perpendicular"), ("LERP", "Lerp", "Linear Interpolate"), ("SLERP", "S-Lerp", "Spherical Interpolate")], default="ADD", update=ScNode.update_value)
 
     def init(self, context):
         super().init(context)
-        self.inputs.new("ScNodeSocketString", "Operation").init("in_op", True)
         self.inputs.new("ScNodeSocketVector", "X").init("in_x", True)
         self.inputs.new("ScNodeSocketVector", "Y").init("in_y", True)
         self.inputs.new("ScNodeSocketNumber", "K").init("in_k")
+        self.inputs.new("ScNodeSocketString", "Operation").init("in_op", True)
         self.outputs.new("ScNodeSocketVector", "Value")
     
     def error_condition(self):

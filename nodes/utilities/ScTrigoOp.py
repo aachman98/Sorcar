@@ -9,15 +9,15 @@ class ScTrigoOp(Node, ScNode):
     bl_idname = "ScTrigoOp"
     bl_label = "Trigonometric Operation"
 
+    in_x: FloatProperty(update=ScNode.update_value)
     in_op1: EnumProperty(name="Opertion", items=[("SIN","Sin",""), ("COS","Cos",""), ("TAN","Tan","")], default="SIN", update=ScNode.update_value)
     in_op2: EnumProperty(name="Opertion 2", items=[("NONE","None",""), ("HB","Hyperbolic",""), ("INV","Inverse","")], default="NONE", update=ScNode.update_value)
-    in_x: FloatProperty(update=ScNode.update_value)
 
     def init(self, context):
         super().init(context)
+        self.inputs.new("ScNodeSocketNumber", "X").init("in_x", True)
         self.inputs.new("ScNodeSocketString", "Operation 1").init("in_op1", True)
         self.inputs.new("ScNodeSocketString", "Operation 2").init("in_op2")
-        self.inputs.new("ScNodeSocketNumber", "X").init("in_x", True)
         self.outputs.new("ScNodeSocketNumber", "Value")
     
     def error_condition(self):

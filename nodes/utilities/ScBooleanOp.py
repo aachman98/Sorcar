@@ -8,15 +8,15 @@ class ScBooleanOp(Node, ScNode):
     bl_idname = "ScBooleanOp"
     bl_label = "Boolean Operation"
 
-    in_op: EnumProperty(items=[("AND", "X and Y", "&&"), ("OR", "X or Y", "||"), ("EQUAL", "X equals Y", "=="), ("NOTEQUAL", "X not equals Y", "!="), ("NOTX", "not X", "!X"), ("NOTY", "not Y", "!Y")], default="OR", update=ScNode.update_value)
     in_x: BoolProperty(name="X", update=ScNode.update_value)
     in_y: BoolProperty(name="Y", update=ScNode.update_value)
+    in_op: EnumProperty(items=[("AND", "X and Y", "&&"), ("OR", "X or Y", "||"), ("EQUAL", "X equals Y", "=="), ("NOTEQUAL", "X not equals Y", "!="), ("NOTX", "not X", "!X"), ("NOTY", "not Y", "!Y")], default="OR", update=ScNode.update_value)
 
     def init(self, context):
         super().init(context)
-        self.inputs.new("ScNodeSocketString", "Operation").init("in_op", True)
         self.inputs.new("ScNodeSocketBool", "X").init("in_x", True)
         self.inputs.new("ScNodeSocketBool", "Y").init("in_y", True)
+        self.inputs.new("ScNodeSocketString", "Operation").init("in_op", True)
         self.outputs.new("ScNodeSocketBool", "Value")
     
     def error_condition(self):

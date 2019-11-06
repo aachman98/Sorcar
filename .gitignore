@@ -1,0 +1,6 @@
+___pycache__
+.vscode
+experimental/
+
+scraper.py
+scraper2.py

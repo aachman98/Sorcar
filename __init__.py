@@ -15,9 +15,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 bl_info = {
-	"name": "Sorcar v3 (beta)",
+	"name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (3, 0, 2),
+    "version": (3, 1, 0),
     "blender": (2, 80, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
@@ -65,7 +65,7 @@ all_classes = []
 
 def register():
     print("-------------REGISTER SORCAR-------------")
-    path = repr([i for i in addon_utils.modules() if i.bl_info['name'] == "Sorcar v3 (beta)"][0]).split("from '")[1].split("__init__.py'>")[0]
+    path = repr([i for i in addon_utils.modules() if i.bl_info['name'] == bpy.path.display_name(__name__)][0]).split("from '")[1].split("__init__.py'>")[0]
     classes_ops = import_ops(path)
     classes_sockets = import_sockets(path)
     classes_nodes = import_nodes(path)
@@ -94,8 +94,12 @@ def unregister():
     print("------------UNREGISTER SORCAR----------------")
     global all_classes
     all_classes.reverse()
+
     for i in all_classes:
         bpy.utils.unregister_class(i)
+        print_log("UNREGISTER", i.bl_idname, None, i.bl_label)
     nodeitems_utils.unregister_node_categories("sc_node_categories")
     if (update_each_frame in bpy.app.handlers.frame_change_pre):
         bpy.app.handlers.frame_change_pre.remove(update_each_frame)
+
+    print_log("UNREGISTERED", msg=str(len(all_classes)) + " classes")

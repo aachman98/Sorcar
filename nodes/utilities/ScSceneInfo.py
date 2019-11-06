@@ -1,4 +1,5 @@
 import bpy
+import time
 
 from bpy.types import Node
 from .._base.node_base import ScNode
@@ -12,6 +13,7 @@ class ScSceneInfo(Node, ScNode):
         self.outputs.new("ScNodeSocketNumber", "Start Frame")
         self.outputs.new("ScNodeSocketNumber", "Current Frame")
         self.outputs.new("ScNodeSocketNumber", "End Frame")
+        self.outputs.new("ScNodeSocketNumber", "System Time")
     
     def draw_buttons(self, context, layout):
         super().draw_buttons(context, layout)
@@ -22,4 +24,5 @@ class ScSceneInfo(Node, ScNode):
         out["Start Frame"] = bpy.context.scene.frame_start
         out["Current Frame"] = bpy.context.scene.frame_current
         out["End Frame"] = bpy.context.scene.frame_end
+        out["System Time"] = time.time()
         return out

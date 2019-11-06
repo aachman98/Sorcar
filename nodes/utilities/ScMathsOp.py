@@ -9,15 +9,15 @@ class ScMathsOp(Node, ScNode):
     bl_idname = "ScMathsOp"
     bl_label = "Maths Operation"
 
-    in_op: EnumProperty(name="Operation", items=[("ADD", "X + Y", "Addition"), ("SUB", "X - Y", "Subtraction"), ("MULT", "X * Y", "Multiplication"), ("DIV", "X / Y", "Division"), ("MOD", "X % Y", "Modulo (Remainder)"), ("POW", "X ^ Y", "Exponent (Power)"), ("LOG", "Log(X) to base Y", "Logarithm"), ("FACT", "!X", "X Factorial")], default="ADD", update=ScNode.update_value)
     in_x: FloatProperty(update=ScNode.update_value)
     in_y: FloatProperty(update=ScNode.update_value)
+    in_op: EnumProperty(name="Operation", items=[("ADD", "X + Y", "Addition"), ("SUB", "X - Y", "Subtraction"), ("MULT", "X * Y", "Multiplication"), ("DIV", "X / Y", "Division"), ("MOD", "X % Y", "Modulo (Remainder)"), ("POW", "X ^ Y", "Exponent (Power)"), ("LOG", "Log(X) to base Y", "Logarithm"), ("FACT", "!X", "X Factorial")], default="ADD", update=ScNode.update_value)
 
     def init(self, context):
         super().init(context)
-        self.inputs.new("ScNodeSocketString", "Operation").init("in_op", True)
         self.inputs.new("ScNodeSocketNumber", "X").init("in_x", True)
         self.inputs.new("ScNodeSocketNumber", "Y").init("in_y", True)
+        self.inputs.new("ScNodeSocketString", "Operation").init("in_op", True)
         self.outputs.new("ScNodeSocketNumber", "Value")
     
     def error_condition(self):
