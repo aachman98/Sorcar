@@ -9,7 +9,7 @@ Procedural modeling in Blender using Node Editor
 </br>Intro & Tutorials: <https://www.youtube.com/playlist?list=PLZiIC3gdS_O7nCm1-xpWbZmTQWeL5c6KV>
 <!-- </br>Itch: <> -->
 <!-- </br>Gumroad: <> -->
-</br>Trello (Project Tracker): <https://trello.com/b/aKIFRoTh/sorcar-v205>
+</br>Trello (Project Tracker): <https://trello.com/b/aKIFRoTh/sorcar>
 
 ## About
 
