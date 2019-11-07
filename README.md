@@ -2,7 +2,7 @@
 
 Procedural modeling in Blender using Node Editor
 
-![sc_cover](https://user-images.githubusercontent.com/26548023/68349507-651b6a00-0123-11ea-9769-a01744cc7084.png "Sorcar v3")
+![sc_cover](https://github.com/aachman98/sc-img-data/raw/master/sc_cover.png "Sorcar v3")
 <!-- [![sc_](http://img.youtube.com/vi/VIDEO_ID/0.jpg)](http://www.youtube.com/watch?v=VIDEO_ID "Sorcar v3") -->
 </br>Github: <https://github.com/aachman98/Sorcar>
 </br>BlenderArtist Thread: <https://blenderartists.org/t/sorcar-formerly-procgenmod-procedural-modeling-in-blender-using-node-editor/1156769>
@@ -32,12 +32,12 @@ Sorcar is a **procedural modeling node-based system** which utilises Blender and
 
 | | |
 | --- | --- |
-| ![sc_visual_programming](https://github.com/aachman98/sc-gif-data/raw/master/sc_1_1.gif "Visual Programming") | <p style="text-align: left; padding-left: 16px;"><strong>VISUAL PROGRAMMING</strong><br /><em>Don't like programming?</em></p> <hr style="padding-left: 16px;" /> <p style="text-align: left; padding-left: 16px;">Construct geometries using custom algorithms, maths or generate patterns without writing a single line of code!</p> |
-| <p style="text-align: right; padding-right: 16px;"><strong>NON-DESTRUCTIVE WORKFLOW</strong><br /><em>Want to change cylinder vertices after bevel?</em></p> <hr style="padding-right: 16px;" /> <p style="text-align: right; padding-right: 16px;">Edit node parameters at any point without the fear of losing mesh data. Also apply same procedural operations to different objects easily.</p> | ![sc_non_destructive](https://github.com/aachman98/sc-gif-data/raw/master/sc_1_2.gif "Non-Destructive Workflow") |
-| ![sc_realtime_updates](https://github.com/aachman98/sc-gif-data/raw/master/sc_1_3.gif "Realtime Updates") | <p style="text-align: left; padding-left: 16px;"><strong>REAL-TIME UPDATES</strong><br /><em>Quick as the wind...</em></p> <hr style="padding-left: 16px;" /> <p style="text-align: left; padding-left: 16px;">Drive a parameter using current frame value (or manually change it) and see the mesh update in viewport.</p> |
-| <p style="text-align: right; padding-right: 16px;"><strong>ITERATE & RANDOMIZE</strong><br /><em>Need multiple extrusions of random amount?</em></p> <hr style="padding-right: 16px;" /> <p style="text-align: right; padding-right: 16px;">Generate variations in mesh by using seed-controlled pseudorandom numbers. Use loops to handle repeatitive operations with same level of randomness.</p> | ![sc_iterate_randomize](https://github.com/aachman98/sc-gif-data/raw/master/sc_1_4.gif "Iterate & Randomize") |
-| ![sc_automation](https://github.com/aachman98/sc-gif-data/raw/master/sc_1_5.gif "Automation") | <p style="text-align: left; padding-left: 16px;"><strong>AUTOMATION</strong><br /><em>Modify, Save, Repeat...</em></p> <hr style="padding-left: 16px;" /> <p style="text-align: left; padding-left: 16px;">Use frame number to drive seed value and batch export the meshes in different files.</p> |
-| <p style="text-align: right; padding-right: 16px;"><strong>170+ NODES</strong><br /><em>At your service!</em></p> <hr style="padding-right: 16px;" /> <p style="text-align: right; padding-right: 16px;">A growing list of functions available as nodes (operators & scene settings) including custom inputs, selection & transform tools, modifiers and component level operators.</p> | ![sc_nodes](https://github.com/aachman98/sc-gif-data/raw/master/sc_1_6.gif "170+ Nodes") |
+| ![sc_visual_programming](https://github.com/aachman98/sc-img-data/raw/master/sc_visual_programming.gif "Visual Programming") | <p style="text-align: left; padding-left: 16px;"><strong>VISUAL PROGRAMMING</strong><br /><em>Don't like programming?</em></p> <hr style="padding-left: 16px;" /> <p style="text-align: left; padding-left: 16px;">Construct geometries using custom algorithms, maths or generate patterns without writing a single line of code!</p> |
+| <p style="text-align: right; padding-right: 16px;"><strong>NON-DESTRUCTIVE WORKFLOW</strong><br /><em>Want to change cylinder vertices after bevel?</em></p> <hr style="padding-right: 16px;" /> <p style="text-align: right; padding-right: 16px;">Edit node parameters at any point without the fear of losing mesh data. Also apply same procedural operations to different objects easily.</p> | ![sc_non_destructive](https://github.com/aachman98/sc-img-data/raw/master/sc_non_destructive.gif "Non-Destructive Workflow") |
+| ![sc_realtime_updates](https://github.com/aachman98/sc-img-data/raw/master/sc_realtime_updates.gif "Realtime Updates") | <p style="text-align: left; padding-left: 16px;"><strong>REAL-TIME UPDATES</strong><br /><em>Quick as the wind...</em></p> <hr style="padding-left: 16px;" /> <p style="text-align: left; padding-left: 16px;">Drive a parameter using current frame value (or manually change it) and see the mesh update in viewport.</p> |
+| <p style="text-align: right; padding-right: 16px;"><strong>ITERATE & RANDOMIZE</strong><br /><em>Need multiple extrusions of random amount?</em></p> <hr style="padding-right: 16px;" /> <p style="text-align: right; padding-right: 16px;">Generate variations in mesh by using seed-controlled pseudorandom numbers. Use loops to handle repeatitive operations with same level of randomness.</p> | ![sc_iterate_randomize](https://github.com/aachman98/sc-img-data/raw/master/sc_iterate_randomize.gif "Iterate & Randomize") |
+| ![sc_automation](https://github.com/aachman98/sc-img-data/raw/master/sc_automation.gif "Automation") | <p style="text-align: left; padding-left: 16px;"><strong>AUTOMATION</strong><br /><em>Modify, Save, Repeat...</em></p> <hr style="padding-left: 16px;" /> <p style="text-align: left; padding-left: 16px;">Use frame number to drive seed value and batch export the meshes in different files.</p> |
+| <p style="text-align: right; padding-right: 16px;"><strong>170+ NODES</strong><br /><em>At your service!</em></p> <hr style="padding-right: 16px;" /> <p style="text-align: right; padding-right: 16px;">A growing list of functions available as nodes (operators & scene settings) including custom inputs, selection & transform tools, modifiers and component level operators.</p> | ![sc_nodes](https://github.com/aachman98/sc-img-data/raw/master/sc_nodes.gif "170+ Nodes") |
 
 - Simplified node sockets with internal data conversion for the convenience of users.
 - Colour-coded nodes (preview, error, invalid inputs etc.) for easier debugging.
@@ -49,19 +49,19 @@ and more...!
 
 | | |
 | --- | --- |
-| ![sc_inputs](https://user-images.githubusercontent.com/26548023/68349488-5f258900-0123-11ea-9836-eeebd36c0247.png "Inputs") | **Inputs** </br> Primitive Meshes (Cube, Cylinder, Sphere, ...), Import FBX, Custom Object from the scene |
-| ![sc_transform](https://user-images.githubusercontent.com/26548023/68349489-5f258900-0123-11ea-815e-31250963a9ae.png "Transform") | **Transform** </br> Set/Add/Randomize transform (Edit/Object mode), Apply transform, Create custom orientation|
-| ![sc_selection](https://user-images.githubusercontent.com/26548023/68349490-5f258900-0123-11ea-812a-442c09716f9e.png "Selection") | **Selection** </br> Manual, invert/toggle, loops, random, similar components or by their property (location, index, normal, material, ...) |
-| ![sc_deletion](https://user-images.githubusercontent.com/26548023/68349492-5fbe1f80-0123-11ea-8d37-2d214eb3f6be.png "Deletion") | **Deletion** </br> Delete/Dissolve selected components (or loops) |
+| ![sc_inputs](https://github.com/aachman98/sc-img-data/raw/master/sc_inputs.png "Inputs") | **Inputs** </br> Primitive Meshes (Cube, Cylinder, Sphere, ...), Import FBX, Custom Object from the scene |
+| ![sc_transform](https://github.com/aachman98/sc-img-data/raw/master/sc_transform.png "Transform") | **Transform** </br> Set/Add/Randomize transform (Edit/Object mode), Apply transform, Create custom orientation|
+| ![sc_selection](https://github.com/aachman98/sc-img-data/raw/master/sc_selection.png "Selection") | **Selection** </br> Manual, invert/toggle, loops, random, similar components or by their property (location, index, normal, material, ...) |
+| ![sc_deletion](https://github.com/aachman98/sc-img-data/raw/master/sc_deletion.png "Deletion") | **Deletion** </br> Delete/Dissolve selected components (or loops) |
 | | |
-| ![sc_component_operators](https://user-images.githubusercontent.com/26548023/68349493-5fbe1f80-0123-11ea-85f3-40d2941c9b26.png "Component Operators") | **Component Operators** </br> Bevel, Decimate, Extrude, Fill, Inset, Loop Cut, Merge, Offset Loop, Poke, Screw, Spin, Subdivide, UV Map |
-| ![sc_object_operators](https://user-images.githubusercontent.com/26548023/68349494-5fbe1f80-0123-11ea-9627-d026c49b014f.png "Object Operators") | **Object Operators** </br> Duplicate, Raycast/Overlap, Merge, Scatter, Shading, Viewport Draw Mode |
-| ![sc_modifiers](https://user-images.githubusercontent.com/26548023/68349495-6056b600-0123-11ea-91d4-8376f86fd12b.png "Modifiers") | **Modifiers** </br> Array, Bevel, Boolean, Build, Cast, Curve, Decimate, Remesh, Skin, Solidify, Subsurf, Wave, Wireframe |
+| ![sc_component_operators](https://github.com/aachman98/sc-img-data/raw/master/sc_component_operators.png "Component Operators") | **Component Operators** </br> Bevel, Decimate, Extrude, Fill, Inset, Loop Cut, Merge, Offset Loop, Poke, Screw, Spin, Subdivide, UV Map |
+| ![sc_object_operators](https://github.com/aachman98/sc-img-data/raw/master/sc_object_operators.png "Object Operators") | **Object Operators** </br> Duplicate, Raycast/Overlap, Merge, Scatter, Shading, Viewport Draw Mode |
+| ![sc_modifiers](https://github.com/aachman98/sc-img-data/raw/master/sc_modifiers.png "Modifiers") | **Modifiers** </br> Array, Bevel, Boolean, Build, Cast, Curve, Decimate, Remesh, Skin, Solidify, Subsurf, Wave, Wireframe |
 | | |
-| ![sc_constants](https://user-images.githubusercontent.com/26548023/68349497-6056b600-0123-11ea-8e14-4ace0ce6312c.png "Constants") | **Constants** </br> Number (Float/Int/Angle/Random), Bool, Vector, String |
-| ![sc_utilities](https://user-images.githubusercontent.com/26548023/68349498-6056b600-0123-11ea-9677-28494c38dec1.png "Utilities") | **Utilities** </br> Array, String/Bool/Vector ops, Maths, Clamp, Map, Trigonometry, Scene/Component/Object Info, Custom Python Script |
-| ![sc_flow_control](https://user-images.githubusercontent.com/26548023/68349500-60ef4c80-0123-11ea-9437-01ee457a85c5.png "Flow Control") | **Flow Control** </br> For loop, For-Each loop, If-Else Branch |
-| ![sc_settings](https://user-images.githubusercontent.com/26548023/68349487-5e8cf280-0123-11ea-9e7b-19466fdeb856.png "Settings") | **Settings** </br> Cursor Transform, Edit Mode, Pivot Point, Transform Orientation |
+| ![sc_constants](https://github.com/aachman98/sc-img-data/raw/master/sc_constants.png "Constants") | **Constants** </br> Number (Float/Int/Angle/Random), Bool, Vector, String |
+| ![sc_utilities](https://github.com/aachman98/sc-img-data/raw/master/sc_utilities.png "Utilities") | **Utilities** </br> Array, String/Bool/Vector ops, Maths, Clamp, Map, Trigonometry, Scene/Component/Object Info, Custom Python Script |
+| ![sc_flow_control](https://github.com/aachman98/sc-img-data/raw/master/sc_flow_control.png "Flow Control") | **Flow Control** </br> For loop, For-Each loop, If-Else Branch |
+| ![sc_settings](https://github.com/aachman98/sc-img-data/raw/master/sc_settings.png "Settings") | **Settings** </br> Cursor Transform, Edit Mode, Pivot Point, Transform Orientation |
 
 ## Upcoming Feature
 
@@ -80,5 +80,5 @@ and more...!
 
 ## Showcase
 
-![sc_logo](https://raw.githubusercontent.com/aachman98/Sorcar/v3.0-alpha/sorcar.png "Sorcar")
-![sc_showcase](https://user-images.githubusercontent.com/26548023/68349644-de1ac180-0123-11ea-8ba0-9d0da373c9fd.jpg "Made in Sorcar")
+![sc_logo](https://github.com/aachman98/sc-img-data/raw/master/sc_logo.png "Sorcar")
+![sc_showcase](https://github.com/aachman98/sc-img-data/raw/master/sc_showcase.png "Made in Sorcar")
