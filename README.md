@@ -2,14 +2,14 @@
 
 Procedural modeling in Blender using Node Editor
 
-![alt text](http://randallmfg.com/ramps/wp-content/uploads/2013/02/640x480.jpg "Sorcar v3")
+![sc_cover](https://user-images.githubusercontent.com/26548023/68349507-651b6a00-0123-11ea-9769-a01744cc7084.png "Sorcar v3")
 <!-- [![alt text](http://img.youtube.com/vi/VIDEO_ID/0.jpg)](http://www.youtube.com/watch?v=VIDEO_ID "Sorcar v3") -->
-<!-- </br>Github: <https://github.com/aachman98/Sorcar> -->
-<!-- </br>BlenderArtist Thread: <> -->
-<!-- </br>Intro & Tutorials: <> -->
+</br>Github: <https://github.com/aachman98/Sorcar>
+</br>BlenderArtist Thread: <https://blenderartists.org/t/sorcar-formerly-procgenmod-procedural-modeling-in-blender-using-node-editor/1156769>
+</br>Intro & Tutorials: <https://www.youtube.com/playlist?list=PLZiIC3gdS_O7nCm1-xpWbZmTQWeL5c6KV>
 <!-- </br>Itch: <> -->
 <!-- </br>Gumroad: <> -->
-<!-- </br>Trello (Project Tracker): <> -->
+</br>Trello (Project Tracker): <https://trello.com/b/aKIFRoTh/sorcar-v205>
 
 ## About
 
@@ -49,19 +49,19 @@ and more...!
 
 | | |
 | --- | --- |
-| ![alt text](https://www.edu-art.in/wp-content/uploads/2017/02/iOS-7-Download-Nebula-Dots-Wallpapers-640x240.png "Inputs") | **Inputs** </br> Primitive Meshes (Cube, Cylinder, Sphere, ...), Import FBX, Custom Object from the scene |
-| ![alt text](https://www.edu-art.in/wp-content/uploads/2017/02/iOS-7-Download-Nebula-Dots-Wallpapers-640x240.png "Transform") | **Transform** </br> Set/Add/Randomize transform (Edit/Object mode), Apply transform, Create custom orientation|
-| ![alt text](https://www.edu-art.in/wp-content/uploads/2017/02/iOS-7-Download-Nebula-Dots-Wallpapers-640x240.png "Selection") | **Selection** </br> Manual, invert/toggle, loops, random, similar components or by their property (location, index, normal, material, ...) |
-| ![alt text](https://www.edu-art.in/wp-content/uploads/2017/02/iOS-7-Download-Nebula-Dots-Wallpapers-640x240.png "Deletion") | **Deletion** </br> Delete/Dissolve selected components (or loops) |
+| ![sc_inputs](https://user-images.githubusercontent.com/26548023/68349488-5f258900-0123-11ea-9836-eeebd36c0247.png "Inputs") | **Inputs** </br> Primitive Meshes (Cube, Cylinder, Sphere, ...), Import FBX, Custom Object from the scene |
+| ![sc_transform](https://user-images.githubusercontent.com/26548023/68349489-5f258900-0123-11ea-815e-31250963a9ae.png "Transform") | **Transform** </br> Set/Add/Randomize transform (Edit/Object mode), Apply transform, Create custom orientation|
+| ![sc_selection](https://user-images.githubusercontent.com/26548023/68349490-5f258900-0123-11ea-812a-442c09716f9e.png "Selection") | **Selection** </br> Manual, invert/toggle, loops, random, similar components or by their property (location, index, normal, material, ...) |
+| ![sc_deletion](https://user-images.githubusercontent.com/26548023/68349492-5fbe1f80-0123-11ea-8d37-2d214eb3f6be.png "Deletion") | **Deletion** </br> Delete/Dissolve selected components (or loops) |
 | | |
-| ![alt text](https://www.edu-art.in/wp-content/uploads/2017/02/iOS-7-Download-Nebula-Dots-Wallpapers-640x240.png "Component Operators") | **Component Operators** </br> Bevel, Decimate, Extrude, Fill, Inset, Loop Cut, Merge, Offset Loop, Poke, Screw, Spin, Subdivide, UV Map |
-| ![alt text](https://www.edu-art.in/wp-content/uploads/2017/02/iOS-7-Download-Nebula-Dots-Wallpapers-640x240.png "Object Operators") | **Object Operators** </br> Duplicate, Raycast/Overlap, Merge, Scatter, Shading, Viewport Draw Mode |
-| ![alt text](https://www.edu-art.in/wp-content/uploads/2017/02/iOS-7-Download-Nebula-Dots-Wallpapers-640x240.png "Modifiers") | **Modifiers** </br> Array, Bevel, Boolean, Build, Cast, Curve, Decimate, Remesh, Skin, Solidify, Subsurf, Wave, Wireframe |
+| ![sc_component_operators](https://user-images.githubusercontent.com/26548023/68349493-5fbe1f80-0123-11ea-85f3-40d2941c9b26.png "Component Operators") | **Component Operators** </br> Bevel, Decimate, Extrude, Fill, Inset, Loop Cut, Merge, Offset Loop, Poke, Screw, Spin, Subdivide, UV Map |
+| ![sc_object_operators](https://user-images.githubusercontent.com/26548023/68349494-5fbe1f80-0123-11ea-9627-d026c49b014f.png "Object Operators") | **Object Operators** </br> Duplicate, Raycast/Overlap, Merge, Scatter, Shading, Viewport Draw Mode |
+| ![sc_modifiers](https://user-images.githubusercontent.com/26548023/68349495-6056b600-0123-11ea-91d4-8376f86fd12b.png "Modifiers") | **Modifiers** </br> Array, Bevel, Boolean, Build, Cast, Curve, Decimate, Remesh, Skin, Solidify, Subsurf, Wave, Wireframe |
 | | |
-| ![alt text](https://www.edu-art.in/wp-content/uploads/2017/02/iOS-7-Download-Nebula-Dots-Wallpapers-640x240.png "Constants") | **Constants** </br> Number (Float/Int/Angle/Random), Bool, Vector, String |
-| ![alt text](https://www.edu-art.in/wp-content/uploads/2017/02/iOS-7-Download-Nebula-Dots-Wallpapers-640x240.png "Utilities") | **Utilities** </br> Array, String/Bool/Vector ops, Maths, Clamp, Map, Trigonometry, Scene/Component/Object Info, Custom Python Script |
-| ![alt text](https://www.edu-art.in/wp-content/uploads/2017/02/iOS-7-Download-Nebula-Dots-Wallpapers-640x240.png "Flow Control") | **Flow Control** </br> For loop, For-Each loop, If-Else Branch |
-| ![alt text](https://www.edu-art.in/wp-content/uploads/2017/02/iOS-7-Download-Nebula-Dots-Wallpapers-640x240.png "Settings") | **Settings** </br> Cursor Transform, Edit Mode, Pivot Point, Transform Orientation |
+| ![sc_constants](https://user-images.githubusercontent.com/26548023/68349497-6056b600-0123-11ea-8e14-4ace0ce6312c.png "Constants") | **Constants** </br> Number (Float/Int/Angle/Random), Bool, Vector, String |
+| ![sc_utilities](https://user-images.githubusercontent.com/26548023/68349498-6056b600-0123-11ea-9677-28494c38dec1.png "Utilities") | **Utilities** </br> Array, String/Bool/Vector ops, Maths, Clamp, Map, Trigonometry, Scene/Component/Object Info, Custom Python Script |
+| ![sc_flow_control](https://user-images.githubusercontent.com/26548023/68349500-60ef4c80-0123-11ea-9437-01ee457a85c5.png "Flow Control") | **Flow Control** </br> For loop, For-Each loop, If-Else Branch |
+| ![sc_settings](https://user-images.githubusercontent.com/26548023/68349487-5e8cf280-0123-11ea-9e7b-19466fdeb856.png "Settings") | **Settings** </br> Cursor Transform, Edit Mode, Pivot Point, Transform Orientation |
 
 ## Upcoming Feature
 
@@ -80,4 +80,5 @@ and more...!
 
 ## Showcase
 
-![alt text](http://randallmfg.com/ramps/wp-content/uploads/2013/02/640x480.jpg)
+![sc_logo](https://raw.githubusercontent.com/aachman98/Sorcar/v3.0-alpha/sorcar.png "Sorcar")
+![sc_showcase](https://user-images.githubusercontent.com/26548023/68349644-de1ac180-0123-11ea-8ba0-9d0da373c9fd.jpg "Made in Sorcar")
