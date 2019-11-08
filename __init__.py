@@ -21,7 +21,8 @@ bl_info = {
     "blender": (2, 80, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
-	"category": "Node"}
+	"category": "Node"
+}
 
 import bpy
 import nodeitems_utils
