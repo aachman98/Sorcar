@@ -2,7 +2,7 @@ import bpy
 
 from bpy.props import BoolProperty
 from bpy.types import NodeTree
-from ..helper import print_log
+from ..helper import print_log, update_each_frame
 
 class ScNodeTree(NodeTree):
     bl_idname = 'ScNodeTree'
@@ -11,7 +11,12 @@ class ScNodeTree(NodeTree):
 
     node = None
     links_hash = 0
-    prop_realtime: BoolProperty(name="Realtime")
+
+    def update_realtime(self, context):
+        if not (update_each_frame in bpy.app.handlers.frame_change_post):
+            bpy.app.handlers.frame_change_post.append(update_each_frame)
+        return None
+    prop_realtime: BoolProperty(name="Realtime", update=update_realtime)
 
     def get_links_hash(self):
         links = self.links

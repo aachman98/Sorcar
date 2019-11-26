@@ -86,8 +86,8 @@ def register():
     for i in all_classes:
         bpy.utils.register_class(i)
     nodeitems_utils.register_node_categories("sc_node_categories", node_categories)
-    if not (update_each_frame in bpy.app.handlers.frame_change_pre):
-        bpy.app.handlers.frame_change_pre.append(update_each_frame)
+    if not (update_each_frame in bpy.app.handlers.frame_change_post):
+        bpy.app.handlers.frame_change_post.append(update_each_frame)
     
     print_log("REGISTERED", msg="{} operators, {} sockets & {} nodes ({} categories)".format(len(classes_ops), len(classes_sockets), total_nodes, len(classes_nodes)))
 
@@ -100,7 +100,7 @@ def unregister():
         bpy.utils.unregister_class(i)
         print_log("UNREGISTER", i.bl_idname, None, i.bl_label)
     nodeitems_utils.unregister_node_categories("sc_node_categories")
-    if (update_each_frame in bpy.app.handlers.frame_change_pre):
-        bpy.app.handlers.frame_change_pre.remove(update_each_frame)
+    if (update_each_frame in bpy.app.handlers.frame_change_post):
+        bpy.app.handlers.frame_change_post.remove(update_each_frame)
 
     print_log("UNREGISTERED", msg=str(len(all_classes)) + " classes")

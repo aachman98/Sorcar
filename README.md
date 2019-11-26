@@ -7,8 +7,6 @@ Procedural modeling in Blender using Node Editor
 <!-- </br>Github: <https://github.com/aachman98/Sorcar> -->
 </br>BlenderArtist Thread: <https://blenderartists.org/t/sorcar-procedural-modeling-in-blender-using-node-editor/1156769>
 </br>Intro & Tutorials: <https://www.youtube.com/playlist?list=PLZiIC3gdS_O7nCm1-xpWbZmTQWeL5c6KV>
-<!-- </br>Itch: <> -->
-<!-- </br>Gumroad: <> -->
 </br>Trello (Project Tracker): <https://trello.com/b/aKIFRoTh/sorcar>
 
 ## About
