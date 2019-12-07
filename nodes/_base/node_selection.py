@@ -15,7 +15,7 @@ class ScSelectionNode(ScNode):
         return (
             self.inputs["Object"].default_value == None
         )
-    
+
     def pre_execute(self):
         focus_on_object(self.inputs["Object"].default_value, True)
     
