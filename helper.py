@@ -81,7 +81,7 @@ def convert_data(data, from_type=None, to_type=None):
             elif (from_type == "ARRAY"):
                 val = bool(eval(data))
             elif (from_type == "SELECTION_TYPE"):
-                val = data[0] or data[1] or data[2]
+                val = len(data) != 0
         elif (to_type == "STRING"):
             if (from_type == "NUMBER"):
                 val = str(data)
@@ -96,7 +96,7 @@ def convert_data(data, from_type=None, to_type=None):
             elif (from_type == "ARRAY"):
                 val = data
             elif (from_type == "SELECTION_TYPE"):
-                val = selection_type_to_string(data)
+                val = str(data)
         elif (to_type == "VECTOR"):
             if (from_type == "NUMBER"):
                 val = (data, data, data)
@@ -111,7 +111,7 @@ def convert_data(data, from_type=None, to_type=None):
             elif (from_type == "ARRAY"):
                 val = Vector((eval(data)[0], eval(data)[1], eval(data)[2])).to_tuple()
             elif (from_type == "SELECTION_TYPE"):
-                val = Vector((float(eval(data)[0]), float(eval(data)[1]), float(eval(data)[2]))).to_tuple()
+                val = Vector(float("VERT" in data), float("EDGE" in data), float("FACE" in data)).to_tuple()
         elif (to_type == "OBJECT"):
             if (from_type == "NUMBER"):
                 val = bpy.data.objects[data]
@@ -124,6 +124,8 @@ def convert_data(data, from_type=None, to_type=None):
             elif (from_type == "OBJECT"):
                 val = data
             elif (from_type == "ARRAY"):
+                return False, None
+            elif (from_type == "SELECTION_TYPE"):
                 return False, None
         elif (to_type == "ARRAY"):
             if (from_type == "NUMBER"):
@@ -139,20 +141,33 @@ def convert_data(data, from_type=None, to_type=None):
             elif (from_type == "ARRAY"):
                 val = data
             elif (from_type == "SELECTION_TYPE"):
-                val = data
-        elif (to_type == "SELECTION_TYPE"): # TODO: Add more automatic conversions
+                val = str(list(data))
+        elif (to_type == "SELECTION_TYPE"):
             if (from_type == "NUMBER"):
                 return False, None
             elif (from_type == "BOOL"):
                 return False, None
             elif (from_type == "STRING"):
-                return False, None
+                val = eval(data)
             elif (from_type == "VECTOR"):
-                val = [bool(data[0]), bool(data[1]), bool(data[2])]
+                val = set()
+                if bool(data[0]):
+                    val.add("VERT")
+                if bool(data[1]):
+                    val.add("EDGE")
+                if bool(data[2]):
+                    val.add("FACE")
             elif (from_type == "OBJECT"):
                 return False, None
-            elif (from_type == "ARRAY"):
-                val = [bool(eval(data)[0]), bool(eval(data)[1]), bool(eval(data)[2])]
+            elif (from_type == "ARRAY"): # Allows you to take in a boolean array
+                data_eval = eval(data)
+                val = set()
+                if bool(data_eval[0]):
+                    val.add("VERT")
+                if bool(data_eval[1]):
+                    val.add("EDGE")
+                if bool(data_eval[2]):
+                    val.add("FACE")
             elif (from_type == "SELECTION_TYPE"):
                 val = data
         return True, val
