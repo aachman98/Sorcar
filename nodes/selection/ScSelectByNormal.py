@@ -13,11 +13,9 @@ class ScSelectByNormal(Node, ScSelectionNode):
     in_max: FloatVectorProperty(default=(1.0, 1.0, 1.0), min=-1.0, max=1.0, update=ScNode.update_value)
     in_extend: BoolProperty(update=ScNode.update_value)
     in_deselect: BoolProperty(update=ScNode.update_value)
-    in_selection_type: EnumProperty(name="Mode", items=[("VERT", "Vertices", "", "VERTEXSEL", 1), ("EDGE", "Edges", "", "EDGESEL", 2), ("FACE", "Faces", "", "FACESEL", 4)], default={"VERT", "EDGE", "FACE"}, options={"ENUM_FLAG"}, update=ScNode.update_value)
     
     def init(self, context):
         super().init(context)
-        self.inputs.new("ScNodeSocketSelectionType", "Selection Type").init("in_selection_type", True)
         self.inputs.new("ScNodeSocketVector", "Minimum").init("in_min", True)
         self.inputs.new("ScNodeSocketVector", "Maximum").init("in_max", True)
         self.inputs.new("ScNodeSocketBool", "Extend").init("in_extend")
@@ -38,8 +36,6 @@ class ScSelectByNormal(Node, ScSelectionNode):
             bpy.ops.object.mode_set(mode="EDIT")
             bpy.ops.mesh.select_all(action="DESELECT")
             bpy.ops.object.mode_set(mode="OBJECT")
-
-        bpy.context.tool_settings.mesh_select_mode = ["VERT" in self.inputs["Selection Type"].default_value, "EDGE" in self.inputs["Selection Type"].default_value, "FACE" in self.inputs["Selection Type"].default_value]
 
         if (bpy.context.tool_settings.mesh_select_mode[0]):
             for vertex in self.inputs["Object"].default_value.data.vertices:

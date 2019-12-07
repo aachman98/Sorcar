@@ -13,11 +13,9 @@ class ScSelectByIndex(Node, ScSelectionNode):
     in_index: IntProperty(min=0, update=ScNode.update_value)
     in_extend: BoolProperty(update=ScNode.update_value)
     in_deselect: BoolProperty(update=ScNode.update_value)
-    in_selection_type: EnumProperty(name="Mode", items=[("VERT", "Vertices", "", "VERTEXSEL", 1), ("EDGE", "Edges", "", "EDGESEL", 2), ("FACE", "Faces", "", "FACESEL", 4)], default={"VERT", "EDGE", "FACE"}, options={"ENUM_FLAG"}, update=ScNode.update_value)
     
     def init(self, context):
         super().init(context)
-        self.inputs.new("ScNodeSocketSelectionType", "Selection Type").init("in_selection_type", True)
         self.inputs.new("ScNodeSocketNumber", "Index").init("in_index", True)
         self.inputs.new("ScNodeSocketBool", "Extend").init("in_extend")
         self.inputs.new("ScNodeSocketBool", "Deselect").init("in_deselect")
@@ -31,8 +29,6 @@ class ScSelectByIndex(Node, ScSelectionNode):
     def functionality(self):
         bpy.ops.object.mode_set(mode="OBJECT")
         data = []
-
-        bpy.context.tool_settings.mesh_select_mode = ["VERT" in self.inputs["Selection Type"].default_value, "EDGE" in self.inputs["Selection Type"].default_value, "FACE" in self.inputs["Selection Type"].default_value]
 
         if (bpy.context.tool_settings.mesh_select_mode[0]):
             data.append(self.inputs["Object"].default_value.data.vertices)
