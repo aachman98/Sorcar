@@ -1,6 +1,6 @@
 import bpy
 
-from bpy.props import BoolVectorProperty, BoolProperty, FloatVectorProperty, BoolProperty
+from bpy.props import BoolVectorProperty, BoolProperty, FloatVectorProperty, BoolProperty, EnumProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_selection import ScSelectionNode
@@ -13,9 +13,8 @@ class ScSelectByLocation(Node, ScSelectionNode):
     in_max: FloatVectorProperty(default=(1.0, 1.0, 1.0), update=ScNode.update_value)
     in_extend: BoolProperty(update=ScNode.update_value)
     in_deselect: BoolProperty(update=ScNode.update_value)
-    in_selection_type: BoolVectorProperty(default=(True, False, False), update=ScNode.update_value)
+    in_selection_type: EnumProperty(name="Mode", items=[("VERT", "Vertices", "", "VERTEXSEL", 1), ("EDGE", "Edges", "", "EDGESEL", 2), ("FACE", "Faces", "", "FACESEL", 4)], default={"VERT", "EDGE", "FACE"}, options={"ENUM_FLAG"}, update=ScNode.update_value)
 
-    # items=[("FACE", "Face", ""), ("EDGE", "Edge", ""), ("VERTEX", "Vertex", "")]
     def init(self, context):
         super().init(context)
 
@@ -28,25 +27,25 @@ class ScSelectByLocation(Node, ScSelectionNode):
     def functionality(self):
         bpy.ops.object.mode_set(mode="OBJECT")
 
-        bpy.context.tool_settings.mesh_select_mode = self.inputs["Selection Type"].default_value
+        bpy.context.tool_settings.mesh_select_mode = ["VERT" in self.inputs["Selection Type"].default_value, "EDGE" in self.inputs["Selection Type"].default_value, "FACE" in self.inputs["Selection Type"].default_value]
 
         if (not (self.inputs["Deselect"].default_value or self.inputs["Extend"].default_value)):
             bpy.ops.object.mode_set(mode="EDIT")
             bpy.ops.mesh.select_all(action="DESELECT")
             bpy.ops.object.mode_set(mode="OBJECT")
 
-        if (self.inputs["Selection Type"].default_value[0]):
+        if (bpy.context.tool_settings.mesh_select_mode[0]):
             for vertex in self.inputs["Object"].default_value.data.vertices:
                 if (((vertex.co[0]>=self.inputs["Minimum"].default_value[0] and vertex.co[1]>=self.inputs["Minimum"].default_value[1] and vertex.co[2]>=self.inputs["Minimum"].default_value[2]) and (vertex.co[0]<=self.inputs["Maximum"].default_value[0] and vertex.co[1]<=self.inputs["Maximum"].default_value[1] and vertex.co[2]<=self.inputs["Maximum"].default_value[2]))):
                     vertex.select = not self.inputs["Deselect"].default_value
 
-        if (self.inputs["Selection Type"].default_value[1]):
+        if (bpy.context.tool_settings.mesh_select_mode[1]):
             for edge in self.inputs["Object"].default_value.data.edges:
                 co = (self.inputs["Object"].default_value.data.vertices[edge.vertices[0]].co + self.inputs["Object"].default_value.data.vertices[edge.vertices[1]].co)/2
                 if (((co[0]>=self.inputs["Minimum"].default_value[0] and co[1]>=self.inputs["Minimum"].default_value[1] and co[2]>=self.inputs["Minimum"].default_value[2]) and (co[0]<=self.inputs["Maximum"].default_value[0] and co[1]<=self.inputs["Maximum"].default_value[1] and co[2]<=self.inputs["Maximum"].default_value[2]))):
                     edge.select = not self.inputs["Deselect"].default_value
 
-        if (self.inputs["Selection Type"].default_value[2]):
+        if (bpy.context.tool_settings.mesh_select_mode[2]):
             for face in self.inputs["Object"].default_value.data.polygons:
                 if (((face.center[0]>=self.inputs["Minimum"].default_value[0] and face.center[1]>=self.inputs["Minimum"].default_value[1] and face.center[2]>=self.inputs["Minimum"].default_value[2]) and (face.center[0]<=self.inputs["Maximum"].default_value[0] and face.center[1]<=self.inputs["Maximum"].default_value[1] and face.center[2]<=self.inputs["Maximum"].default_value[2]))):
                     face.select = not self.inputs["Deselect"].default_value

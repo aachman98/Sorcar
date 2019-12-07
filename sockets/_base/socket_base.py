@@ -48,9 +48,7 @@ class ScNodeSocket:
                     if self.default_prop == "in_selection_type":
                         row = layout.row(align = True)
                         row.label(text=text)
-                        row.prop(node, self.default_prop, index = 0, toggle = True, icon_only = True, icon = "VERTEXSEL")
-                        row.prop(node, self.default_prop, index = 1, toggle = True, icon_only = True, icon = "EDGESEL")
-                        row.prop(node, self.default_prop, index = 2, toggle = True, icon_only = True, icon = "FACESEL")
+                        row.prop(node, self.default_prop, icon_only = True)
                     else:
                         layout.column().prop(node, self.default_prop, text=text)
     

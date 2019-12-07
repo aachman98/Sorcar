@@ -9,7 +9,7 @@ class ScEditMode(Node, ScNode):
     bl_idname = "ScEditMode"
     bl_label = "Edit Mode"
 
-    prop_mode: EnumProperty(name="Mode", items=[("VERT", "Vertices", "", 2), ("EDGE", "Edges", "", 4), ("FACE", "Faces", "", 8)], default={"VERT", "EDGE", "FACE"}, options={"ENUM_FLAG"}, update=ScNode.update_value)
+    prop_mode: EnumProperty(name="Mode", items=[("VERT", "Vertices", "", "VERTEXSEL", 1), ("EDGE", "Edges", "", "EDGESEL", 2), ("FACE", "Faces", "", "FACESEL", 4)], default={"VERT", "EDGE", "FACE"}, options={"ENUM_FLAG"}, update=ScNode.update_value)
 
     def init(self, context):
         self.node_executable = False

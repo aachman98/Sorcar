@@ -1,6 +1,6 @@
 import bpy
 
-from bpy.props import IntProperty, BoolProperty, BoolVectorProperty
+from bpy.props import EnumProperty, IntProperty, BoolProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_selection import ScSelectionNode
@@ -9,13 +9,15 @@ class ScSelectByIndex(Node, ScSelectionNode):
     bl_idname = "ScSelectByIndex"
     bl_label = "Select by Index"
     
-    in_selection_type: BoolVectorProperty(default=(True, False, False), update=ScNode.update_value)
+    in_selection_type: EnumProperty(items=[("FACE", "Face", ""), ("VERT", "Vertex", ""), ("EDGE", "Edge", "")], default="FACE", update=ScNode.update_value)
     in_index: IntProperty(min=0, update=ScNode.update_value)
     in_extend: BoolProperty(update=ScNode.update_value)
     in_deselect: BoolProperty(update=ScNode.update_value)
+    in_selection_type: EnumProperty(name="Mode", items=[("VERT", "Vertices", "", "VERTEXSEL", 1), ("EDGE", "Edges", "", "EDGESEL", 2), ("FACE", "Faces", "", "FACESEL", 4)], default={"VERT", "EDGE", "FACE"}, options={"ENUM_FLAG"}, update=ScNode.update_value)
     
     def init(self, context):
         super().init(context)
+        self.inputs.new("ScNodeSocketSelectionType", "Selection Type").init("in_selection_type", True)
         self.inputs.new("ScNodeSocketNumber", "Index").init("in_index", True)
         self.inputs.new("ScNodeSocketBool", "Extend").init("in_extend")
         self.inputs.new("ScNodeSocketBool", "Deselect").init("in_deselect")
@@ -29,16 +31,15 @@ class ScSelectByIndex(Node, ScSelectionNode):
     def functionality(self):
         bpy.ops.object.mode_set(mode="OBJECT")
         data = []
-        
-        bpy.context.tool_settings.mesh_select_mode = self.inputs["Selection Type"].default_value
 
-        if (self.inputs["Selection Type"].default_value[0]):
+        bpy.context.tool_settings.mesh_select_mode = ["VERT" in self.inputs["Selection Type"].default_value, "EDGE" in self.inputs["Selection Type"].default_value, "FACE" in self.inputs["Selection Type"].default_value]
+
+        if (bpy.context.tool_settings.mesh_select_mode[0]):
             data.append(self.inputs["Object"].default_value.data.vertices)
-        if (self.inputs["Selection Type"].default_value[1]):
+        if (bpy.context.tool_settings.mesh_select_mode[1]):
             data.append(self.inputs["Object"].default_value.data.edges)
-        if (self.inputs["Selection Type"].default_value[2]):
+        if (bpy.context.tool_settings.mesh_select_mode[2]):
             data.append(self.inputs["Object"].default_value.data.polygons)
-
         if (not (self.inputs["Deselect"].default_value or self.inputs["Extend"].default_value)):
             bpy.ops.object.mode_set(mode="EDIT")
             bpy.ops.mesh.select_all(action="DESELECT")

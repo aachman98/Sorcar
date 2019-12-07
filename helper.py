@@ -161,13 +161,13 @@ def convert_data(data, from_type=None, to_type=None):
 
 def selection_type_to_string(sel_type):
     out = []
-    if sel_type[0]:
+    if "VERT" in sel_type:
         out.append("Vertex")
 
-    if sel_type[1]:
+    if "EDGE" in sel_type:
         out.append("Edge")
 
-    if sel_type[2]:
+    if "FACE" in sel_type:
         out.append("Face")
 
     return " + ".join(out)
