@@ -45,7 +45,7 @@ class ScNodeSocket:
                     layout.label(text=text)
                 else:
                     layout.prop(self, "hide", icon='RADIOBUT_OFF', icon_only=True, invert_checkbox=True)
-                    if self.default_prop == "in_selection_type":
+                    if self.default_type == "SELECTION_TYPE":
                         row = layout.row(align = True)
                         row.label(text=text)
                         row.prop(node, self.default_prop, icon_only = True)

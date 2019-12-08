@@ -1,6 +1,6 @@
 import bpy
 
-from bpy.props import BoolVectorProperty, BoolProperty, FloatVectorProperty, BoolProperty, EnumProperty
+from bpy.props import BoolProperty, FloatVectorProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_selection import ScSelectionNode
