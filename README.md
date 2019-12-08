@@ -8,6 +8,7 @@ Procedural modeling in Blender using Node Editor
 </br>BlenderArtist Thread: <https://blenderartists.org/t/sorcar-procedural-modeling-in-blender-using-node-editor/1156769>
 </br>Intro & Tutorials: <https://www.youtube.com/playlist?list=PLZiIC3gdS_O7nCm1-xpWbZmTQWeL5c6KV>
 </br>Trello (Project Tracker): <https://trello.com/b/aKIFRoTh/sorcar>
+</br>Documentation: https://github.com/aachman98/Sorcar/wiki
 
 ## About
 
@@ -98,6 +99,8 @@ and more...!
 
 ## Contributors
  - [@8176135](https://github.com/8176135) - Individual edit mode type in selection nodes using a new socket ([#80](https://github.com/aachman98/Sorcar/pull/80))
+ - [@huiyao8761380](https://github.com/huiyao8761380) (TangHui) - Documentation maintainer
+ - [@Megalomaniak](https://github.com/Megalomaniak) (Felix Kütt) - Documentation maintainer
  - [@kichristensen](https://github.com/kichristensen) (Kim Christensen) - Port Sorcar (v2) to Blender 2.80 ([#54](https://github.com/aachman98/Sorcar/pull/54))
  - [@SevenNeumann](https://github.com/SevenNeumann) (Mark Andrianov) - Icons for Sorcar & layout design for main menu ([#46](https://github.com/aachman98/Sorcar/pull/46))
 
