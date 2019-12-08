@@ -97,6 +97,6 @@ and more...!
  - Improved socket types and node hierarchy
 
 ## Contributors
- - @8176135 - Individual edit mode type in selection nodes using a new socket (#80)
- - @kichristensen (Kim Christensen) - Port Sorcar (v2) to Blender 2.80 (#54)
- - @SevenNeumann (Mark Andrianov) - Icons for Sorcar & layout design for main menu (#46)
+ - [@8176135](https://github.com/8176135) - Individual edit mode type in selection nodes using a new socket ([#80](https://github.com/aachman98/Sorcar/pull/80))
+ - [@kichristensen](https://github.com/kichristensen) (Kim Christensen) - Port Sorcar (v2) to Blender 2.80 ([#54](https://github.com/aachman98/Sorcar/pull/54))
+ - [@SevenNeumann](https://github.com/SevenNeumann) (Mark Andrianov) - Icons for Sorcar & layout design for main menu ([#46](https://github.com/aachman98/Sorcar/pull/46))
