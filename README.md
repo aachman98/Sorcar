@@ -80,3 +80,23 @@ and more...!
 
 ![sc_logo](https://github.com/aachman98/sc-img-data/raw/master/sc_logo.png "Sorcar")
 ![sc_showcase](https://github.com/aachman98/sc-img-data/raw/master/sc_showcase.png "Made in Sorcar")
+
+## Changelog
+
+#### [Unreleased]
+
+ - Fixed issue with realtime update checkbox in "Scene Info" node
+ - New socket type: Selection Type
+ - Ability to change selection type directly though selection nodes
+ - Added issue templates for bug report & feature request
+
+#### v3.1.0
+
+ - Internal data conversions
+ - New architecture for data flow node executions
+ - Improved socket types and node hierarchy
+
+## Contributors
+ - @8176135 - Individual edit mode type in selection nodes using a new socket (#80)
+ - @kichristensen (Kim Christensen) - Port Sorcar (v2) to Blender 2.80 (#54)
+ - @SevenNeumann (Mark Andrianov) - Icons for Sorcar & layout design for main menu (#46)
