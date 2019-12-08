@@ -9,7 +9,6 @@ class ScSelectByIndex(Node, ScSelectionNode):
     bl_idname = "ScSelectByIndex"
     bl_label = "Select by Index"
     
-    in_selection_type: EnumProperty(items=[("FACE", "Face", ""), ("VERT", "Vertex", ""), ("EDGE", "Edge", "")], default="FACE", update=ScNode.update_value)
     in_index: IntProperty(min=0, update=ScNode.update_value)
     in_extend: BoolProperty(update=ScNode.update_value)
     in_deselect: BoolProperty(update=ScNode.update_value)
@@ -29,6 +28,7 @@ class ScSelectByIndex(Node, ScSelectionNode):
     def functionality(self):
         bpy.ops.object.mode_set(mode="OBJECT")
         data = []
+
         if (bpy.context.tool_settings.mesh_select_mode[0]):
             data.append(self.inputs["Object"].default_value.data.vertices)
         if (bpy.context.tool_settings.mesh_select_mode[1]):

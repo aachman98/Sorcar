@@ -36,6 +36,7 @@ class ScSelectByNormal(Node, ScSelectionNode):
             bpy.ops.object.mode_set(mode="EDIT")
             bpy.ops.mesh.select_all(action="DESELECT")
             bpy.ops.object.mode_set(mode="OBJECT")
+
         if (bpy.context.tool_settings.mesh_select_mode[0]):
             for vertex in self.inputs["Object"].default_value.data.vertices:
                 if (((vertex.normal[0]>=self.inputs["Minimum"].default_value[0] and vertex.normal[1]>=self.inputs["Minimum"].default_value[1] and vertex.normal[2]>=self.inputs["Minimum"].default_value[2]) and (vertex.normal[0]<=self.inputs["Maximum"].default_value[0] and vertex.normal[1]<=self.inputs["Maximum"].default_value[1] and vertex.normal[2]<=self.inputs["Maximum"].default_value[2]))):
