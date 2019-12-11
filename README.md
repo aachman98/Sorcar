@@ -4,7 +4,6 @@ Procedural modeling in Blender using Node Editor
 
 ![sc_cover](https://github.com/aachman98/sc-img-data/raw/master/sc_cover.png "Sorcar v3")
 <!-- [![sc_](http://img.youtube.com/vi/VIDEO_ID/0.jpg)](http://www.youtube.com/watch?v=VIDEO_ID "Sorcar v3") -->
-<!-- </br>Github: <https://github.com/aachman98/Sorcar> -->
 </br>BlenderArtist Thread: <https://blenderartists.org/t/sorcar-procedural-modeling-in-blender-using-node-editor/1156769>
 </br>Intro & Tutorials: <https://www.youtube.com/playlist?list=PLZiIC3gdS_O7nCm1-xpWbZmTQWeL5c6KV>
 </br>Trello (Project Tracker): <https://trello.com/b/aKIFRoTh/sorcar>
@@ -93,14 +92,14 @@ and more...!
 
 #### v3.1.0
 
- - Internal data conversions
  - New architecture for data flow node executions
  - Improved socket types and node hierarchy
+ - Internal data conversions
 
 ## Contributors
  - [@8176135](https://github.com/8176135) - Individual edit mode type in selection nodes using a new socket ([#80](https://github.com/aachman98/Sorcar/pull/80))
- - [@huiyao8761380](https://github.com/huiyao8761380) (TangHui) - Documentation maintainer
- - [@Megalomaniak](https://github.com/Megalomaniak) (Felix Kütt) - Documentation maintainer
+ - [@huiyao8761380](https://github.com/huiyao8761380) (TangHui) - Documentation
+ - [@Megalomaniak](https://github.com/Megalomaniak) (Felix Kütt) - Documentation
  - [@kichristensen](https://github.com/kichristensen) (Kim Christensen) - Port Sorcar (v2) to Blender 2.80 ([#54](https://github.com/aachman98/Sorcar/pull/54))
  - [@SevenNeumann](https://github.com/SevenNeumann) (Mark Andrianov) - Icons for Sorcar & layout design for main menu ([#46](https://github.com/aachman98/Sorcar/pull/46))
 
