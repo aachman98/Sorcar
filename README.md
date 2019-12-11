@@ -15,7 +15,7 @@ Sorcar is a **procedural modeling node-based system** which utilises Blender and
 
 ## Release & Instructions
 
-Latest Release (v3.1.0): <https://github.com/aachman98/Sorcar/releases/tag/v3.1.0>
+Latest Release (v3.1.1): <https://github.com/aachman98/Sorcar/releases/tag/v3.1.1>
 </br>*Requirement: Blender 2.80 or later*
 
 1. Download the zip file and install it as a Blender addon (Edit -> Preferences... -> Add-ons-> Install...)
@@ -63,11 +63,10 @@ and more...!
 
 ## Upcoming Feature
 
-1. Update addon using CGCookie Addon Updater module (<https://github.com/CGCookie/blender-addon-updater)>
-2. Improve loop nodes: Add more options to control in each pass
-3. Curve nodes: Edit spline properties, convert to mesh
-4. More array operations: Add/append, remove, push/pop, find, count
-5. Named variables: Get/set values of custom variables, accessible across node trees
+1. Improve loop nodes: Add more options to control in each pass
+2. Curve nodes: Edit spline properties, convert to mesh
+3. More array operations: Add/append, remove, push/pop, find, count
+4. Named variables: Get/set values of custom variables, accessible across node trees
 
 ## Future
 
@@ -83,24 +82,27 @@ and more...!
 
 ## Changelog
 
-#### [Unreleased]
+#### v3.1.1
 
- - Fixed issue with realtime update checkbox in "Scene Info" node
- - New socket type: Selection Type
- - Ability to change selection type directly though selection nodes
- - Added issue templates for bug report & feature request
+- Added addon updator by CGCookie
+- Fixed issue with realtime update checkbox in "Scene Info" node
+- New socket type: Selection Type
+- Ability to change selection type directly though selection nodes
+- Added issue templates for bug report & feature request
 
 #### v3.1.0
 
- - New architecture for data flow node executions
- - Improved socket types and node hierarchy
- - Internal data conversions
+- New architecture for data flow node executions
+- Improved socket types and node hierarchy
+- Internal data conversions
 
 ## Contributors
- - [@8176135](https://github.com/8176135) - Individual edit mode type in selection nodes using a new socket ([#80](https://github.com/aachman98/Sorcar/pull/80))
- - [@huiyao8761380](https://github.com/huiyao8761380) (TangHui) - Documentation
- - [@Megalomaniak](https://github.com/Megalomaniak) (Felix Kütt) - Documentation
- - [@kichristensen](https://github.com/kichristensen) (Kim Christensen) - Port Sorcar (v2) to Blender 2.80 ([#54](https://github.com/aachman98/Sorcar/pull/54))
- - [@SevenNeumann](https://github.com/SevenNeumann) (Mark Andrianov) - Icons for Sorcar & layout design for main menu ([#46](https://github.com/aachman98/Sorcar/pull/46))
+
+- [@CGCookie](https://github.com/CGCookie) (CG Cookie) - Addon updater [Github](https://github.com/CGCookie/blender-addon-updater)
+- [@8176135](https://github.com/8176135) - Individual edit mode type in selection nodes using a new socket ([#80](https://github.com/aachman98/Sorcar/pull/80))
+- [@huiyao8761380](https://github.com/huiyao8761380) (TangHui) - Documentation
+- [@Megalomaniak](https://github.com/Megalomaniak) (Felix Kütt) - Documentation
+- [@kichristensen](https://github.com/kichristensen) (Kim Christensen) - Port Sorcar (v2) to Blender 2.80 ([#54](https://github.com/aachman98/Sorcar/pull/54))
+- [@SevenNeumann](https://github.com/SevenNeumann) (Mark Andrianov) - Icons for Sorcar & layout design for main menu ([#46](https://github.com/aachman98/Sorcar/pull/46))
 
 And the amazing [BlenderArtists](https://blenderartists.org) community!

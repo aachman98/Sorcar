@@ -22,10 +22,9 @@ class ScSelectionNode(ScNode):
         )
 
     def pre_execute(self):
+        focus_on_object(self.inputs["Object"].default_value, True)
         if len(self.inputs["Selection Type"].default_value) != 0:
             bpy.context.tool_settings.mesh_select_mode = ["VERT" in self.inputs["Selection Type"].default_value, "EDGE" in self.inputs["Selection Type"].default_value, "FACE" in self.inputs["Selection Type"].default_value]
-            pass
-        focus_on_object(self.inputs["Object"].default_value, True)
     
     def post_execute(self):
         return {"Object": self.inputs["Object"].default_value}
