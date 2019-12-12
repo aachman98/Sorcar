@@ -84,6 +84,7 @@ and more...!
 
 #### [Unreleased]
 
+- Added noise nodes (cell, fractal, voronoi, ...) in a new category
 - Renamed "Edit Mode" node to "Set Selection Mode"
 - Added selection type input socket in "Set Selection Mode" node
 - Removed redundant sorcar_updater folder (also added in gitignore)
