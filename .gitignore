@@ -1,3 +1,4 @@
-__pycache__
-.vscode
+__pycache__/
+.vscode/
 experimental/
+sorcar_updater/

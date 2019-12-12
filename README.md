@@ -82,6 +82,12 @@ and more...!
 
 ## Changelog
 
+#### [Unreleased]
+
+- Renamed "Edit Mode" node to "Set Selection Mode"
+- Added selection type input socket in "Set Selection Mode" node
+- Removed redundant sorcar_updater folder (also added in gitignore)
+
 #### v3.1.1
 
 - Added addon updator by CGCookie
@@ -92,6 +98,7 @@ and more...!
 
 #### v3.1.0
 
+- Support for Blender 2.8
 - New architecture for data flow node executions
 - Improved socket types and node hierarchy
 - Internal data conversions
