@@ -29,6 +29,7 @@ class ScVoxelRemesh(Node, ScObjectOperatorNode):
         return(
             super().error_condition()
             or (self.inputs["Voxel Size"].default_value) < 0.0
+            or (self.inputs["Adaptivity"].default_value) < 0.0 or (self.inputs["Adaptivity"].default_value) > 1.0
         )
 
     def functionality(self):
