@@ -85,7 +85,10 @@ and more...!
 #### [Unreleased]
 
 - Added noise nodes (cell, fractal, voronoi, ...) in a new category
+- Added array operation nodes (add, remove, search, ...) in a new category
+- Added "Material Parameter" node
 - Renamed "Edit Mode" node to "Set Selection Mode"
+- Moved "Get Element" & "Make Array" node to "Arrays" category
 - Added selection type input socket in "Set Selection Mode" node
 - Removed redundant sorcar_updater folder (also added in gitignore)
 
