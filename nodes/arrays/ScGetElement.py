@@ -1,12 +1,12 @@
 import bpy
 
-from bpy.props import EnumProperty, IntProperty
+from bpy.props import IntProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 
-class ScGetArrayElement(Node, ScNode):
-    bl_idname = "ScGetArrayElement"
-    bl_label = "Get Array Element"
+class ScGetElement(Node, ScNode):
+    bl_idname = "ScGetElement"
+    bl_label = "Get Element"
     
     in_index: IntProperty(min=0, update=ScNode.update_value)
 
