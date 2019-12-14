@@ -1,6 +1,6 @@
 import bpy
 
-from bpy.props import PointerProperty, StringProperty, IntProperty, FloatProperty, BoolProperty
+from bpy.props import IntProperty, FloatProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_input import ScInputNode
