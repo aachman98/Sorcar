@@ -83,8 +83,8 @@ and more...!
 
 #### v3.1.2
 
-- Added noise nodes (cell, fractal, voronoi, ...) in a new category
-- Added array operation nodes (add, remove, search, ...) in a new category
+- Added noise nodes (cell, fractal, voronoi, ...) in a new category "Noise"
+- Added array operation nodes (add, remove, search, ...) in a new category "Arrays"
 - Added "Material Parameter" node
 - Renamed "Edit Mode" node to "Set Selection Mode"
 - Moved "Get Element" & "Make Array" node to "Arrays" category
