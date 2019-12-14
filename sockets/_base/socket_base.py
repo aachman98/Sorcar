@@ -34,6 +34,10 @@ class ScNodeSocket:
     def draw_color(self, context, node):
         return self.color
     
+    def draw_layout(self, context, layout, node, text):
+        # Draw overridable custom layout of socket
+        layout.prop(node, self.default_prop, text=text)
+    
     def draw(self, context, layout, node, text):
         if (self.is_output):
             layout.label(text=text + " (" + self.get_label() + ")")
@@ -45,12 +49,7 @@ class ScNodeSocket:
                     layout.label(text=text)
                 else:
                     layout.prop(self, "hide", icon='RADIOBUT_OFF', icon_only=True, invert_checkbox=True)
-                    if self.default_type == "SELECTION_TYPE":
-                        row = layout.row(align = True)
-                        row.label(text=text)
-                        row.prop(node, self.default_prop, icon_only = True)
-                    else:
-                        layout.column().prop(node, self.default_prop, text=text)
+                    self.draw_layout(context, layout, node, text)
     
     def execute(self, forced):
         # Execute node socket to get/set default_value

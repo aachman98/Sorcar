@@ -14,3 +14,6 @@ class ScNodeSocketVector(NodeSocket, ScNodeSocket):
 
     def get_label(self):
         return str(round(self.default_value[0], 1)) + ", " + str(round(self.default_value[1], 1)) + ", " + str(round(self.default_value[2], 1))
+    
+    def draw_layout(self, context, layout, node, text):
+        layout.column().prop(node, self.default_prop, text=text)
