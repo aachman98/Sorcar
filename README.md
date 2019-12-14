@@ -15,7 +15,7 @@ Sorcar is a **procedural modeling node-based system** which utilises Blender and
 
 ## Release & Instructions
 
-Latest Release (v3.1.1): <https://github.com/aachman98/Sorcar/releases/tag/v3.1.1>
+Latest Release (v3.1.2): <https://github.com/aachman98/Sorcar/releases/tag/v3.1.2>
 </br>*Requirement: Blender 2.80 or later*
 
 1. Download the zip file and install it as a Blender addon (Edit -> Preferences... -> Add-ons-> Install...)
@@ -81,7 +81,7 @@ and more...!
 
 ## Changelog
 
-#### [Unreleased]
+#### v3.1.2
 
 - Added noise nodes (cell, fractal, voronoi, ...) in a new category
 - Added array operation nodes (add, remove, search, ...) in a new category
@@ -89,6 +89,7 @@ and more...!
 - Renamed "Edit Mode" node to "Set Selection Mode"
 - Moved "Get Element" & "Make Array" node to "Arrays" category
 - Added selection type input socket in "Set Selection Mode" node
+- Added custom overridable method for socket layout drawing
 - Removed redundant sorcar_updater folder (also added in gitignore)
 
 #### v3.1.1
