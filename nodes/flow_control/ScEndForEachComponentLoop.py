@@ -29,7 +29,12 @@ class ScEndForEachComponentLoop(Node, ScNode):
             bpy.ops.object.mode_set(mode="EDIT")
             bpy.ops.mesh.select_all(action="DESELECT")
             bpy.ops.object.mode_set(mode="OBJECT")
-            self.inputs["Begin For-Each Component Loop"].links[0].from_node.outputs["Out"].default_value.data.polygons[i].select = True
+            if (self.inputs["Begin For-Each Component Loop"].links[0].from_node.inputs["Type"].default_value == 'VERT'):
+                self.inputs["Begin For-Each Component Loop"].links[0].from_node.outputs["Out"].default_value.data.vertices[i].select = True
+            elif (self.inputs["Begin For-Each Component Loop"].links[0].from_node.inputs["Type"].default_value == 'EDGE'):
+                self.inputs["Begin For-Each Component Loop"].links[0].from_node.outputs["Out"].default_value.data.edges[i].select = True
+            elif (self.inputs["Begin For-Each Component Loop"].links[0].from_node.inputs["Type"].default_value == 'FACE'):
+                self.inputs["Begin For-Each Component Loop"].links[0].from_node.outputs["Out"].default_value.data.polygons[i].select = True
             bpy.ops.object.mode_set(mode="EDIT")
             self.inputs["In"].execute(True)
         self.inputs["Begin For-Each Component Loop"].links[0].from_node.prop_locked = False
