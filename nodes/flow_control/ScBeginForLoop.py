@@ -1,6 +1,6 @@
 import bpy
 
-from bpy.props import IntProperty, BoolProperty
+from bpy.props import BoolProperty, IntProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 
@@ -18,16 +18,14 @@ class ScBeginForLoop(Node, ScNode):
         self.outputs.new("ScNodeSocketUniversal", "Out")
         self.outputs.new("ScNodeSocketNumber", "Counter")
     
-    def error_condition(self):
-        return (
-            not self.outputs["End For Loop"].is_linked
-        )
-    
     def execute(self, forced=False):
         if (self.prop_locked):
-            return self.init_out(self.post_execute())
+            self.outputs["Counter"].default_value = self.out_counter
+            self.set_color()
+            return True
         else:
             self.prop_locked = True
+            self.out_counter = 0
             return super().execute(forced)
     
     def post_execute(self):

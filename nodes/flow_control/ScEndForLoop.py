@@ -8,32 +8,35 @@ class ScEndForLoop(Node, ScNode):
     bl_idname = "ScEndForLoop"
     bl_label = "End For Loop"
 
-    in_start: IntProperty(default=1, update=ScNode.update_value)
-    in_finish: IntProperty(default=5, update=ScNode.update_value)
+    in_iterations: IntProperty(default=5, min=1, update=ScNode.update_value)
 
     def init(self, context):
         self.node_executable = True
         super().init(context)
         self.inputs.new("ScNodeSocketInfo", "Begin For Loop")
         self.inputs.new("ScNodeSocketUniversal", "In")
-        self.inputs.new("ScNodeSocketNumber", "Start").init("in_start", True)
-        self.inputs.new("ScNodeSocketNumber", "Finish").init("in_finish", True)
+        self.inputs.new("ScNodeSocketNumber", "Iterations").init("in_iterations", True)
         self.outputs.new("ScNodeSocketUniversal", "Out")
     
     def init_in(self, forced):
-        return self.inputs["Start"].execute(forced) and self.inputs["Finish"].execute(forced)
+        return (
+            self.inputs["Begin For Loop"].is_linked
+            and self.inputs["Begin For Loop"].links[0].from_node.execute(forced)
+            and self.inputs["Iterations"].execute(forced)
+        )
     
     def error_condition(self):
         return (
-            (not self.inputs["Begin For Loop"].is_linked)
-            or int(self.inputs["Start"].default_value) > int(self.inputs["Finish"].default_value)
+            int(self.inputs["Iterations"].default_value) < 1
         )
     
     def functionality(self):
-        for i in range(int(self.inputs["Start"].default_value), int(self.inputs["Finish"].default_value)+1):
-            self.inputs["Begin For Loop"].links[0].from_node.out_counter = i
+        for i in range (0, int(self.inputs["Iterations"].default_value)):
+            self.inputs["Begin For Loop"].links[0].from_node.out_counter += 1
             self.inputs["In"].execute(True)
+        self.inputs["Begin For Loop"].links[0].from_node.prop_locked = False
     
     def post_execute(self):
-        self.inputs["Begin For Loop"].links[0].from_node.prop_locked = False
-        return {"Out": self.inputs["In"].default_value}
+        out = {}
+        out["Out"] = self.inputs["In"].default_value
+        return out

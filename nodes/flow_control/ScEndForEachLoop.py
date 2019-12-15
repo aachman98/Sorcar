@@ -8,7 +8,7 @@ class ScEndForEachLoop(Node, ScNode):
     bl_idname = "ScEndForEachLoop"
     bl_label = "End For-Each Loop"
 
-    prop_counter: IntProperty()
+    in_iterations: IntProperty(default=5, min=1, update=ScNode.update_value)
 
     def init(self, context):
         self.node_executable = True
@@ -19,23 +19,25 @@ class ScEndForEachLoop(Node, ScNode):
         self.outputs.new("ScNodeSocketUniversal", "Out")
     
     def init_in(self, forced):
-        return self.inputs["Array"].execute(forced)
+        return (
+            self.inputs["Begin For-Each Loop"].is_linked
+            and self.inputs["Begin For-Each Loop"].links[0].from_node.execute(forced)
+            and self.inputs["Array"].execute(forced)
+        )
     
     def error_condition(self):
         return (
-            not self.inputs["Begin For-Each Loop"].is_linked
+            len(eval(self.inputs["Array"].default_value)) == 0
         )
-    
-    def pre_execute(self):
-        self.prop_counter = -1
     
     def functionality(self):
         for i in eval(self.inputs["Array"].default_value):
-            self.prop_counter += 1
+            self.inputs["Begin For-Each Loop"].links[0].from_node.out_index += 1
             self.inputs["Begin For-Each Loop"].links[0].from_node.out_element = repr(i)
-            self.inputs["Begin For-Each Loop"].links[0].from_node.out_index = self.prop_counter
             self.inputs["In"].execute(True)
+        self.inputs["Begin For-Each Loop"].links[0].from_node.prop_locked = False
     
     def post_execute(self):
-        self.inputs["Begin For-Each Loop"].links[0].from_node.prop_locked = False
-        return {"Out": self.inputs["In"].default_value}
+        out = {}
+        out["Out"] = self.inputs["In"].default_value
+        return out
