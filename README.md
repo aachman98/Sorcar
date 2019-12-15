@@ -81,6 +81,12 @@ and more...!
 
 ## Changelog
 
+#### [Unreleased]
+
+- Added "For-Each Component Loop" nodes
+- Improved "For" & "For-Each" loop nodes
+- Fixed issue with reset() attribute
+
 #### v3.1.2
 
 - Added noise nodes (cell, fractal, voronoi, ...) in a new category "Noise"

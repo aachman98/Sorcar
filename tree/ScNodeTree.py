@@ -29,7 +29,8 @@ class ScNodeTree(NodeTree):
         if (not self.nodes.get(str(self.node))):
             self.node = None
         for i in self.nodes:
-            i.reset(execute)
+            if (hasattr(i, "reset")):
+                i.reset(execute)
     
     def update_links(self):
         for i in self.links:
