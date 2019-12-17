@@ -84,6 +84,8 @@ and more...!
 #### [Unreleased]
 
 - Added "For-Each Component Loop" nodes
+- Added "Get/Set Variable" nodes
+- Added "To Sphere" transform node
 - Improved "For" & "For-Each" loop nodes
 - Fixed issue with reset() attribute
 
