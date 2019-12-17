@@ -15,8 +15,9 @@ class ScPrint(Node, ScNode):
     def init(self, context):
         super().init(context)
         self.node_executable = True
+        self.inputs.new("ScNodeSocketUniversal", "In")
         self.inputs.new("ScNodeSocketString", "String").init("in_str", True)
-        self.outputs.new("ScNodeSocketString", "Value")
+        self.outputs.new("ScNodeSocketUniversal", "Out")
     
     def draw_buttons(self, context, layout):
         super().draw_buttons(context, layout)
@@ -30,4 +31,4 @@ class ScPrint(Node, ScNode):
         print_log(self.name, msg=self.inputs["String"].default_value)
     
     def post_execute(self):
-        return {"Value": self.inputs["String"].default_value}
+        return {"Out": self.inputs["In"].default_value}

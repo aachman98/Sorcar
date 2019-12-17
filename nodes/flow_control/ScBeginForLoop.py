@@ -11,6 +11,11 @@ class ScBeginForLoop(Node, ScNode):
     prop_locked: BoolProperty()
     out_counter: IntProperty()
 
+    def reset(self, execute):
+        if (execute):
+            self.prop_locked = False
+        super().reset(execute)
+
     def init(self, context):
         super().init(context)
         self.inputs.new("ScNodeSocketUniversal", "In")
