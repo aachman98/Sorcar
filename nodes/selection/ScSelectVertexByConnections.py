@@ -1,6 +1,6 @@
 import bpy
 import bmesh
-from bpy.props import IntProperty, BoolProperty
+from bpy.props import IntProperty, BoolProperty, EnumProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_selection import ScSelectionNode
@@ -11,42 +11,24 @@ class ScSelectVertexByConnections(Node, ScSelectionNode):
     bl_label = "Select Vertex By Connections"
 
     in_connections: IntProperty(default=1, min=0, update=ScNode.update_value)
-    in_extend: BoolProperty(default=True, update=ScNode.update_value)
+    in_extend: BoolProperty(default=False, update=ScNode.update_value)
+    in_selection_type: EnumProperty(name="Mode", items=[("VERT", "Vertices", "", "VERTEXSEL", 1), ("EDGE", "Edges", "", "EDGESEL", 2), ("FACE", "Faces", "", "FACESEL", 4)], default=set({'VERT'}), options={"ENUM_FLAG"}, update=ScNode.update_value)
 
     def init(self, context):
         super().init(context)
         self.inputs.new("ScNodeSocketNumber", "Connections").init("in_connections", True)
         self.inputs.new("ScNodeSocketBool", "Extend").init("in_extend")
-        # work in vertex mode:
-        # With this it is not necessary to manually force the mode to vertices mode:
-        self.in_selection_type = {'VERT'}
-        self.in_extend = False
 
     def error_condition(self):
         return (
                 super().error_condition()
                 or int(self.inputs["Connections"].default_value) < 0
-                # prevent other modes:
-                or self.in_selection_type != {'VERT'}
+                or (not 'VERT' in self.inputs["Selection Type"].default_value)
         )
 
     def functionality(self):
-        print(self)
-        connections = int(self.inputs["Connections"].default_value)
-        obj = self.inputs["Object"].default_value
 
-        mode = bpy.context.mode
-        if mode != 'EDIT':
-            bpy.ops.object.mode_set(mode='EDIT')
-
-        ## Force to use vertex mode:
-        ## save selection mode:
-        # sel_mode = bpy.context.tool_settings.mesh_select_mode
-        ## set selection mode to vertext:
-        # if not bpy.context.tool_settings.mesh_select_mode[0]:
-        #    bpy.context.tool_settings.mesh_select_mode = [True, False, False]
-
-        bm = bmesh.from_edit_mesh(obj.data)
+        bm = bmesh.from_edit_mesh(self.inputs["Object"].default_value.data)
         matched = False
         i = 0
         total_vertex = len(bm.verts)
@@ -67,7 +49,7 @@ class ScSelectVertexByConnections(Node, ScSelectionNode):
 
                 # prevent out of range:
                 if i <= (total_vertex-1):
-                    if len(bm.verts[i].link_edges) == connections:
+                    if len(bm.verts[i].link_edges) == int(self.inputs["Connections"].default_value):
                         v = bm.verts[i]
                         v.select = True
                         any_vertex_selected = True
@@ -83,7 +65,3 @@ class ScSelectVertexByConnections(Node, ScSelectionNode):
         if self.in_extend:
             for v in original_selection:
                 v.select = True
-
-        ## Restore selection mode forced previously:
-        ## restore selection mode:
-        # bpy.context.tool_settings.mesh_select_mode = sel_mode
