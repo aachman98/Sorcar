@@ -7,13 +7,13 @@ from .._base.node_operator import ScObjectOperatorNode
 
 class ScVoxelRemesh(Node, ScObjectOperatorNode):
     bl_idname = "ScVoxelRemesh"
-    bl_label = "Voxel Remesh"
+    bl_label = "Voxel Remesh(Blender 2.81 + )"
 
     in_remesh_voxel_size: FloatProperty(default=0.1, min=0.0001, update=ScNode.update_value)
     in_remesh_voxel_adaptivity: FloatProperty(default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
     in_use_remesh_fix_poles: BoolProperty(default=False, update=ScNode.update_value)
     in_use_remesh_smooth_normals: BoolProperty(default=False, update=ScNode.update_value)
-    in_use_remesh_use_remesh_preserve_volume: BoolProperty(default=False, update=ScNode.update_value)
+    in_use_remesh_preserve_volume: BoolProperty(default=False, update=ScNode.update_value)
     in_use_remesh_preserve_paint_mask: BoolProperty(default=False, update=ScNode.update_value)
 
     def init(self, context):
@@ -22,14 +22,14 @@ class ScVoxelRemesh(Node, ScObjectOperatorNode):
         self.inputs.new("ScNodeSocketNumber", "Adaptivity").init("in_remesh_voxel_adaptivity")
         self.inputs.new("ScNodeSocketBool", "Fix Poles").init("in_use_remesh_fix_poles")
         self.inputs.new("ScNodeSocketBool", "Smooth Normals").init("in_use_remesh_smooth_normals")
-        self.inputs.new("ScNodeSocketBool", "Preserve Volume").init("in_use_remesh_use_remesh_preserve_volume")
+        self.inputs.new("ScNodeSocketBool", "Preserve Volume").init("in_use_remesh_preserve_volume")
         self.inputs.new("ScNodeSocketBool", "Preserve Paint Mask").init("in_use_remesh_preserve_paint_mask")
     
     def error_condition(self):
         return(
             super().error_condition()
             or (self.inputs["Voxel Size"].default_value) < 0.0
-            or (self.inputs["Adaptivity"].default_value) < 0.0 or (self.inputs["Adaptivity"].default_value) > 1.0
+            or (self.inputs["Adaptivity"].default_value < 0.0 or self.inputs["Adaptivity"].default_value > 1.0)
         )
 
     def functionality(self):
