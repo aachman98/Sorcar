@@ -2,3 +2,5 @@ __pycache__/
 .vscode/
 experimental/
 sorcar_updater/
+.idea/
+venv/
