@@ -87,6 +87,7 @@ and more...!
 - Added "Get/Set Variable" nodes
 - Added "To Sphere" transform node
 - Improved "For" & "For-Each" loop nodes
+- Improved "Select Manually" node
 - Fixed issue with reset() attribute
 
 #### v3.1.2
