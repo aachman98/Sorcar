@@ -15,7 +15,7 @@ Sorcar is a **procedural modeling node-based system** which utilises Blender and
 
 ## Release & Instructions
 
-[Latest Release (v3.1.2)](https://github.com/aachman98/Sorcar/releases/latest)
+[Latest Release (v3.1.3)](https://github.com/aachman98/Sorcar/releases/latest)
 </br>*Requirement: Blender 2.80 or later*
 
 1. Download the zip file and install it as a Blender addon (Edit -> Preferences... -> Add-ons-> Install...)
@@ -81,15 +81,15 @@ and more...!
 
 ## Changelog
 
-#### [Unreleased]
+#### v3.1.3
 
 - Added "For-Each Component Loop" nodes
 - Added "Get/Set Variable" nodes
 - Added "To Sphere" transform node
 - Added "Select Vertices by Connections" selection node
+- Fixed issue with reset() attribute
 - Improved "For" & "For-Each" loop nodes
 - Improved "Select Manually" node
-- Fixed issue with reset() attribute
 
 #### v3.1.2
 
