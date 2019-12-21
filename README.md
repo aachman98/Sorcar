@@ -86,6 +86,7 @@ and more...!
 - Added "For-Each Component Loop" nodes
 - Added "Get/Set Variable" nodes
 - Added "To Sphere" transform node
+- Added "Select Vertices by Connections" selection node
 - Improved "For" & "For-Each" loop nodes
 - Improved "Select Manually" node
 - Fixed issue with reset() attribute
@@ -118,6 +119,7 @@ and more...!
 
 ## Contributors
 
+- [@zebus3d](https://github.com/zebus3d) - "Select Vertices by Connections" node ([#88](https://github.com/aachman98/Sorcar/pull/88))
 - [@CGCookie](https://github.com/CGCookie) (CG Cookie) - Addon updater [Github](https://github.com/CGCookie/blender-addon-updater)
 - [@8176135](https://github.com/8176135) - Individual edit mode type in selection nodes using a new socket ([#80](https://github.com/aachman98/Sorcar/pull/80))
 - [@huiyao8761380](https://github.com/huiyao8761380) (TangHui) - Documentation
