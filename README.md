@@ -84,6 +84,7 @@ and more...!
 #### [Unreleased]
 
 - Added "Voxel Remesh" object operator node
+- Added "Empty" input node
 
 #### v3.1.3
 
