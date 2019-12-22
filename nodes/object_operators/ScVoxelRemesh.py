@@ -7,7 +7,7 @@ from .._base.node_operator import ScObjectOperatorNode
 
 class ScVoxelRemesh(Node, ScObjectOperatorNode):
     bl_idname = "ScVoxelRemesh"
-    bl_label = "Voxel Remesh(Blender 2.81 + )"
+    bl_label = "Voxel Remesh (Blender 2.81+)"
 
     in_remesh_voxel_size: FloatProperty(default=0.1, min=0.0001, update=ScNode.update_value)
     in_remesh_voxel_adaptivity: FloatProperty(default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
@@ -28,7 +28,8 @@ class ScVoxelRemesh(Node, ScObjectOperatorNode):
     def error_condition(self):
         return(
             super().error_condition()
-            or (self.inputs["Voxel Size"].default_value) < 0.0
+            or bpy.app.version[1] < 81
+            or self.inputs["Voxel Size"].default_value < 0.0
             or (self.inputs["Adaptivity"].default_value < 0.0 or self.inputs["Adaptivity"].default_value > 1.0)
         )
 
