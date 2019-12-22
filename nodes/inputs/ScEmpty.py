@@ -9,7 +9,7 @@ class ScEmpty(Node, ScInputNode):
     bl_idname = "ScEmpty"
     bl_label = "Empty"
     
-    in_type: EnumProperty(items=[('PLAIN_AXES', 'Plain_axes', ''), ('ARROWS', 'Arrows', ''), ('SINGLE_ARROW', 'Single_arrow', ''), ('CIRCLE', 'Circle', ''), ('CUBE', 'Cube', ''), ('SPHERE', 'Sphere', ''), ('CONE', 'Cone', ''), ('IMAGE', 'Image', '')], default='PLAIN_AXES', update=ScNode.update_value)
+    in_type: EnumProperty(items=[('PLAIN_AXES', 'Plain Axes', ''), ('ARROWS', 'Arrows', ''), ('SINGLE_ARROW', 'Single Arrow', ''), ('CIRCLE', 'Circle', ''), ('CUBE', 'Cube', ''), ('SPHERE', 'Sphere', ''), ('CONE', 'Cone', ''), ('IMAGE', 'Image', '')], default='PLAIN_AXES', update=ScNode.update_value)
     in_radius: FloatProperty(default=1.0, min=0.0, update=ScNode.update_value)
 
     def init(self, context):
