@@ -14,7 +14,6 @@ class ScImportFbx(Node, ScInputNode):
     in_filename: StringProperty(default="untitled")
 
     def init(self, context):
-        self.node_executable = True
         super().init(context)
         self.inputs.new("ScNodeSocketString", "File Path").init("in_filepath", True)
         self.inputs.new("ScNodeSocketString", "File Name").init("in_filename", True)
