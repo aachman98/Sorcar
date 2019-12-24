@@ -1,21 +1,12 @@
 import bpy
 
 from bpy.types import Node
-from .._base.node_base import ScNode
 from .._base.node_input import ScInputNode
 
 
 class ScSingleVertex(Node, ScInputNode):
     bl_idname = "ScSingleVertex"
     bl_label = "Single Vertex"
-
-    def init(self, context):
-        super().init(context)
-
-    def error_condition(self):
-        return (
-            super().error_condition()
-        )
 
     def functionality(self):
         name = self.inputs["Name"].default_value
