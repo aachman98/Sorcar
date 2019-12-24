@@ -84,7 +84,7 @@ and more...!
 #### [Unreleased]
 
 - Added "Voxel Remesh" object operator node
-- Added "Empty" input node
+- Added "Empty" and "Single Vertex" input node
 
 #### v3.1.3
 
@@ -125,12 +125,12 @@ and more...!
 ## Contributors
 
 - [@CORPSE-SYS](https://github.com/CORPSE-SYS) - "Voxel Remesh" node ([#83](https://github.com/aachman98/Sorcar/pull/83))
-- [@zebus3d](https://github.com/zebus3d) - "Select Vertices by Connections" node ([#88](https://github.com/aachman98/Sorcar/pull/88))
+- [@zebus3d](https://github.com/zebus3d) - "Select Vertices by Connections", "Single Vertex" nodes ([#88](https://github.com/aachman98/Sorcar/pull/88), [#90](https://github.com/aachman98/Sorcar/pull/90))
 - [@CGCookie](https://github.com/CGCookie) (CG Cookie) - Addon updater ([Github](https://github.com/CGCookie/blender-addon-updater))
 - [@8176135](https://github.com/8176135) - Individual edit mode type in selection nodes using a new socket ([#80](https://github.com/aachman98/Sorcar/pull/80))
 - [@huiyao8761380](https://github.com/huiyao8761380) (TangHui) - Documentation
 - [@Megalomaniak](https://github.com/Megalomaniak) (Felix Kütt) - Documentation
 - [@kichristensen](https://github.com/kichristensen) (Kim Christensen) - Port Sorcar (v2) to Blender 2.80 ([#54](https://github.com/aachman98/Sorcar/pull/54))
-- [@SevenNeumann](https://github.com/SevenNeumann) (Mark Andrianov) - Icons for Sorcar & layout design for main menu ([#46](https://github.com/aachman98/Sorcar/pull/46))
+- [@SevenNeumann](https://github.com/SevenNeumann) (Mark) - Icons for Sorcar & layout design for main menu ([#46](https://github.com/aachman98/Sorcar/pull/46))
 
 And the amazing [BlenderArtists](https://blenderartists.org) community!
