@@ -85,6 +85,9 @@ and more...!
 
 - Added "Voxel Remesh" object operator node
 - Added "Empty" and "Single Vertex" input node
+- Added "Mark Component" node
+- Fixed "Element" output pin type of "Begin For-Each Loop" node
+- Fixed issue with addon activation
 
 #### v3.1.3
 
