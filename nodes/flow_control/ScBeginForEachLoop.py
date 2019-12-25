@@ -17,7 +17,7 @@ class ScBeginForEachLoop(Node, ScNode):
         self.inputs.new("ScNodeSocketUniversal", "In")
         self.outputs.new("ScNodeSocketInfo", "End For-Each Loop")
         self.outputs.new("ScNodeSocketUniversal", "Out")
-        self.outputs.new("ScNodeSocketString", "Element")
+        self.outputs.new("ScNodeSocketUniversal", "Element")
         self.outputs.new("ScNodeSocketNumber", "Index")
     
     def execute(self, forced=False):
