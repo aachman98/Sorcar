@@ -6,14 +6,14 @@ from ...helper import focus_on_object, remove_object
 
 class ScInputNode(ScNode):
     in_name: StringProperty(default="Object", update=ScNode.update_value)
-    in_uv: BoolProperty(default=True, update=ScNode.update_value)
+    # in_uv: BoolProperty(default=True, update=ScNode.update_value)
     out_mesh: PointerProperty(type=bpy.types.Object)
 
     def init(self, context):
         self.node_executable = True
         super().init(context)
         self.inputs.new("ScNodeSocketString", "Name").init("in_name")
-        self.inputs.new("ScNodeSocketBool", "Generate UVs").init("in_uv")
+        # self.inputs.new("ScNodeSocketBool", "Generate UVs").init("in_uv")
         self.outputs.new("ScNodeSocketObject", "Object")
     
     def error_condition(self):
@@ -29,6 +29,7 @@ class ScInputNode(ScNode):
         out = {}
         self.out_mesh = bpy.context.active_object
         self.out_mesh.name = self.inputs["Name"].default_value
-        self.out_mesh.data.name = self.out_mesh.name
+        if (self.out_mesh.data):
+            self.out_mesh.data.name = self.out_mesh.name
         out["Object"] = self.out_mesh
         return out

@@ -15,7 +15,7 @@ Sorcar is a **procedural modeling node-based system** which utilises Blender and
 
 ## Release & Instructions
 
-Latest Release (v3.1.1): <https://github.com/aachman98/Sorcar/releases/tag/v3.1.1>
+[Latest Release (v3.1.3)](https://github.com/aachman98/Sorcar/releases/latest)
 </br>*Requirement: Blender 2.80 or later*
 
 1. Download the zip file and install it as a Blender addon (Edit -> Preferences... -> Add-ons-> Install...)
@@ -35,7 +35,7 @@ Latest Release (v3.1.1): <https://github.com/aachman98/Sorcar/releases/tag/v3.1.
 | ![sc_realtime_updates](https://github.com/aachman98/sc-img-data/raw/master/sc_realtime_updates.gif "Realtime Updates") | <p style="text-align: left; padding-left: 16px;"><strong>REAL-TIME UPDATES</strong><br /><em>Quick as the wind...</em></p> <hr style="padding-left: 16px;" /> <p style="text-align: left; padding-left: 16px;">Drive a parameter using current frame value (or manually change it) and see the mesh update in viewport.</p> |
 | <p style="text-align: right; padding-right: 16px;"><strong>ITERATE & RANDOMIZE</strong><br /><em>Need multiple extrusions of random amount?</em></p> <hr style="padding-right: 16px;" /> <p style="text-align: right; padding-right: 16px;">Generate variations in mesh by using seed-controlled pseudorandom numbers. Use loops to handle repeatitive operations with same level of randomness.</p> | ![sc_iterate_randomize](https://github.com/aachman98/sc-img-data/raw/master/sc_iterate_randomize.gif "Iterate & Randomize") |
 | ![sc_automation](https://github.com/aachman98/sc-img-data/raw/master/sc_automation.gif "Automation") | <p style="text-align: left; padding-left: 16px;"><strong>AUTOMATION</strong><br /><em>Modify, Save, Repeat...</em></p> <hr style="padding-left: 16px;" /> <p style="text-align: left; padding-left: 16px;">Use frame number to drive seed value and batch export the meshes in different files.</p> |
-| <p style="text-align: right; padding-right: 16px;"><strong>170+ NODES</strong><br /><em>At your service!</em></p> <hr style="padding-right: 16px;" /> <p style="text-align: right; padding-right: 16px;">A growing list of functions available as nodes (operators & scene settings) including custom inputs, selection & transform tools, modifiers and component level operators.</p> | ![sc_nodes](https://github.com/aachman98/sc-img-data/raw/master/sc_nodes.gif "170+ Nodes") |
+| <p style="text-align: right; padding-right: 16px;"><strong>200+ NODES</strong><br /><em>At your service!</em></p> <hr style="padding-right: 16px;" /> <p style="text-align: right; padding-right: 16px;">A growing list of functions available as nodes (operators & scene settings) including custom inputs, selection & transform tools, modifiers and component level operators.</p> | ![sc_nodes](https://github.com/aachman98/sc-img-data/raw/master/sc_nodes.gif "200+ Nodes") |
 
 - Simplified node sockets with internal data conversion for the convenience of users.
 - Colour-coded nodes (preview, error, invalid inputs etc.) for easier debugging.
@@ -65,8 +65,7 @@ and more...!
 
 1. Improve loop nodes: Add more options to control in each pass
 2. Curve nodes: Edit spline properties, convert to mesh
-3. More array operations: Add/append, remove, push/pop, find, count
-4. Named variables: Get/set values of custom variables, accessible across node trees
+3. Named variables: Get/set values of custom variables, accessible across node trees
 
 ## Future
 
@@ -82,6 +81,35 @@ and more...!
 
 ## Changelog
 
+#### [Unreleased]
+
+- Added "Voxel Remesh" object operator node
+- Added "Empty" and "Single Vertex" input node
+- Added "Mark Component" node
+- Fixed "Element" output pin type of "Begin For-Each Loop" node
+- Fixed issue with addon activation
+
+#### v3.1.3
+
+- Added "For-Each Component Loop" nodes
+- Added "Get/Set Variable" nodes
+- Added "To Sphere" transform node
+- Added "Select Vertices by Connections" selection node
+- Fixed issue with reset() attribute
+- Improved "For" & "For-Each" loop nodes
+- Improved "Select Manually" node
+
+#### v3.1.2
+
+- Added noise nodes (cell, fractal, voronoi, ...) in a new category "Noise"
+- Added array operation nodes (add, remove, search, ...) in a new category "Arrays"
+- Added "Material Parameter" node
+- Renamed "Edit Mode" node to "Set Selection Mode"
+- Moved "Get Element" & "Make Array" node to "Arrays" category
+- Added selection type input socket in "Set Selection Mode" node
+- Added custom overridable method for socket layout drawing
+- Removed redundant sorcar_updater folder (also added in gitignore)
+
 #### v3.1.1
 
 - Added addon updator by CGCookie
@@ -92,17 +120,20 @@ and more...!
 
 #### v3.1.0
 
+- Support for Blender 2.8
 - New architecture for data flow node executions
 - Improved socket types and node hierarchy
 - Internal data conversions
 
 ## Contributors
 
-- [@CGCookie](https://github.com/CGCookie) (CG Cookie) - Addon updater [Github](https://github.com/CGCookie/blender-addon-updater)
+- [@CORPSE-SYS](https://github.com/CORPSE-SYS) - "Voxel Remesh" node ([#83](https://github.com/aachman98/Sorcar/pull/83))
+- [@zebus3d](https://github.com/zebus3d) - "Select Vertices by Connections", "Single Vertex" nodes ([#88](https://github.com/aachman98/Sorcar/pull/88), [#90](https://github.com/aachman98/Sorcar/pull/90))
+- [@CGCookie](https://github.com/CGCookie) (CG Cookie) - Addon updater ([Github](https://github.com/CGCookie/blender-addon-updater))
 - [@8176135](https://github.com/8176135) - Individual edit mode type in selection nodes using a new socket ([#80](https://github.com/aachman98/Sorcar/pull/80))
 - [@huiyao8761380](https://github.com/huiyao8761380) (TangHui) - Documentation
 - [@Megalomaniak](https://github.com/Megalomaniak) (Felix Kütt) - Documentation
 - [@kichristensen](https://github.com/kichristensen) (Kim Christensen) - Port Sorcar (v2) to Blender 2.80 ([#54](https://github.com/aachman98/Sorcar/pull/54))
-- [@SevenNeumann](https://github.com/SevenNeumann) (Mark Andrianov) - Icons for Sorcar & layout design for main menu ([#46](https://github.com/aachman98/Sorcar/pull/46))
+- [@SevenNeumann](https://github.com/SevenNeumann) (Mark) - Icons for Sorcar & layout design for main menu ([#46](https://github.com/aachman98/Sorcar/pull/46))
 
 And the amazing [BlenderArtists](https://blenderartists.org) community!

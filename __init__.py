@@ -17,7 +17,7 @@
 bl_info = {
 	"name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (3, 1, 1),
+    "version": (3, 1, 3),
     "blender": (2, 80, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",
@@ -105,7 +105,7 @@ all_classes = []
 
 def register():
     print("-------------REGISTER SORCAR-------------")
-    path = repr([i for i in addon_utils.modules() if i.bl_info['name'] == bpy.path.display_name(__name__)][0]).split("from '")[1].split("__init__.py'>")[0]
+    path = repr([i for i in addon_utils.modules() if i.bl_info['name'] == "Sorcar"][0]).split("from '")[1].split("__init__.py'>")[0]
     classes_ops = import_ops(path)
     classes_sockets = import_sockets(path)
     classes_nodes = import_nodes(path)
@@ -126,8 +126,8 @@ def register():
     for i in all_classes:
         bpy.utils.register_class(i)
     nodeitems_utils.register_node_categories("sc_node_categories", node_categories)
-    if not (update_each_frame in bpy.app.handlers.frame_change_post):
-        bpy.app.handlers.frame_change_post.append(update_each_frame)
+    if not (update_each_frame in bpy.app.handlers.frame_change_pre):
+        bpy.app.handlers.frame_change_pre.append(update_each_frame)
     
     addon_updater_ops.register(bl_info)
     
@@ -142,8 +142,8 @@ def unregister():
         bpy.utils.unregister_class(i)
         print_log("UNREGISTER", i.bl_idname, None, i.bl_label)
     nodeitems_utils.unregister_node_categories("sc_node_categories")
-    if (update_each_frame in bpy.app.handlers.frame_change_post):
-        bpy.app.handlers.frame_change_post.remove(update_each_frame)
+    if (update_each_frame in bpy.app.handlers.frame_change_pre):
+        bpy.app.handlers.frame_change_pre.remove(update_each_frame)
     
     addon_updater_ops.unregister()
 

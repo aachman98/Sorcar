@@ -1,6 +1,6 @@
 import bpy
 
-from bpy.props import PointerProperty, EnumProperty, StringProperty, IntProperty, FloatProperty, BoolProperty
+from bpy.props import EnumProperty, IntProperty, FloatProperty, BoolProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_input import ScInputNode
@@ -9,6 +9,7 @@ class ScTorus(Node, ScInputNode):
     bl_idname = "ScTorus"
     bl_label = "Torus"
 
+    in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_mode: EnumProperty(items=[("MAJOR_MINOR", "Major/Minor", ""), ("EXT_INT", "Exterior/Interior", "")], default="MAJOR_MINOR", update=ScNode.update_value)
     in_major_segment: IntProperty(default=48, min=3, max=256, update=ScNode.update_value)
     in_minor_segment: IntProperty(default=12, min=3, max=256, update=ScNode.update_value)
@@ -19,6 +20,7 @@ class ScTorus(Node, ScInputNode):
 
     def init(self, context):
         super().init(context)
+        self.inputs.new("ScNodeSocketBool", "Generate UVs").init("in_uv")
         self.inputs.new("ScNodeSocketNumber", "Major Segments").init("in_major_segment", True)
         self.inputs.new("ScNodeSocketNumber", "Minor Segments").init("in_minor_segment", True)
         self.inputs.new("ScNodeSocketString", "Torus Dimensions").init("in_mode")

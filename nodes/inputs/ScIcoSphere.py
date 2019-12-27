@@ -1,6 +1,6 @@
 import bpy
 
-from bpy.props import PointerProperty, StringProperty, IntProperty, FloatProperty, BoolProperty
+from bpy.props import IntProperty, FloatProperty, BoolProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_input import ScInputNode
@@ -9,11 +9,13 @@ class ScIcoSphere(Node, ScInputNode):
     bl_idname = "ScIcoSphere"
     bl_label = "Ico Sphere"
 
+    in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_subdivision: IntProperty(default=2, min=1, max=10, update=ScNode.update_value)
     in_radius: FloatProperty(default=1.0, min=0.0, update=ScNode.update_value)
 
     def init(self, context):
         super().init(context)
+        self.inputs.new("ScNodeSocketBool", "Generate UVs").init("in_uv")
         self.inputs.new("ScNodeSocketNumber", "Subdivisions").init("in_subdivision", True)
         self.inputs.new("ScNodeSocketNumber", "Radius").init("in_radius", True)
     

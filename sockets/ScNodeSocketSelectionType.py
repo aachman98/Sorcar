@@ -1,6 +1,6 @@
 import bpy
 
-from bpy.props import FloatVectorProperty, StringProperty, BoolVectorProperty, EnumProperty
+from bpy.props import StringProperty, EnumProperty
 from bpy.types import NodeSocket
 from ._base.socket_base import ScNodeSocket
 from ..helper import selection_type_to_string
@@ -15,3 +15,8 @@ class ScNodeSocketSelectionType(NodeSocket, ScNodeSocket):
 
     def get_label(self):
         return selection_type_to_string(self.default_value)
+    
+    def draw_layout(self, context, layout, node, text):
+        row = layout.row(align = True)
+        row.label(text=text)
+        row.prop(node, self.default_prop, icon_only = True)

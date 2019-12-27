@@ -1,7 +1,6 @@
 import bpy
 import math
 
-from bpy.props import EnumProperty, FloatProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 

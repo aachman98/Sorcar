@@ -1,6 +1,6 @@
 import bpy
 
-from bpy.props import IntProperty, BoolProperty, StringProperty
+from bpy.props import BoolProperty, IntProperty, StringProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 
@@ -20,21 +20,19 @@ class ScBeginForEachLoop(Node, ScNode):
         self.outputs.new("ScNodeSocketUniversal", "Element")
         self.outputs.new("ScNodeSocketNumber", "Index")
     
-    def error_condition(self):
-        return (
-            not self.outputs["End For-Each Loop"].is_linked
-        )
-    
     def execute(self, forced=False):
         if (self.prop_locked):
-            return self.init_out(self.post_execute())
+            self.outputs["Element"].default_value = self.out_element
+            self.outputs["Index"].default_value = self.out_index
+            self.set_color()
+            return True
         else:
             self.prop_locked = True
+            self.out_index = 0
             return super().execute(forced)
     
     def post_execute(self):
         out = {}
         out["Out"] = self.inputs["In"].default_value
-        out["Element"] = self.out_element
         out["Index"] = self.out_index
         return out
