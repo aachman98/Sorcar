@@ -15,6 +15,7 @@ class ScSceneInfo(Node, ScNode):
         self.outputs.new("ScNodeSocketNumber", "End Frame")
         self.outputs.new("ScNodeSocketVector", "Cursor Location")
         self.outputs.new("ScNodeSocketVector", "Cursor Rotation")
+        self.outputs.new("ScNodeSocketArray", "Objects")
         self.outputs.new("ScNodeSocketNumber", "System Time")
     
     def draw_buttons(self, context, layout):
@@ -28,5 +29,6 @@ class ScSceneInfo(Node, ScNode):
         out["End Frame"] = bpy.context.scene.frame_end
         out["Cursor Location"] = bpy.context.scene.cursor.location
         out["Cursor Rotation"] = bpy.context.scene.cursor.rotation_euler
+        out["Objects"] = repr(list(bpy.context.scene.objects))
         out["System Time"] = time.time()
         return out

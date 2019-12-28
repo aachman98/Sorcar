@@ -84,7 +84,8 @@ and more...!
 #### [Unreleased]
 
 - Added "Voxel Remesh" object operator node
-- Added "Empty" and "Single Vertex" input node
+- Added "Raycast (Scene)" utility node (renamed "Raycast" to "Raycast (Object)")
+- Added "Empty" and "Single Vertex" input nodes
 - Added "Mark Component" node
 - Fixed "Element" output pin type of "Begin For-Each Loop" node
 - Fixed issue with addon activation
