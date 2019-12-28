@@ -13,8 +13,8 @@ class ScSelectShortestPath(Node, ScSelectionNode):
     in_step: BoolProperty(update=ScNode.update_value)
     in_distance: BoolProperty(update=ScNode.update_value)
     in_fill: BoolProperty(update=ScNode.update_value)
-    in_nth: IntProperty(default=1, min=0, update=ScNode.update_value)
-    in_skip: IntProperty(default=1, min=0, update=ScNode.update_value)
+    in_nth: IntProperty(default=1, min=1, update=ScNode.update_value)
+    in_skip: IntProperty(default=0, min=0, update=ScNode.update_value)
     in_offset: IntProperty(update=ScNode.update_value)
     
     def init(self, context):
@@ -31,8 +31,8 @@ class ScSelectShortestPath(Node, ScSelectionNode):
         return(
             super().error_condition()
             or (not self.inputs["Edge Tag"].default_value in ['SELECT', 'SEAM', 'SHARP', 'CREASE', 'BEVEL', 'FREESTYLE'])
-            or self.inputs["Nth Selection"].default_value < 0
-            or self.inputs["Skip"].default_value < 0
+            or int(self.inputs["Nth Selection"].default_value) < 1
+            or int(self.inputs["Skip"].default_value) < 0
         )
     
     def functionality(self):
