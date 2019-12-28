@@ -17,5 +17,5 @@ class ScHideComponents(Node, ScEditOperatorNode):
 
     def functionality(self):
         bpy.ops.mesh.hide(
-            unselected = self.inputs["Unselected"].default_value,
+            unselected = self.inputs["Unselected"].default_value
             )
