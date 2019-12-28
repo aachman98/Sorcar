@@ -17,5 +17,5 @@ class ScUnhideComponents(Node, ScEditOperatorNode):
     
     def functionality(self):
         bpy.ops.mesh.reveal(
-            select = self.inputs["Select"].default_value,
+            select = self.inputs["Select"].default_value
             )
