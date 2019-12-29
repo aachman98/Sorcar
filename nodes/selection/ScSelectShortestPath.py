@@ -14,7 +14,7 @@ class ScSelectShortestPath(Node, ScSelectionNode):
     in_distance: BoolProperty(update=ScNode.update_value)
     in_fill: BoolProperty(update=ScNode.update_value)
     in_nth: IntProperty(default=1, min=1, update=ScNode.update_value)
-    in_skip: IntProperty(default=0, min=0, update=ScNode.update_value)
+    in_skip: IntProperty(min=0, update=ScNode.update_value)
     in_offset: IntProperty(update=ScNode.update_value)
     
     def init(self, context):
@@ -41,7 +41,7 @@ class ScSelectShortestPath(Node, ScSelectionNode):
             use_face_step = self.inputs["Face Stepping"].default_value,
             use_topology_distance = self.inputs["Topology Distance"].default_value,
             use_fill = self.inputs["Fill Region"].default_value,
-            nth = self.inputs["Nth Selection"].default_value,
-            skip = self.inputs["Skip"].default_value,
-            offset = self.inputs["Offset"].default_value,
+            nth = int(self.inputs["Nth Selection"].default_value),
+            skip = int(self.inputs["Skip"].default_value),
+            offset = int(self.inputs["Offset"].default_value)
         )

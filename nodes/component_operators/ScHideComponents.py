@@ -9,7 +9,7 @@ class ScHideComponents(Node, ScEditOperatorNode):
     bl_idname = "ScHideComponents"
     bl_label = "Hide Components"
     
-    in_unselected: BoolProperty(default=False, update=ScNode.update_value)
+    in_unselected: BoolProperty(update=ScNode.update_value)
 
     def init(self, context):
         super().init(context)
@@ -18,4 +18,4 @@ class ScHideComponents(Node, ScEditOperatorNode):
     def functionality(self):
         bpy.ops.mesh.hide(
             unselected = self.inputs["Unselected"].default_value
-            )
+        )

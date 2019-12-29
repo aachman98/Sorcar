@@ -33,9 +33,9 @@ class ScSelectShortestPathPick(Node, ScSelectionNode):
         return(
             super().error_condition()
             or (not self.inputs["Edge Tag"].default_value in ['SELECT', 'SEAM', 'SHARP', 'CREASE', 'BEVEL', 'FREESTYLE'])
-            or self.inputs["Nth Selection"].default_value < 1
-            or self.inputs["Skip"].default_value < 1
-            or self.inputs["Index"].default_value < 0
+            or int(self.inputs["Nth Selection"].default_value) < 1
+            or int(self.inputs["Skip"].default_value) < 1
+            or int(self.inputs["Index"].default_value) < 0
         )
     
     def functionality(self):
@@ -44,8 +44,8 @@ class ScSelectShortestPathPick(Node, ScSelectionNode):
             use_face_step = self.inputs["Face Stepping"].default_value,
             use_topology_distance = self.inputs["Topology Distance"].default_value,
             use_fill = self.inputs["Fill Region"].default_value,
-            nth = self.inputs["Nth Selection"].default_value,
-            skip = self.inputs["Skip"].default_value,
-            offset = self.inputs["Offset"].default_value,
-            index = self.inputs["Index"].default_value
+            nth = int(self.inputs["Nth Selection"].default_value),
+            skip = int(self.inputs["Skip"].default_value),
+            offset = int(self.inputs["Offset"].default_value),
+            index = int(self.inputs["Index"].default_value)
         )
