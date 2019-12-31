@@ -17,7 +17,7 @@
 bl_info = {
 	"name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (3, 1, 3),
+    "version": (3, 1, 4),
     "blender": (2, 80, 0),
     "location": "Node Editor",
     "description": "Create procedural meshes using Node Editor",

@@ -81,15 +81,16 @@ and more...!
 
 ## Changelog
 
-#### [Unreleased]
+#### v3.1.4
 
 - Added "Voxel Remesh" object operator node
 - Added "Raycast (Scene)" utility node (renamed "Raycast" to "Raycast (Object)")
+- Added "Instancing" & "Parent" object operator nodes
 - Added "Empty" and "Single Vertex" input nodes
 - Added "Hide/Unhide Component" and "Mark Component" nodes
 - Fixed "Element" output pin type of "Begin For-Each Loop" node
 - Fixed issue with addon activation
-- Fixed int conversion in selection nodes
+- Fixed int conversion in "Shortest Path" selection nodes
 
 #### v3.1.3
 
