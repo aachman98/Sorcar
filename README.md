@@ -15,7 +15,7 @@ Sorcar is a **procedural modeling node-based system** which utilises Blender and
 
 ## Release & Instructions
 
-[Latest Release (v3.1.3)](https://github.com/aachman98/Sorcar/releases/latest)
+[Latest Release (v3.1.4)](https://github.com/aachman98/Sorcar/releases/latest)
 </br>*Requirement: Blender 2.80 or later*
 
 1. Download the zip file and install it as a Blender addon (Edit -> Preferences... -> Add-ons-> Install...)
