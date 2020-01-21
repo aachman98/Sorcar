@@ -13,15 +13,15 @@ class ScScatter(Node, ScObjectOperatorNode):
 
     prop_loc: EnumProperty(items=[('X', 'X', '', 2), ('Y', 'Y', '', 4), ('Z', 'Z', '', 8)], default={'X', 'Y', 'Z'}, options={'ENUM_FLAG'}, update=ScNode.update_value)
     prop_rot: EnumProperty(items=[('X', 'X', '', 2), ('Y', 'Y', '', 4), ('Z', 'Z', '', 8)], default={'X', 'Y', 'Z'}, options={'ENUM_FLAG'}, update=ScNode.update_value)
-    in_type: EnumProperty(items=[('INST', 'Instanced', ''), ('MAN', 'Manual', ''), ('RAND', 'Random', '')], default='INST', update=ScNode.update_value)
     in_obj: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    in_type: EnumProperty(items=[('INST', 'Instanced', ''), ('MAN', 'Manual', ''), ('RAND', 'Random', '')], default='INST', update=ScNode.update_value)
     in_component: EnumProperty(items=[("FACES", "Faces", ""), ("VERTS", "Vertices", ""), ("EDGES", "Edges", "")], default="FACES", update=ScNode.update_value)
     prop_obj_array: StringProperty(default="[]")
 
     def init(self, context):
         super().init(context)
-        self.inputs.new("ScNodeSocketString", "Type").init("in_type", True)
         self.inputs.new("ScNodeSocketObject", "Scatter Object").init("in_obj", True)
+        self.inputs.new("ScNodeSocketString", "Type").init("in_type", True)
         self.inputs.new("ScNodeSocketString", "Component").init("in_component", True)
         self.outputs.new("ScNodeSocketArray", "Scattered Objects")
     
