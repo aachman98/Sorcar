@@ -6,9 +6,9 @@ from .._base.node_base import ScNode
 from .._base.node_transform import ScTransformNode
 from ...helper import get_override
 
-class ScTransform(Node, ScTransformNode):
-    bl_idname = "ScTransform"
-    bl_label = "Transform"
+class ScLocalTransform(Node, ScTransformNode):
+    bl_idname = "ScLocalTransform"
+    bl_label = "Local Transform"
 
     in_mode: EnumProperty(items=[('TRANSLATION', 'Translate', ''), ('ROTATION', 'Rotate', ''), ('RESIZE', 'Scale', ''), ('SHEAR', 'Shear', ''), ('BEND', 'Bend', ''), ('SHRINKFATTEN', 'Shrink-Fatten', ''), ('TILT', 'Tilt', ''), ('PUSHPULL', 'Push-Pull', ''), ('SKIN_RESIZE', 'Skin Resize', ''), ('CREASE', 'Crease', ''), ('MIRROR', 'Mirror', ''), ('ALIGN', 'Align', ''), ('EDGESLIDE', 'Edge Slide', '')], update=ScNode.update_value)
     in_x: FloatProperty(update=ScNode.update_value)

@@ -5,9 +5,9 @@ from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_transform import ScTransformNode
 
-class ScSetTransform(Node, ScTransformNode):
-    bl_idname = "ScSetTransform"
-    bl_label = "Set Transform"
+class ScWorldTransform(Node, ScTransformNode):
+    bl_idname = "ScWorldTransform"
+    bl_label = "World Transform"
 
     in_type: EnumProperty(items=[('LOCATION', 'Location', ''), ('ROTATION', 'Rotation', ''), ('SCALE', 'Scale', '')], update=ScNode.update_value)
     in_val: FloatVectorProperty(update=ScNode.update_value)
