@@ -33,9 +33,11 @@ class ScLocalTransform(Node, ScTransformNode):
             super().error_condition()
             or (not self.inputs["Mode"].default_value in ['TRANSLATION', 'ROTATION', 'RESIZE', 'SHEAR', 'BEND', 'SHRINKFATTEN', 'TILT', 'PUSHPULL', 'SKIN_RESIZE', 'CREASE', 'MIRROR', 'ALIGN', 'EDGESLIDE'])
             or (not self.inputs["Axis"].default_value in ['X', 'Y', 'Z'])
+            or (self.inputs["Mode"].default_value in ['CREASE'] and not self.inputs["Edit Mode"].default_value)
         )
     
     def functionality(self):
+        print("lol")
         bpy.ops.transform.transform(
             get_override(self.inputs["Object"].default_value, self.inputs["Edit Mode"].default_value),
             mode = self.inputs["Mode"].default_value,
