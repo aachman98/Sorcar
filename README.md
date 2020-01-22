@@ -81,6 +81,12 @@ and more...!
 
 ## Changelog
 
+#### [Unreleased]
+
+- "Scatter" node supports instanced scattering
+- Renamed transform nodes to "World/Local Transform"
+- Fixed issue with Crease transform
+
 #### v3.1.4
 
 - Added "Voxel Remesh" object operator node
