@@ -40,7 +40,7 @@ class ScMathsOp(Node, ScNode):
         elif (self.inputs["Operation"].default_value == 'DIV'):
             out["Value"] = self.inputs["X"].default_value / self.inputs["Y"].default_value
         elif (self.inputs["Operation"].default_value == 'MOD'):
-            out["Value"] = int(self.inputs["X"].default_value) % int(self.inputs["Y"].default_value)
+            out["Value"] = self.inputs["X"].default_value % self.inputs["Y"].default_value
         elif (self.inputs["Operation"].default_value == 'POW'):
             out["Value"] = pow(self.inputs["X"].default_value, self.inputs["Y"].default_value)
         elif (self.inputs["Operation"].default_value == 'LOG'):
