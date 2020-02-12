@@ -65,7 +65,7 @@ and more...!
 
 1. Improve loop nodes: Add more options to control in each pass
 2. Curve nodes: Edit spline properties, convert to mesh
-3. Named variables: Get/set values of custom variables, accessible across node trees
+3. Object constraint nodes
 
 ## Future
 
