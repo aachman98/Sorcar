@@ -3,9 +3,9 @@ import bpy
 from bpy.props import FloatVectorProperty, EnumProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
-from .._base.node_transform import ScTransformNode
+from .._base.node_operator import ScObjectOperatorNode
 
-class ScWorldTransform(Node, ScTransformNode):
+class ScWorldTransform(Node, ScObjectOperatorNode):
     bl_idname = "ScWorldTransform"
     bl_label = "World Transform"
 

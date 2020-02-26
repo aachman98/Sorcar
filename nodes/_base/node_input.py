@@ -6,14 +6,12 @@ from ...helper import focus_on_object, remove_object
 
 class ScInputNode(ScNode):
     in_name: StringProperty(default="Object", update=ScNode.update_value)
-    # in_uv: BoolProperty(default=True, update=ScNode.update_value)
     out_mesh: PointerProperty(type=bpy.types.Object)
 
     def init(self, context):
         self.node_executable = True
         super().init(context)
         self.inputs.new("ScNodeSocketString", "Name").init("in_name")
-        # self.inputs.new("ScNodeSocketBool", "Generate UVs").init("in_uv")
         self.outputs.new("ScNodeSocketObject", "Object")
     
     def error_condition(self):
