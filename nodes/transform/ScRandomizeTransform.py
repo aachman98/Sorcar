@@ -35,7 +35,7 @@ class ScRandomizeTransform(Node, ScObjectOperatorNode):
     def error_condition(self):
         return (
             super().error_condition()
-            or (self.inputs["Random Seed"].default_value < 0 or self.inputs["Random Seed"].default_value > 10000)
+            or (int(self.inputs["Random Seed"].default_value) < 0 or int(self.inputs["Random Seed"].default_value) > 10000)
             or (Vector(self.inputs["Location"].default_value).magnitude < -100.0 or Vector(self.inputs["Location"].default_value).magnitude > 100.0)
             or (Vector(self.inputs["Rotation"].default_value).magnitude < -3.14159 or Vector(self.inputs["Rotation"].default_value).magnitude > 3.14159)
             or (Vector(self.inputs["Scale"].default_value).magnitude < -100.0 or Vector(self.inputs["Scale"].default_value).magnitude > 100.0)
