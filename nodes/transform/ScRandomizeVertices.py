@@ -1,6 +1,5 @@
 import bpy
 
-from mathutils import Vector
 from bpy.props import IntProperty, FloatProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
