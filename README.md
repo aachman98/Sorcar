@@ -84,8 +84,10 @@ and more...!
 #### [Unreleased]
 
 - "Scatter" node supports instanced scattering
+- Added "Warp" & "Randomize Vertices" transform nodes
+- Added "Weld Modifier" node
 - Renamed transform nodes to "World/Local Transform"
-- Fixed issue with Crease transform
+- Fixed issue with Crease, Edge-Slide, Skin-Resize local transform
 
 #### v3.1.4
 
