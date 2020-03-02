@@ -57,3 +57,10 @@ class ScNodeTree(NodeTree):
                 print_log(self.name, msg="Failed to execute...")
             else:
                 print_log(self.name, msg="Executed successfully!")
+    
+    def update_ext(self, node_name="Cube", attr_name="in_size", value=1, refresh=True):
+        n = self.nodes.get(node_name)
+        if (n):
+            setattr(n, attr_name, value)
+            if (refresh):
+                self.execute_node();
