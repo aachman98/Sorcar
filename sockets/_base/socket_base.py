@@ -56,7 +56,8 @@ class ScNodeSocket:
         if (self.is_output):
             return self.node.execute(forced)
         else:
-            if (self.is_linked):
+            # if (len(self.links) > 0):
+            if (self.is_linked): # self.is_linked doesn't get updated quickly (when using realtime update & modify links)
                 if (self.links[0].from_socket.execute(forced)):
                     ret, data = self.links[0].from_socket.get_data(self.default_type)
                     if(ret):

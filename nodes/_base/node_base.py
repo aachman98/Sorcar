@@ -1,6 +1,7 @@
 import bpy
 
 from bpy.props import BoolProperty
+from ...helper import print_log
 
 class ScNode:
     node_executable: BoolProperty()
@@ -12,7 +13,10 @@ class ScNode:
         return _ntree.bl_idname == "ScNodeTree"
     
     def update_value(self, context):
-        context.space_data.edit_tree.execute_node()
+        if (hasattr(context.space_data, "edit_tree")):
+            context.space_data.edit_tree.execute_node()
+        else:
+            print_log("ScNode", None, "update_value", "Context is not Sorcar node tree")
         return None
     
     def reset(self, execute):
