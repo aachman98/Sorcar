@@ -91,6 +91,7 @@ and more...!
 - Renamed transform nodes to "World/Local Transform"
 - Fixed issue with Crease, Edge-Slide, Skin-Resize local transform
 - Fixed transform nodes to use snapping & proportional editing settings
+- Fixed nodetree execution (re-evaluation) on external modification of node attributes
 
 #### v3.1.4
 
