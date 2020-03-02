@@ -37,7 +37,6 @@ class ScLocalTransform(Node, ScTransformNode):
         )
     
     def functionality(self):
-        print("lol")
         bpy.ops.transform.transform(
             get_override(self.inputs["Object"].default_value, self.inputs["Edit Mode"].default_value),
             mode = self.inputs["Mode"].default_value,
@@ -45,12 +44,14 @@ class ScLocalTransform(Node, ScTransformNode):
             orient_axis = self.inputs["Axis"].default_value,
             orient_type = bpy.context.scene.transform_orientation_slots[0].type,
             mirror = self.inputs["Mirror"].default_value,
-            # use_proportional_edit = bpy.context.scene.tool_settings.use_proportional_edit,
-            # proportional_edit_falloff = bpy.context.scene.tool_settings.proportional_edit_falloff,
-            # proportional_size = bpy.context.scene.tool_settings.proportional_size,
-            # use_proportional_connected = bpy.context.scene.tool_settings.use_proportional_connected,
+            use_proportional_edit = bpy.context.scene.tool_settings.use_proportional_edit,
+            proportional_edit_falloff = bpy.context.scene.tool_settings.proportional_edit_falloff,
+            proportional_size = bpy.context.scene.tool_settings.proportional_size,
+            use_proportional_connected = bpy.context.scene.tool_settings.use_proportional_connected,
             # use_proportional_projected = bpy.context.scene.tool_settings.use_proportional_projected,
-            # snap = bpy.context.scene.tool_settings.use_snap,
-            # snap_target = bpy.context.scene.tool_settings.snap_target,
-            # snap_align = bpy.context.scene.tool_settings.use_snap_align_rotation
+            snap = bpy.context.scene.tool_settings.use_snap,
+            snap_target = bpy.context.scene.tool_settings.snap_target,
+            # snap_point = (0, 0, 0),
+            snap_align = bpy.context.scene.tool_settings.use_snap_align_rotation,
+            # snap_normal = bpy.context.scene.tool_settings.use_snap_align_rotation,
         )

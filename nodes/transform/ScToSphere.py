@@ -37,15 +37,17 @@ class ScToSphere(Node, ScNode):
             get_override(self.inputs["Object"].default_value, True),
             value = self.inputs["Value"].default_value,
             mirror = self.inputs["Mirror"].default_value,
-            # use_proportional_edit = bpy.context.scene.tool_settings.use_proportional_edit,
-            # proportional_edit_falloff = bpy.context.scene.tool_settings.proportional_edit_falloff,
-            # proportional_size = bpy.context.scene.tool_settings.proportional_size,
-            # use_proportional_connected = bpy.context.scene.tool_settings.use_proportional_connected,
-            # use_proportional_projected = bpy.context.scene.tool_settings.use_proportional_projected,
-            # snap = bpy.context.scene.tool_settings.use_snap,
-            # snap_target = bpy.context.scene.tool_settings.snap_target,
-            # snap_align = bpy.context.scene.tool_settings.use_snap_align_rotation
             center_override = self.inputs["Center"].default_value,
+            use_proportional_edit = bpy.context.scene.tool_settings.use_proportional_edit,
+            proportional_edit_falloff = bpy.context.scene.tool_settings.proportional_edit_falloff,
+            proportional_size = bpy.context.scene.tool_settings.proportional_size,
+            use_proportional_connected = bpy.context.scene.tool_settings.use_proportional_connected,
+            # use_proportional_projected = bpy.context.scene.tool_settings.use_proportional_projected,
+            snap = bpy.context.scene.tool_settings.use_snap,
+            snap_target = bpy.context.scene.tool_settings.snap_target,
+            # snap_point = (0, 0, 0),
+            snap_align = bpy.context.scene.tool_settings.use_snap_align_rotation,
+            # snap_normal = bpy.context.scene.tool_settings.use_snap_align_rotation,
         )
     
     def post_execute(self):

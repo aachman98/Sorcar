@@ -18,9 +18,9 @@ class ScProportionalEditing(Node, ScSettingNode):
     def init(self, context):
         super().init(context)
         self.inputs.new("ScNodeSocketString", "Falloff").init("in_falloff", True)
-        self.inputs.new("ScNodeSocketNumber", "Size").init("in_size")
+        self.inputs.new("ScNodeSocketNumber", "Size").init("in_size", True)
         self.inputs.new("ScNodeSocketBool", "Edit Mode").init("in_edit", True)
-        self.inputs.new("ScNodeSocketBool", "Object Mode").init("in_object", True)
+        self.inputs.new("ScNodeSocketBool", "Object Mode").init("in_object")
         self.inputs.new("ScNodeSocketBool", "Connected Only").init("in_connected")
     
     def error_condition(self):
