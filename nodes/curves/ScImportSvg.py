@@ -44,11 +44,12 @@ class ScImportSvg(Node, ScNode):
     
     def post_execute(self):
         out = {}
-        bpy.context.view_layer.objects.active = bpy.data.collections[self.inputs["File Name"].default_value+".svg"].objects[0]
+        self.prop_collection = bpy.data.collections.get(self.inputs["File Name"].default_value+".svg")
+        bpy.context.view_layer.objects.active = self.prop_collection.objects[0]
         self.out_curve = bpy.context.active_object
+        self.out_curve.select_set(True)
         self.out_curve.name = self.inputs["Name"].default_value
         if (self.out_curve.data):
             self.out_curve.data.name = self.out_curve.name
-        self.prop_collection = bpy.data.collections.get(self.inputs["File Name"].default_value+".svg")
         out["Curve"] = self.out_curve
         return out
