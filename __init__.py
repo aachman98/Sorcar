@@ -102,6 +102,7 @@ def import_nodes(path="./"):
     return out
 
 all_classes = []
+addon_keymaps = []
 
 def register():
     print("-------------REGISTER SORCAR-------------")
@@ -110,7 +111,7 @@ def register():
     classes_sockets = import_sockets(path)
     classes_nodes = import_nodes(path)
 
-    global all_classes
+    global all_classes, addon_keymaps
     all_classes = [import_tree()]
     all_classes.extend(classes_ops)
     all_classes.extend(classes_sockets)
@@ -129,13 +130,19 @@ def register():
     if not (update_each_frame in bpy.app.handlers.frame_change_pre):
         bpy.app.handlers.frame_change_pre.append(update_each_frame)
     
+    kc = bpy.context.window_manager.keyconfigs.addon
+    km = kc.keymaps.new(name="Node Generic", space_type='NODE_EDITOR')
+    kmi = km.keymap_items.new("sc.execute_node", 'E', 'PRESS')
+    kmi.active = True
+    addon_keymaps.append((km, kmi))
+    
     addon_updater_ops.register(bl_info)
     
     print_log("REGISTERED", msg="{} operators, {} sockets & {} nodes ({} categories)".format(len(classes_ops), len(classes_sockets), total_nodes, len(classes_nodes)))
 
 def unregister():
     print("------------UNREGISTER SORCAR----------------")
-    global all_classes
+    global all_classes, addon_keymaps
     all_classes.reverse()
 
     for i in all_classes:
@@ -144,6 +151,10 @@ def unregister():
     nodeitems_utils.unregister_node_categories("sc_node_categories")
     if (update_each_frame in bpy.app.handlers.frame_change_pre):
         bpy.app.handlers.frame_change_pre.remove(update_each_frame)
+    
+    for km, kmi in addon_keymaps:
+        km.keymap_items.remove(kmi)
+    addon_keymaps.clear()
     
     addon_updater_ops.unregister()
 
