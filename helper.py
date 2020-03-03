@@ -66,6 +66,8 @@ def convert_data(data, from_type=None, to_type=None):
                 val = Vector(data).magnitude
             elif (from_type == "OBJECT"):
                 val = bpy.data.objects.find(data.name)
+            elif (from_type == "CURVE"):
+                val = bpy.data.curves.find(data.name)
             elif (from_type == "ARRAY"):
                 val = len(eval(data))
             elif (from_type == "SELECTION_TYPE"):
@@ -80,6 +82,8 @@ def convert_data(data, from_type=None, to_type=None):
             elif (from_type == "VECTOR"):
                 val = bool(data)
             elif (from_type == "OBJECT"):
+                val = bool(data)
+            elif (from_type == "CURVE"):
                 val = bool(data)
             elif (from_type == "ARRAY"):
                 val = bool(eval(data))
@@ -96,6 +100,8 @@ def convert_data(data, from_type=None, to_type=None):
                 val = str(Vector(data).to_tuple())
             elif (from_type == "OBJECT"):
                 val = str(repr(data))
+            elif (from_type == "CURVE"):
+                val = str(repr(data))
             elif (from_type == "ARRAY"):
                 val = data
             elif (from_type == "SELECTION_TYPE"):
@@ -110,6 +116,8 @@ def convert_data(data, from_type=None, to_type=None):
             elif (from_type == "VECTOR"):
                 val = data
             elif (from_type == "OBJECT"):
+                return False, None
+            elif (from_type == "CURVE"):
                 return False, None
             elif (from_type == "ARRAY"):
                 val = Vector((eval(data)[0], eval(data)[1], eval(data)[2])).to_tuple()
@@ -126,6 +134,25 @@ def convert_data(data, from_type=None, to_type=None):
                 return False, None
             elif (from_type == "OBJECT"):
                 val = data
+            elif (from_type == "CURVE"):
+                return False, None
+            elif (from_type == "ARRAY"):
+                return False, None
+            elif (from_type == "SELECTION_TYPE"):
+                return False, None
+        elif (to_type == "CURVE"):
+            if (from_type == "NUMBER"):
+                return False, None
+            elif (from_type == "BOOL"):
+                return False, None
+            elif (from_type == "STRING"):
+                return False, None
+            elif (from_type == "VECTOR"):
+                return False, None
+            elif (from_type == "OBJECT"):
+                return False, None
+            elif (from_type == "CURVE"):
+                val = data
             elif (from_type == "ARRAY"):
                 return False, None
             elif (from_type == "SELECTION_TYPE"):
@@ -140,6 +167,8 @@ def convert_data(data, from_type=None, to_type=None):
             elif (from_type == "VECTOR"):
                 val = str(list(data))
             elif (from_type == "OBJECT"):
+                val = "[" + repr(data) + "]"
+            elif (from_type == "CURVE"):
                 val = "[" + repr(data) + "]"
             elif (from_type == "ARRAY"):
                 val = data
@@ -161,6 +190,8 @@ def convert_data(data, from_type=None, to_type=None):
                 if bool(data[2]):
                     val.add("FACE")
             elif (from_type == "OBJECT"):
+                return False, None
+            elif (from_type == "CURVE"):
                 return False, None
             elif (from_type == "ARRAY"): # Allows you to take in a boolean array
                 data_eval = eval(data)
