@@ -12,14 +12,15 @@ def focus_on_object(obj, edit=False):
             if (edit):
                 bpy.ops.object.mode_set(mode="EDIT")
 
-def remove_object(obj, type='MESH'):
+def remove_object(obj):
     if (obj):
         data = obj.data
-        bpy.data.objects.remove(object=obj)
+        type = obj.type
+        bpy.data.objects.remove(obj)
         if (data):
             if (type == 'MESH'):
                 bpy.data.meshes.remove(mesh=data)
-            elif (type == 'CURVE'):
+            elif (type in ['CURVE', 'FONT']):
                 bpy.data.curves.remove(curve=data)
 
 def get_override(active=None, edit=False, selected=[]):

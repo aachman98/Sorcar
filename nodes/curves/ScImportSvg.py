@@ -4,7 +4,7 @@ import os
 from bpy.props import StringProperty, PointerProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
-from ...helper import focus_on_object, remove_object
+from ...helper import remove_object
 
 class ScImportSvg(Node, ScNode):
     bl_idname = "ScImportSvg"
@@ -32,8 +32,8 @@ class ScImportSvg(Node, ScNode):
         )
     
     def pre_execute(self):
-        focus_on_object(self.out_curve)
-        remove_object(self.out_curve, type="CURVE")
+        if (self.out_curve):
+            remove_object(self.out_curve)
         if (self.prop_collection):
             bpy.data.collections.remove(self.prop_collection)
     
