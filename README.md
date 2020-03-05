@@ -86,7 +86,8 @@ and more...!
 - "Scatter" node supports instanced scattering
 - New "Curve" category & socket to handle objects with curve data
 - Keymap support to quickly execute selected node (Key: 'E')
-- Added "Import SVG" & "Convert To Mesh" curve nodes
+- Added "Import SVG" & "Text" curve input nodes
+- Added "Convert to Mesh" & "Convert to Curve" nodes
 - Added "QuadriFlow Remesh" object operator node
 - Added "Warp" & "Randomize Vertices" transform nodes
 - Added Weld, Lattice, Shrinkwrap & Weighted Normal modifier nodes

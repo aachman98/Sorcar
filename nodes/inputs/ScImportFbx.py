@@ -1,7 +1,7 @@
 import bpy
 import os
 
-from bpy.props import StringProperty
+from bpy.props import StringProperty, BoolProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_input import ScInputNode
@@ -12,11 +12,13 @@ class ScImportFbx(Node, ScInputNode):
 
     in_filepath: StringProperty(default="/path/to/dir/")
     in_filename: StringProperty(default="untitled")
+    in_uv: BoolProperty(default=True, update=ScNode.update_value)
 
     def init(self, context):
         super().init(context)
         self.inputs.new("ScNodeSocketString", "File Path").init("in_filepath", True)
         self.inputs.new("ScNodeSocketString", "File Name").init("in_filename", True)
+        self.inputs.new("ScNodeSocketBool", "Generate UVs").init("in_uv")
     
     def error_condition(self):
         return (
