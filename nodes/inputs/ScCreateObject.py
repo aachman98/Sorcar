@@ -1,6 +1,5 @@
 import bpy
 
-from bpy.props import StringProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_input import ScInputNode
@@ -16,10 +15,8 @@ class ScCreateObject(Node, ScInputNode):
         self.inputs.new("ScNodeSocketArray", "Faces")
     
     def functionality(self):
-        m = bpy.data.meshes.new(self.inputs["Name"].default_value)
-        m.from_pydata(eval(self.inputs["Vertices"].default_value), eval(self.inputs["Edges"].default_value), eval(self.inputs["Faces"].default_value))
-        o = bpy.data.objects.new(self.inputs["Name"].default_value, m)
-        bpy.ops.object.add_named(
-            linked = True,
-            name = self.inputs["Name"].default_value
+        bpy.ops.object.add(
+            type = "MESH",
+            align = "CURSOR"
         )
+        bpy.context.active_object.data.from_pydata(eval(self.inputs["Vertices"].default_value), eval(self.inputs["Edges"].default_value), eval(self.inputs["Faces"].default_value))
