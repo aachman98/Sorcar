@@ -10,15 +10,15 @@ class ScParent(Node, ScObjectOperatorNode):
     bl_label = "Parent"
 
     prop_obj: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
-    ops_type: EnumProperty(items=[('OBJECT', 'Object', ''), ('WITHOUT_INVERSE', 'Object(Without Inverse)', '')], default='OBJECT', update=ScNode.update_value)
-    keep_transform: BoolProperty(update=ScNode.update_value)
+    in_ops_type: EnumProperty(items=[('OBJECT', 'Object', ''), ('WITHOUT_INVERSE', 'Object(Without Inverse)', '')], default='OBJECT', update=ScNode.update_value)
+    in_keep_transform: BoolProperty(update=ScNode.update_value)
 
     def init(self, context):
         super().init(context)
         self.inputs.new("ScNodeSocketObject", "Parent").init("prop_obj", True)
-        self.inputs.new("ScNodeSocketString", "Type").init("ops_type")
+        self.inputs.new("ScNodeSocketString", "Type").init("in_ops_type")
         self.inputs.new("ScNodeSocketBool", "Keep Transform").init(
-            "keep_transform")
+            "in_keep_transform")
 
     def error_condition(self):
         return (
@@ -36,6 +36,6 @@ class ScParent(Node, ScObjectOperatorNode):
             bpy.ops.object.parent_no_inverse_set()
         else:
             bpy.ops.object.parent_set(
-                type=self.inputs["Type"].default_value,
-                keep_transform=self.inputs["Keep Transform"].default_value
+                type = 'OBJECT',
+                keep_transform = self.inputs["Keep Transform"].default_value
             )

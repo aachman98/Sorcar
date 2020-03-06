@@ -13,7 +13,7 @@ class ScClearParent(Node, ScObjectOperatorNode):
 
     def init(self, context):
         super().init(context)
-        self.inputs.new("ScNodeSocketString", "Type").init("ops_type")
+        self.inputs.new("ScNodeSocketString", "Type").init("ops_type", True)
 
     def error_condition(self):
         return (
