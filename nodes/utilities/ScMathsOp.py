@@ -89,5 +89,5 @@ class ScMathsOp(Node, ScNode):
         elif (op == 'FRACT'):
             out["Value"] = x - math.floor(x)
         elif (op == 'MOD'):
-            out["Value"] = int(x) % int(y)
+            out["Value"] = x % y
         return out
