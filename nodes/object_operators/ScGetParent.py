@@ -18,8 +18,5 @@ class ScGetParent(Node, ScNode):
             self.inputs["Object"].default_value == None
         )
     
-    # def pre_execute(self):
-    #     focus_on_object(self.inputs["Object"].default_value)
-    
     def post_execute(self):
         return {"Parent": self.inputs["Object"].default_value.parent}
