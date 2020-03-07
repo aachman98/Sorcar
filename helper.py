@@ -16,12 +16,12 @@ def remove_object(obj):
     if (obj):
         data = obj.data
         type = obj.type
-        bpy.data.objects.remove(obj)
-        if (data):
+        bpy.data.objects.remove(obj, do_unlink=True, do_id_user=True)
+        if data.users == 0:
             if (type == 'MESH'):
-                bpy.data.meshes.remove(mesh=data)
+                bpy.data.meshes.remove(data, do_unlink=True, do_id_user=True)
             elif (type in ['CURVE', 'FONT']):
-                bpy.data.curves.remove(curve=data)
+                bpy.data.curves.remove(data, do_unlink=True, do_id_user=True)
 
 def get_override(active=None, edit=False, selected=[]):
     override = bpy.context.copy()

@@ -9,7 +9,7 @@ class ScSelectNth(Node, ScSelectionNode):
     bl_idname = "ScSelectNth"
     bl_label = "Select Nth (Checker Deselect)"
     
-    in_nth: IntProperty(default=2, min=2, update=ScNode.update_value)
+    in_nth: IntProperty(default=1, min=1, update=ScNode.update_value)
     in_skip: IntProperty(default=1, min=1, update=ScNode.update_value)
     in_offset: IntProperty(update=ScNode.update_value)
     
@@ -22,7 +22,7 @@ class ScSelectNth(Node, ScSelectionNode):
     def error_condition(self):
         return(
             super().error_condition()
-            or int(self.inputs["Nth Element"].default_value) < 2
+            or int(self.inputs["Nth Element"].default_value) < 1
             or int(self.inputs["Skip Number"].default_value) < 1
         )
     

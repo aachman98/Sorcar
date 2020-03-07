@@ -58,8 +58,16 @@ class ScNodeSocket:
         else:
             # if (len(self.links) > 0):
             if (self.is_linked): # self.is_linked doesn't get updated quickly (when using realtime update & modify links)
-                if (self.links[0].from_socket.execute(forced)):
-                    ret, data = self.links[0].from_socket.get_data(self.default_type)
+                from_node = self.links[0].from_node
+                from_socket = self.links[0].from_socket
+                while (from_node.bl_idname == "NodeReroute"):
+                    if (not from_node.inputs[0].is_linked):
+                        from_socket = None
+                        break
+                    from_socket = from_node.inputs[0].links[0].from_socket
+                    from_node = from_node.inputs[0].links[0].from_node
+                if (from_socket and from_socket.execute(forced)):
+                    ret, data = from_socket.get_data(self.default_type)
                     if(ret):
                         return self.set(data)
                     else:
