@@ -86,6 +86,7 @@ and more...!
 - "Scatter" node supports instanced scattering
 - New "Curve" category & socket to handle objects with curve data
 - Keymap support to quickly execute selected node (Key: 'E')
+- Added method for modifying node parameter externally (automatically re-evaluates nodetree)
 - Added "Import SVG" & "Text" curve input nodes
 - Added "Convert to Mesh" & "Convert to Curve" nodes
 - Added "Create Object" input node
@@ -101,7 +102,6 @@ and more...!
 - Fixed custom object/curve nodes to hide original object
 - Fixed issue with rerouting socket connections
 - Fixed transform nodes to use snapping & proportional editing settings
-- Fixed nodetree execution (re-evaluation) on external modification of node attributes
 - Fixed object deletion helper method to remove orphaned data
 - Fixed "Select Nth" node parameter minimum value
 
