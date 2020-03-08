@@ -15,7 +15,7 @@ Sorcar is a **procedural modeling node-based system** which utilises Blender and
 
 ## Release & Instructions
 
-[Latest Release (v3.1.4)](https://github.com/aachman98/Sorcar/releases/latest)
+[Latest Release (v3.1.5)](https://github.com/aachman98/Sorcar/releases/latest)
 </br>*Requirement: Blender 2.80 or later*
 
 1. Download the zip file and install it as a Blender addon (Edit -> Preferences... -> Add-ons-> Install...)
@@ -64,7 +64,7 @@ and more...!
 ## Upcoming Feature
 
 1. Improve loop nodes: Add more options to control in each pass
-2. Curve nodes: Edit spline properties, convert to mesh
+2. Curve nodes: Edit spline properties
 3. Object constraint nodes
 
 ## Future
@@ -81,7 +81,7 @@ and more...!
 
 ## Changelog
 
-#### [Unreleased]
+#### v3.1.5
 
 - "Scatter" node supports instanced scattering
 - New "Curve" category & socket to handle objects with curve data
@@ -93,11 +93,17 @@ and more...!
 - Added "Warp" & "Randomize Vertices" transform nodes
 - Added Weld, Lattice, Shrinkwrap & Weighted Normal modifier nodes
 - Added "Proportional Editing" & "Snap" settings node
+- Added "Clear Parent", "Get Parent", & "Get Children" object operator nodes
 - Renamed transform nodes to "World/Local Transform"
+- Improved "Maths Operation" node to include more operations & better menu layout
+- Improved "Parent" node to include option to set the inverse parent correction
 - Fixed issue with Crease, Edge-Slide, Skin-Resize local transform
 - Fixed custom object/curve nodes to hide original object
+- Fixed issue with rerouting socket connections
 - Fixed transform nodes to use snapping & proportional editing settings
 - Fixed nodetree execution (re-evaluation) on external modification of node attributes
+- Fixed object deletion helper method to remove orphaned data
+- Fixed "Select Nth" node parameter minimum value
 
 #### v3.1.4
 
@@ -148,8 +154,10 @@ and more...!
 
 ## Contributors
 
+- [@tomoaki-e33](https://github.com/tomoaki-e33) (Tomoaki Nakano) - Active Developer ([#107](https://github.com/aachman98/Sorcar/pull/107), [#110](https://github.com/aachman98/Sorcar/pull/110), [#111](https://github.com/aachman98/Sorcar/pull/111))
+- [@devilvalley](https://github.com/devilvalley) (袁腾鹏) - Bug fix in "Select Nth" selection node ([#106](https://github.com/aachman98/Sorcar/pull/106))
 - [@CORPSE-SYS](https://github.com/CORPSE-SYS) - Active Developer ([#83](https://github.com/aachman98/Sorcar/pull/83), [#96](https://github.com/aachman98/Sorcar/pull/96))
-- [@zebus3d](https://github.com/zebus3d) - Active Developer ([#88](https://github.com/aachman98/Sorcar/pull/88), [#90](https://github.com/aachman98/Sorcar/pull/90))
+- [@zebus3d](https://github.com/zebus3d) - Active Developer ([#88](https://github.com/aachman98/Sorcar/pull/88), [#90](https://github.com/aachman98/Sorcar/pull/90), [#104](https://github.com/aachman98/Sorcar/pull/104))
 - [@CGCookie](https://github.com/CGCookie) (CG Cookie) - Addon updater ([Github](https://github.com/CGCookie/blender-addon-updater))
 - [@8176135](https://github.com/8176135) - Individual edit mode type in selection nodes using a new socket ([#80](https://github.com/aachman98/Sorcar/pull/80))
 - [@huiyao8761380](https://github.com/huiyao8761380) (TangHui) - Documentation Maintainer
