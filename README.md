@@ -83,9 +83,8 @@ and more...!
 
 #### v3.1.5
 
-- "Scatter" node supports instanced scattering
-- New "Curve" category & socket to handle objects with curve data
-- Keymap support to quickly execute selected node (Key: 'E')
+- Added keymap support to quickly execute selected node (Key: 'E')
+- Added new "Curve" category & socket to handle objects with curve data
 - Added method for modifying node parameter externally (automatically re-evaluates nodetree)
 - Added "Import SVG" & "Text" curve input nodes
 - Added "Convert to Mesh" & "Convert to Curve" nodes
@@ -95,9 +94,11 @@ and more...!
 - Added Weld, Lattice, Shrinkwrap & Weighted Normal modifier nodes
 - Added "Proportional Editing" & "Snap" settings node
 - Added "Clear Parent", "Get Parent", & "Get Children" object operator nodes
-- Renamed transform nodes to "World/Local Transform"
+- Improved "Scatter" node to support instanced scattering
 - Improved "Maths Operation" node to include more operations & better menu layout
 - Improved "Parent" node to include option to set the inverse parent correction
+- Improved "Skin Modifier" node to allow skin resize for selected vertices
+- Renamed transform nodes to "World/Local Transform"
 - Fixed issue with Crease, Edge-Slide, Skin-Resize local transform
 - Fixed custom object/curve nodes to hide original object
 - Fixed issue with rerouting socket connections
