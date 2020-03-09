@@ -1,6 +1,7 @@
 import bpy
 
 from bpy.types import Node
+from mathutils import Vector
 from .._base.node_base import ScNode
 from ...helper import focus_on_object
 
@@ -14,6 +15,8 @@ class ScObjectInfo(Node, ScNode):
         self.outputs.new("ScNodeSocketVector", "Location")
         self.outputs.new("ScNodeSocketVector", "Rotation")
         self.outputs.new("ScNodeSocketVector", "Scale")
+        self.outputs.new("ScNodeSocketVector", "Dimensions")
+        self.outputs.new("ScNodeSocketArray", "Bounding Box")
         self.outputs.new("ScNodeSocketArray", "Selected Vertices")
         self.outputs.new("ScNodeSocketArray", "Selected Edges")
         self.outputs.new("ScNodeSocketArray", "Selected Faces")
@@ -39,6 +42,8 @@ class ScObjectInfo(Node, ScNode):
         out["Location"] = self.inputs["Object"].default_value.location
         out["Rotation"] = self.inputs["Object"].default_value.rotation_euler
         out["Scale"] = self.inputs["Object"].default_value.scale
+        out["Dimensions"] = self.inputs["Object"].default_value.dimensions
+        out["Bounding Box"] = repr([Vector(i).to_tuple() for i in self.inputs["Object"].default_value.bound_box])
         out["Selected Vertices"] = str([i.index for i in self.inputs["Object"].default_value.data.vertices if i.select])
         out["Selected Edges"] = str([i.index for i in self.inputs["Object"].default_value.data.edges if i.select])
         out["Selected Faces"] = str([i.index for i in self.inputs["Object"].default_value.data.polygons if i.select])
