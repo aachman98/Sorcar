@@ -12,6 +12,7 @@ class ScObjectInfo(Node, ScNode):
     def init(self, context):
         super().init(context)
         self.inputs.new("ScNodeSocketObject", "Object")
+        self.outputs.new("ScNodeSocketString", "Name")
         self.outputs.new("ScNodeSocketVector", "Location")
         self.outputs.new("ScNodeSocketVector", "Rotation")
         self.outputs.new("ScNodeSocketVector", "Scale")
@@ -39,6 +40,7 @@ class ScObjectInfo(Node, ScNode):
     
     def post_execute(self):
         out = {}
+        out["Name"] = self.inputs["Object"].default_value.name
         out["Location"] = self.inputs["Object"].default_value.location
         out["Rotation"] = self.inputs["Object"].default_value.rotation_euler
         out["Scale"] = self.inputs["Object"].default_value.scale
