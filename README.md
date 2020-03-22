@@ -85,9 +85,11 @@ and more...!
 
 - Added "Set Dimensions" & "Set Object Name" object operator nodes
 - Added "Add ..." input nodes to append primitive object geometry to current object
+- Added "set_preview" method in nodetree class
 - Improved "Object Info" node to output object's name, dimensions and bounding box vertices
 - Improved "Component Info" node to output face area
 - Renamed input nodes to "Create ..." (added prefix)
+- Renamed "update_ext" nodetree method to "set_value"
 - Fixed "remove_object" helper function
 
 #### v3.1.5
