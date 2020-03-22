@@ -1,6 +1,7 @@
 import bpy
 
 from bpy.types import Operator
+from ..helper import sc_poll
 
 class ScExecuteNode(Operator):
     bl_idname = "sc.execute_node"
@@ -8,11 +9,12 @@ class ScExecuteNode(Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.space_data.tree_type == "ScNodeTree"
+        return sc_poll(context)
 
     def execute(self, context):
-        if (context.space_data.edit_tree.bl_idname == "ScNodeTree" and context.space_data.edit_tree.nodes.active):
-            context.space_data.edit_tree.node = context.space_data.edit_tree.nodes.active.name
-            context.space_data.edit_tree.execute_node()
+        curr_tree = context.space_data.edit_tree
+        if (curr_tree.bl_idname == "ScNodeTree" and curr_tree.nodes.active):
+            curr_tree.node = curr_tree.nodes.active.name
+            curr_tree.execute_node()
             return {"FINISHED"}
         return {"CANCELLED"}

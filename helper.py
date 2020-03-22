@@ -1,6 +1,11 @@
 import bpy
 from mathutils import Vector
 
+def sc_poll(context):
+    if hasattr(context.space_data, "tree_type"):
+        return context.space_data.tree_type == "ScNodeTree"
+    return False
+
 def focus_on_object(obj, edit=False):
     if (bpy.ops.object.mode_set.poll()):
         bpy.ops.object.mode_set(mode="OBJECT")
