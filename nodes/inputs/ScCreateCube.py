@@ -5,10 +5,10 @@ from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_input import ScInputNode
 
-class ScPlane(Node, ScInputNode):
-    bl_idname = "ScPlane"
-    bl_label = "Plane"
-
+class ScCreateCube(Node, ScInputNode):
+    bl_idname = "ScCreateCube"
+    bl_label = "Create Cube"
+    
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_size: FloatProperty(default=2.0, min=0.0, update=ScNode.update_value)
 
@@ -24,7 +24,7 @@ class ScPlane(Node, ScInputNode):
         )
     
     def functionality(self):
-        bpy.ops.mesh.primitive_plane_add(
+        bpy.ops.mesh.primitive_cube_add(
             size = self.inputs["Size"].default_value,
             calc_uvs = self.inputs["Generate UVs"].default_value
         )

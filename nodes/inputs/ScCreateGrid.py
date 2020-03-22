@@ -5,9 +5,9 @@ from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_input import ScInputNode
 
-class ScGrid(Node, ScInputNode):
-    bl_idname = "ScGrid"
-    bl_label = "Grid"
+class ScCreateGrid(Node, ScInputNode):
+    bl_idname = "ScCreateGrid"
+    bl_label = "Create Grid"
 
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_x: IntProperty(default=10, min=2, max=10000000, update=ScNode.update_value)

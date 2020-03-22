@@ -5,9 +5,9 @@ from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_input import ScInputNode
 
-class ScCircle(Node, ScInputNode):
-    bl_idname = "ScCircle"
-    bl_label = "Circle"
+class ScCreateCircle(Node, ScInputNode):
+    bl_idname = "ScCreateCircle"
+    bl_label = "Create Circle"
 
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_type: EnumProperty(items=[("NOTHING", "Nothing", ""), ("NGON", "Ngon", ""), ("TRIFAN", "Triangle Fan", "")], default="NOTHING", update=ScNode.update_value)

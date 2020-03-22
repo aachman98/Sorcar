@@ -5,9 +5,9 @@ from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_input import ScInputNode
 
-class ScTorus(Node, ScInputNode):
-    bl_idname = "ScTorus"
-    bl_label = "Torus"
+class ScCreateTorus(Node, ScInputNode):
+    bl_idname = "ScCreateTorus"
+    bl_label = "Create Torus"
 
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_mode: EnumProperty(items=[("MAJOR_MINOR", "Major/Minor", ""), ("EXT_INT", "Exterior/Interior", "")], default="MAJOR_MINOR", update=ScNode.update_value)

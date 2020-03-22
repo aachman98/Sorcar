@@ -5,9 +5,9 @@ from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_input import ScInputNode
 
-class ScIcoSphere(Node, ScInputNode):
-    bl_idname = "ScIcoSphere"
-    bl_label = "Ico Sphere"
+class ScCreateIcoSphere(Node, ScInputNode):
+    bl_idname = "ScCreateIcoSphere"
+    bl_label = "Create Ico Sphere"
 
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_subdivision: IntProperty(default=2, min=1, max=10, update=ScNode.update_value)

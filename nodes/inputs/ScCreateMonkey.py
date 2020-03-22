@@ -5,9 +5,9 @@ from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_input import ScInputNode
 
-class ScMonkey(Node, ScInputNode):
-    bl_idname = "ScMonkey"
-    bl_label = "Monkey (Suzanne)"
+class ScCreateMonkey(Node, ScInputNode):
+    bl_idname = "ScCreateMonkey"
+    bl_label = "Create Monkey (Suzanne)"
 
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_size: FloatProperty(default=2.0, min=0.0, update=ScNode.update_value)
