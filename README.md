@@ -81,6 +81,15 @@ and more...!
 
 ## Changelog
 
+#### [Unreleased]
+
+- Added "Set Dimensions" & "Set Object Name" object operator nodes
+- Added "Add ..." input nodes to append primitive object geometry to current object
+- Improved "Object Info" node to output object's name, dimensions and bounding box vertices
+- Improved "Component Info" node to output face area
+- Renamed input nodes to "Create ..." (added prefix)
+- Fixed "remove_object" helper function
+
 #### v3.1.5
 
 - Added keymap support to quickly execute selected node (Key: 'E')
