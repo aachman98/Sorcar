@@ -64,8 +64,8 @@ and more...!
 ## Upcoming Feature
 
 1. Improve loop nodes: Add more options to control in each pass
-2. Curve nodes: Edit spline properties
-3. Object constraint nodes
+2. Object constraint nodes
+3. Point scatter & voronoi fracture nodes
 
 ## Future
 
