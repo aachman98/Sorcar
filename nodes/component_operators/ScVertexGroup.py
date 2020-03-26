@@ -9,7 +9,7 @@ class ScVertexGroup(Node, ScEditOperatorNode):
     bl_idname = "ScVertexGroup"
     bl_label = "Vertex Group"
     
-    in_vg: StringProperty(update=ScNode.update_value)
+    in_vg: StringProperty(default="Group", update=ScNode.update_value)
     in_assign: BoolProperty(default=True, update=ScNode.update_value)
 
     def init(self, context):

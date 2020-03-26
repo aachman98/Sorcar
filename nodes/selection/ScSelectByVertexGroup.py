@@ -27,7 +27,8 @@ class ScSelectByVertexGroup(Node, ScSelectionNode):
     def error_condition(self):
         return (
             super().error_condition()
-            or self.prop_vg == None
+            or self.prop_vg == ""
+            or self.inputs["Object"].default_value.vertex_groups.get(self.prop_vg) == None
         )
     
     def pre_execute(self):
@@ -39,7 +40,7 @@ class ScSelectByVertexGroup(Node, ScSelectionNode):
                 bpy.ops.mesh.select_all(action="DESELECT")
     
     def functionality(self):
-        self.inputs["Object"].default_value.vertex_groups.active = self.inputs["Object"].default_value.vertex_groups[self.prop_vg]
+        self.inputs["Object"].default_value.vertex_groups.active_index = self.inputs["Object"].default_value.vertex_groups[self.prop_vg].index
         if (self.inputs["Deselect"].default_value):
             bpy.ops.object.vertex_group_deselect()
         else:
