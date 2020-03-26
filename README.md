@@ -92,6 +92,7 @@ and more...!
 - Renamed input nodes to "Create ..." (added prefix)
 - Renamed "update_ext" nodetree method to "set_value"
 - Fixed "remove_object" helper function
+- Fixed vertex group selection & component operator nodes
 
 #### v3.1.5
 
