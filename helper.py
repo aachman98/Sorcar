@@ -37,8 +37,16 @@ def get_override(active=None, edit=False, selected=[]):
     if (active not in selected):
         selected.append(active)
     override["selected_object"] = selected
-    override["area"] = [i for i in bpy.context.screen.areas if i.type == 'VIEW_3D'][0]
-    override["region"] = [i for i in override["area"].regions if i.type == 'WINDOW'][0]
+    flag = False
+    for window in bpy.data.window_managers[0].windows:
+        for area in window.screen.areas:
+            if area.type == 'VIEW_3D':
+                override["area"] = area
+                override["region"] = [i for i in area.regions if i.type == 'WINDOW'][0]
+                flag = True
+                break
+        if (flag):
+            break
     return override
 
 def print_log(parent=None, child=None, func=None, msg=""):
