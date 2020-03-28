@@ -15,7 +15,7 @@ Sorcar is a **procedural modeling node-based system** which utilises Blender and
 
 ## Release & Instructions
 
-[Latest Release (v3.1.5)](https://github.com/aachman98/Sorcar/releases/latest)
+[Latest Release (v3.1.6)](https://github.com/aachman98/Sorcar/releases/latest)
 </br>*Requirement: Blender 2.80 or later*
 
 1. Download the zip file and install it as a Blender addon (Edit -> Preferences... -> Add-ons-> Install...)
@@ -35,7 +35,7 @@ Sorcar is a **procedural modeling node-based system** which utilises Blender and
 | ![sc_realtime_updates](https://github.com/aachman98/sc-img-data/raw/master/sc_realtime_updates.gif "Realtime Updates") | <p style="text-align: left; padding-left: 16px;"><strong>REAL-TIME UPDATES</strong><br /><em>Quick as the wind...</em></p> <hr style="padding-left: 16px;" /> <p style="text-align: left; padding-left: 16px;">Drive a parameter using current frame value (or manually change it) and see the mesh update in viewport.</p> |
 | <p style="text-align: right; padding-right: 16px;"><strong>ITERATE & RANDOMIZE</strong><br /><em>Need multiple extrusions of random amount?</em></p> <hr style="padding-right: 16px;" /> <p style="text-align: right; padding-right: 16px;">Generate variations in mesh by using seed-controlled pseudorandom numbers. Use loops to handle repeatitive operations with same level of randomness.</p> | ![sc_iterate_randomize](https://github.com/aachman98/sc-img-data/raw/master/sc_iterate_randomize.gif "Iterate & Randomize") |
 | ![sc_automation](https://github.com/aachman98/sc-img-data/raw/master/sc_automation.gif "Automation") | <p style="text-align: left; padding-left: 16px;"><strong>AUTOMATION</strong><br /><em>Modify, Save, Repeat...</em></p> <hr style="padding-left: 16px;" /> <p style="text-align: left; padding-left: 16px;">Use frame number to drive seed value and batch export the meshes in different files.</p> |
-| <p style="text-align: right; padding-right: 16px;"><strong>200+ NODES</strong><br /><em>At your service!</em></p> <hr style="padding-right: 16px;" /> <p style="text-align: right; padding-right: 16px;">A growing list of functions available as nodes (operators & scene settings) including custom inputs, selection & transform tools, modifiers and component level operators.</p> | ![sc_nodes](https://github.com/aachman98/sc-img-data/raw/master/sc_nodes.gif "200+ Nodes") |
+| <p style="text-align: right; padding-right: 16px;"><strong>240+ NODES</strong><br /><em>At your service!</em></p> <hr style="padding-right: 16px;" /> <p style="text-align: right; padding-right: 16px;">A growing list of functions available as nodes (operators & scene settings) including custom inputs, curve/mesh conversion, selection & transform tools, modifiers and component level operators.</p> | ![sc_nodes](https://github.com/aachman98/sc-img-data/raw/master/sc_nodes.gif "200+ Nodes") |
 
 - Simplified node sockets with internal data conversion for the convenience of users.
 - Colour-coded nodes (preview, error, invalid inputs etc.) for easier debugging.
@@ -48,6 +48,8 @@ and more...!
 | | |
 | --- | --- |
 | ![sc_inputs](https://github.com/aachman98/sc-img-data/raw/master/sc_inputs.png "Inputs") | **Inputs** </br> Primitive Meshes (Cube, Cylinder, Sphere, ...), Empty Object, Import FBX, Custom Object from the scene, Create Object using arrays of Vertices, Edges & Faces  |
+| ![sc_curves](https://github.com/aachman98/sc-img-data/raw/master/sc_curves.png "Curves") | **Curves** </br> Custom Curve from the scene, Text, Import SVG, Geometry/Shape/Spline Properties, Mesh-Curve or Curve-Mesh Conversion|
+| | |
 | ![sc_transform](https://github.com/aachman98/sc-img-data/raw/master/sc_transform.png "Transform") | **Transform** </br> Set/Add/Randomize transform (Edit/Object mode), Apply/Copy transform in world/local axes, Create custom orientation|
 | ![sc_selection](https://github.com/aachman98/sc-img-data/raw/master/sc_selection.png "Selection") | **Selection** </br> Manual, invert/toggle, loops, random, similar components or by their property (location, index, normal, material, ...) |
 | ![sc_deletion](https://github.com/aachman98/sc-img-data/raw/master/sc_deletion.png "Deletion") | **Deletion** </br> Delete/Dissolve selected components (or loops) |
@@ -57,15 +59,20 @@ and more...!
 | ![sc_modifiers](https://github.com/aachman98/sc-img-data/raw/master/sc_modifiers.png "Modifiers") | **Modifiers** </br> Array, Bevel, Boolean, Build, Cast, Curve, Decimate, Remesh, Shrinkwrap, Skin, Solidify, Subsurf, Wave, Weighted Normal, Wireframe |
 | | |
 | ![sc_constants](https://github.com/aachman98/sc-img-data/raw/master/sc_constants.png "Constants") | **Constants** </br> Number (Float/Int/Angle/Random), Bool, Vector, String, Selection Type (Face/Vert/Edge) |
-| ![sc_utilities](https://github.com/aachman98/sc-img-data/raw/master/sc_utilities.png "Utilities") | **Utilities** </br> Array, String/Bool/Vector ops, Maths, Clamp, Map, Trigonometry, Get/Set Variables, Scene/Component/Object Info, Custom Python Script |
+| ![sc_arrays](https://github.com/aachman98/sc-img-data/raw/master/sc_arrays.png "Arrays") | **Arrays** </br> Create/Append Arrays, Add/Remove elements, Reverse, Search, Clear, Count, Get |
+| | |
+| ![sc_noise](https://github.com/aachman98/sc-img-data/raw/master/sc_noise.png "Noise") | **Noise** </br> Cell (Vector/Float), Fractal, Multi-Fractal, Hetero-Terrain, Ridged, Turbulence (Vector/Float), Variable Lacunaroity, Voronoi |
+| | |
+| ![sc_utilities](https://github.com/aachman98/sc-img-data/raw/master/sc_utilities.png "Utilities") | **Utilities** </br> String/Bool/Vector ops, Maths, Clamp, Map, Trigonometry, Get/Set Variables, Scene/Component/Object Info, Custom Python Script |
 | ![sc_flow_control](https://github.com/aachman98/sc-img-data/raw/master/sc_flow_control.png "Flow Control") | **Flow Control** </br> For loop, For-Each loop (Array/Components), If-Else Branch |
 | ![sc_settings](https://github.com/aachman98/sc-img-data/raw/master/sc_settings.png "Settings") | **Settings** </br> Cursor Transform, Edit Mode, Pivot Point, Snapping, Proportional Editing, Transform Orientation |
 
 ## Upcoming Feature
 
-1. Improve loop nodes: Add more options to control in each pass
-2. Object constraint nodes
-3. Point scatter & voronoi fracture nodes
+1. Export nodes as python code
+2. Send to UE4/Unity (live-link)
+3. Object constraint nodes
+4. Point scatter & voronoi fracture nodes
 
 ## Future
 
@@ -81,7 +88,7 @@ and more...!
 
 ## Changelog
 
-#### [Unreleased]
+#### v3.1.6
 
 - Added "Set Dimensions" & "Set Object Name" object operator nodes
 - Added "Add ..." input nodes to append primitive object geometry to current object
@@ -93,6 +100,7 @@ and more...!
 - Renamed "update_ext" nodetree method to "set_value"
 - Fixed "remove_object" helper function
 - Fixed vertex group selection & component operator nodes
+- Fixed "get_override" helper method to search for correct window/area/region
 
 #### v3.1.5
 
