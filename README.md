@@ -48,20 +48,20 @@ and more...!
 | | |
 | --- | --- |
 | ![sc_inputs](https://github.com/aachman98/sc-img-data/raw/master/sc_inputs.png "Inputs") | **Inputs** </br> Primitive Meshes (Cube, Cylinder, Sphere, ...), Empty Object, Import FBX, Custom Object from the scene, Create Object using arrays of Vertices, Edges & Faces  |
-| ![sc_curves](https://github.com/aachman98/sc-img-data/raw/master/sc_curves.png "Curves") | **Curves** </br> Custom Curve from the scene, Text, Import SVG, Geometry/Shape/Spline Properties, Mesh-Curve or Curve-Mesh Conversion|
+| ![sc_curves](https://github.com/aachman98/sc-img-data/raw/master/sc_curves.png "Curves") | **Curves** </br> Custom Curve from the scene, Text, Import SVG, Geometry/Shape/Spline Properties, Mesh-Curve or Curve-Mesh Conversion |
 | | |
 | ![sc_transform](https://github.com/aachman98/sc-img-data/raw/master/sc_transform.png "Transform") | **Transform** </br> Set/Add/Randomize transform (Edit/Object mode), Apply/Copy transform in world/local axes, Create custom orientation|
 | ![sc_selection](https://github.com/aachman98/sc-img-data/raw/master/sc_selection.png "Selection") | **Selection** </br> Manual, invert/toggle, loops, random, similar components or by their property (location, index, normal, material, ...) |
 | ![sc_deletion](https://github.com/aachman98/sc-img-data/raw/master/sc_deletion.png "Deletion") | **Deletion** </br> Delete/Dissolve selected components (or loops) |
 | | |
 | ![sc_component_operators](https://github.com/aachman98/sc-img-data/raw/master/sc_component_operators.png "Component Operators") | **Component Operators** </br> Bevel, Decimate, Extrude, Fill, Inset, Loop Cut, Merge, Offset Loop, Poke, Screw, Spin, Subdivide, UV Map, Assign material or vertex groups |
-| ![sc_object_operators](https://github.com/aachman98/sc-img-data/raw/master/sc_object_operators.png "Object Operators") | **Object Operators** </br> Duplicate, Raycast/Overlap, Merge, Scatter, Parent (& Get Children), Voxel/QuadriFlow Remesh, Shading, Viewport Draw Mode |
+| ![sc_object_operators](https://github.com/aachman98/sc-img-data/raw/master/sc_object_operators.png "Object Operators") | **Object Operators** </br> Duplicate, Raycast/Overlap, Merge, Scatter, Set/Clear Parent, Voxel/QuadriFlow Remesh, Shading, Viewport Draw Mode |
 | ![sc_modifiers](https://github.com/aachman98/sc-img-data/raw/master/sc_modifiers.png "Modifiers") | **Modifiers** </br> Array, Bevel, Boolean, Build, Cast, Curve, Decimate, Remesh, Shrinkwrap, Skin, Solidify, Subsurf, Wave, Weighted Normal, Wireframe |
 | | |
 | ![sc_constants](https://github.com/aachman98/sc-img-data/raw/master/sc_constants.png "Constants") | **Constants** </br> Number (Float/Int/Angle/Random), Bool, Vector, String, Selection Type (Face/Vert/Edge) |
 | ![sc_arrays](https://github.com/aachman98/sc-img-data/raw/master/sc_arrays.png "Arrays") | **Arrays** </br> Create/Append Arrays, Add/Remove elements, Reverse, Search, Clear, Count, Get |
 | | |
-| ![sc_noise](https://github.com/aachman98/sc-img-data/raw/master/sc_noise.png "Noise") | **Noise** </br> Cell (Vector/Float), Fractal, Multi-Fractal, Hetero-Terrain, Ridged, Turbulence (Vector/Float), Variable Lacunaroity, Voronoi |
+| ![sc_noise](https://github.com/aachman98/sc-img-data/raw/master/sc_noise.png "Noise") | **Noise** </br> Cell (Vector/Float), Fractal, Multi-Fractal, Hetero-Terrain, Ridged, Turbulence (Vector/Float), Variable Lacunarity, Voronoi |
 | | |
 | ![sc_utilities](https://github.com/aachman98/sc-img-data/raw/master/sc_utilities.png "Utilities") | **Utilities** </br> String/Bool/Vector ops, Maths, Clamp, Map, Trigonometry, Get/Set Variables, Scene/Component/Object Info, Custom Python Script |
 | ![sc_flow_control](https://github.com/aachman98/sc-img-data/raw/master/sc_flow_control.png "Flow Control") | **Flow Control** </br> For loop, For-Each loop (Array/Components), If-Else Branch |
