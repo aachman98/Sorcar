@@ -14,8 +14,8 @@ class ScNodeTree(NodeTree):
     variables: StringProperty(default="{}")
 
     def update_realtime(self, context):
-        if not (update_each_frame in bpy.app.handlers.frame_change_pre):
-            bpy.app.handlers.frame_change_pre.append(update_each_frame)
+        if not (update_each_frame in bpy.app.handlers.frame_change_post):
+            bpy.app.handlers.frame_change_post.append(update_each_frame)
         return None
     prop_realtime: BoolProperty(name="Realtime", update=update_realtime)
 
