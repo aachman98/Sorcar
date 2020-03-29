@@ -40,10 +40,10 @@ class ScNodeSocket:
     
     def draw(self, context, layout, node, text):
         if (self.is_output):
-            layout.label(text=text + " (" + self.get_label() + ")")
+            layout.label(text=text + ": " + self.get_label())
         else:
             if (self.is_linked):
-                layout.label(text=text + " (" + self.get_label() + ")")
+                layout.label(text=text + ": " + self.get_label())
             else:
                 if (self.default_prop == ""):
                     layout.label(text=text)

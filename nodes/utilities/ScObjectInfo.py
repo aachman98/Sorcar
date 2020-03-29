@@ -33,10 +33,7 @@ class ScObjectInfo(Node, ScNode):
         bpy.ops.object.mode_set(mode='OBJECT')
     
     def error_condition(self):
-        return (
-            super().error_condition()
-            or self.inputs["Object"].default_value == None
-        )
+        return self.inputs["Object"].default_value == None
     
     def post_execute(self):
         out = {}
