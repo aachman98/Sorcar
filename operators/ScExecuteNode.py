@@ -1,7 +1,7 @@
 import bpy
 
 from bpy.types import Operator
-from ..helper import sc_poll
+from ..helper import sc_poll_op
 
 class ScExecuteNode(Operator):
     bl_idname = "sc.execute_node"
@@ -9,7 +9,7 @@ class ScExecuteNode(Operator):
 
     @classmethod
     def poll(cls, context):
-        return sc_poll(context)
+        return sc_poll_op(context)
 
     def execute(self, context):
         curr_tree = context.space_data.edit_tree

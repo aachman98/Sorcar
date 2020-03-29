@@ -5,13 +5,14 @@ from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_modifier import ScModifierNode
 from ...helper import focus_on_object
+from ...helper import sc_poll_mesh
 
 class ScBooleanMod(Node, ScModifierNode):
     bl_idname = "ScBooleanMod"
     bl_label = "Boolean Modifier"
     
     in_op: EnumProperty(items=[("DIFFERENCE", "Difference", ""), ("UNION", "Union", ""), ("INTERSECT", "Intersect", "")], default="INTERSECT", update=ScNode.update_value)
-    in_obj: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    in_obj: PointerProperty(type=bpy.types.Object, poll=sc_poll_mesh, update=ScNode.update_value)
     in_overlap: FloatProperty(default=0.000001, min=0.0, max=1.0, precision=6, update=ScNode.update_value)
     in_draw_mode: EnumProperty(items=[("SOLID", "Solid", ""), ("WIRE", "Wire", ""), ("BOUNDS", "Bounds", "")], default="WIRE", update=ScNode.update_value)
     

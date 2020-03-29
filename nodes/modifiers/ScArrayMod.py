@@ -4,6 +4,7 @@ from bpy.props import FloatProperty, EnumProperty, IntProperty, PointerProperty,
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_modifier import ScModifierNode
+from ...helper import sc_poll_curve, sc_poll_mesh
 
 class ScArrayMod(Node, ScModifierNode):
     bl_idname = "ScArrayMod"
@@ -12,7 +13,7 @@ class ScArrayMod(Node, ScModifierNode):
     in_fit_type: EnumProperty(items=[("FIXED_COUNT", "Fixed Count", ""), ("FIT_LENGTH", "Fit Length", ""), ("FIT_CURVE", "Fit Curve", "")], default="FIXED_COUNT", update=ScNode.update_value)
     in_count: IntProperty(default=2, min=1, max=1000, update=ScNode.update_value)
     in_fit_length: FloatProperty(default=0.0, min=0.0, update=ScNode.update_value)
-    in_curve: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    in_curve: PointerProperty(type=bpy.types.Object, poll=sc_poll_curve, update=ScNode.update_value)
     in_use_constant_offset: BoolProperty(update=ScNode.update_value)
     in_constant_offset_displace: FloatVectorProperty(update=ScNode.update_value)
     in_use_merge_vertices: BoolProperty(name="Merge", update=ScNode.update_value)
@@ -24,8 +25,8 @@ class ScArrayMod(Node, ScModifierNode):
     in_offset_object: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
     in_offset_u: FloatProperty(default=0.0, min=-1, max=1, update=ScNode.update_value)
     in_offset_v: FloatProperty(default=0.0, min=-1, max=1, update=ScNode.update_value)
-    in_start_cap: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
-    in_end_cap: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    in_start_cap: PointerProperty(type=bpy.types.Object, poll=sc_poll_mesh, update=ScNode.update_value)
+    in_end_cap: PointerProperty(type=bpy.types.Object, poll=sc_poll_mesh, update=ScNode.update_value)
     
     def init(self, context):
         super().init(context)
@@ -33,7 +34,7 @@ class ScArrayMod(Node, ScModifierNode):
         self.inputs.new("ScNodeSocketString", "Fit Type").init("in_fit_type", True)
         self.inputs.new("ScNodeSocketNumber", "Count").init("in_count", True)
         self.inputs.new("ScNodeSocketNumber", "Length").init("in_fit_length", True)
-        self.inputs.new("ScNodeSocketObject", "Curve").init("in_curve")
+        self.inputs.new("ScNodeSocketCurve", "Curve").init("in_curve")
         self.inputs.new("ScNodeSocketBool", "Use Constant Offset").init("in_use_constant_offset")
         self.inputs.new("ScNodeSocketVector", "Constant Offset").init("in_constant_offset_displace")
         self.inputs.new("ScNodeSocketBool", "Use Relative Offset").init("in_use_relative_offset")

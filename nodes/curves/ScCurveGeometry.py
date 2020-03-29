@@ -4,6 +4,7 @@ from bpy.props import EnumProperty, IntProperty, BoolProperty, FloatProperty, Po
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_operator import ScCurveOperatorNode
+from ...helper import sc_poll_curve
 
 class ScCurveGeometry(Node, ScCurveOperatorNode):
     bl_idname = "ScCurveGeometry"
@@ -13,8 +14,8 @@ class ScCurveGeometry(Node, ScCurveOperatorNode):
     in_offset: FloatProperty(update=ScNode.update_value)
     in_extrude: FloatProperty(min=0.0, update=ScNode.update_value)
     in_resolution: IntProperty(default=4, min=0, max=32, update=ScNode.update_value)
-    in_bevel_obj: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
-    in_taper_obj: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    in_bevel_obj: PointerProperty(type=bpy.types.Object, poll=sc_poll_curve, update=ScNode.update_value)
+    in_taper_obj: PointerProperty(type=bpy.types.Object, poll=sc_poll_curve, update=ScNode.update_value)
     in_bevel_mapping_start: EnumProperty(name="Start Mapping Type", items=[("RESOLUTION", "Resolution", ""), ("SEGMENTS", "Segments", ""), ("SPLINE", "Spline", "")], default="RESOLUTION", update=ScNode.update_value)
     in_bevel_mapping_end: EnumProperty(name="End Mapping Type", items=[("RESOLUTION", "Resolution", ""), ("SEGMENTS", "Segments", ""), ("SPLINE", "Spline", "")], default="RESOLUTION", update=ScNode.update_value)
     in_bevel_start: FloatProperty(min=0.0, max=1.0, update=ScNode.update_value)
@@ -26,11 +27,11 @@ class ScCurveGeometry(Node, ScCurveOperatorNode):
         super().init(context)
         self.inputs.new("ScNodeSocketNumber", "Offset").init("in_offset")
         self.inputs.new("ScNodeSocketNumber", "Extrude").init("in_extrude", True)
-        self.inputs.new("ScNodeSocketObject", "Taper Object").init("in_taper_obj")
+        self.inputs.new("ScNodeSocketCurve", "Taper Object").init("in_taper_obj")
         self.inputs.new("ScNodeSocketBool", "Map Taper").init("in_taper")
         self.inputs.new("ScNodeSocketNumber", "Depth").init("in_depth", True)
         self.inputs.new("ScNodeSocketNumber", "Resolution").init("in_resolution")
-        self.inputs.new("ScNodeSocketObject", "Bevel Object").init("in_bevel_obj")
+        self.inputs.new("ScNodeSocketCurve", "Bevel Object").init("in_bevel_obj")
         self.inputs.new("ScNodeSocketBool", "Fill Caps").init("in_fill", True)
         self.inputs.new("ScNodeSocketNumber", "Bevel Start").init("in_bevel_start")
         self.inputs.new("ScNodeSocketNumber", "Bevel End").init("in_bevel_end")

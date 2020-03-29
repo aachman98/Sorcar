@@ -4,6 +4,7 @@ from bpy.props import FloatProperty, PointerProperty, StringProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_modifier import ScModifierNode
+from ...helper import sc_poll_lattice
 
 class ScLatticeMod(Node, ScModifierNode):
     bl_idname = "ScLatticeMod"
@@ -11,7 +12,7 @@ class ScLatticeMod(Node, ScModifierNode):
     
     prop_vertex_group: StringProperty(update=ScNode.update_value)
     in_strength: FloatProperty(default=1.0, soft_min=0.0, soft_max=1.0, update=ScNode.update_value)
-    in_lattice: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    in_lattice: PointerProperty(type=bpy.types.Object, poll=sc_poll_lattice, update=ScNode.update_value)
     
     def init(self, context):
         super().init(context)

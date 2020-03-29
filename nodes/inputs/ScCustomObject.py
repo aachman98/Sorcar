@@ -5,12 +5,13 @@ from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_operator import ScObjectOperatorNode
 from ...helper import remove_object
+from ...helper import sc_poll_mesh
 
 class ScCustomObject(Node, ScObjectOperatorNode):
     bl_idname = "ScCustomObject"
     bl_label = "Custom Object"
 
-    in_obj: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    in_obj: PointerProperty(type=bpy.types.Object, poll=sc_poll_mesh, update=ScNode.update_value)
     in_hide: BoolProperty(default=True, update=ScNode.update_value)
     
     def init(self, context):

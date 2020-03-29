@@ -4,14 +4,13 @@ from bpy.props import PointerProperty, BoolProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 from ...helper import remove_object, focus_on_object
+from ...helper import sc_poll_curve_font
 
 class ScCustomCurve(Node, ScNode):
     bl_idname = "ScCustomCurve"
     bl_label = "Custom Curve"
 
-    def curve_poll(self, object):
-        return object.type == "CURVE"
-    in_obj: PointerProperty(type=bpy.types.Object, update=ScNode.update_value, poll=curve_poll)
+    in_obj: PointerProperty(type=bpy.types.Object, poll=sc_poll_curve_font, update=ScNode.update_value)
     in_hide: BoolProperty(default=True, update=ScNode.update_value)
     
     def init(self, context):

@@ -1,7 +1,7 @@
 import bpy
 
 from bpy.types import Operator
-from ..helper import sc_poll
+from ..helper import sc_poll_op
 
 class ScSaveSelection(Operator):
     bl_idname = "sc.save_selection"
@@ -9,7 +9,7 @@ class ScSaveSelection(Operator):
 
     @classmethod
     def poll(cls, context):
-        return sc_poll(context)
+        return sc_poll_op(context)
 
     def execute(self, context):
         context.space_data.edit_tree.nodes.active.save_selection()

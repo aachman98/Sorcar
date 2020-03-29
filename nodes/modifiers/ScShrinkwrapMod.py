@@ -4,6 +4,7 @@ from bpy.props import BoolProperty, FloatProperty, IntProperty, StringProperty, 
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_modifier import ScModifierNode
+from ...helper import sc_poll_mesh
 
 class ScShrinkwrapMod(Node, ScModifierNode):
     bl_idname = "ScShrinkwrapMod"
@@ -11,7 +12,7 @@ class ScShrinkwrapMod(Node, ScModifierNode):
     
     prop_vertex_group: StringProperty(update=ScNode.update_value)
     prop_invert_vertex_group: BoolProperty(update=ScNode.update_value)
-    in_target: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    in_target: PointerProperty(type=bpy.types.Object, poll=sc_poll_mesh, update=ScNode.update_value)
     in_offset: FloatProperty(update=ScNode.update_value)
     in_mode: EnumProperty(name="Mode", items=[('NEAREST_SURFACEPOINT', 'Nearest Surface Point', ''), ('PROJECT', 'Project', ''), ('NEAREST_VERTEX', 'Nearest Vertex', ''), ('TARGET_PROJECT', 'Target Normal Project', '')], update=ScNode.update_value)
     in_snap_mode: EnumProperty(name="Snap Mode", items=[('ON_SURFACE', 'On Surface', ''), ('INSIDE', 'Inside', ''), ('OUTSIDE', 'Outside', ''), ('OUTSIDE_SURFACE', 'Outside Surface', ''), ('ABOVE_SURFACE', 'Above Surface', '')], update=ScNode.update_value)
@@ -24,7 +25,7 @@ class ScShrinkwrapMod(Node, ScModifierNode):
     in_pos: BoolProperty(default=True, update=ScNode.update_value)
     in_inv: BoolProperty(update=ScNode.update_value)
     in_cull: EnumProperty(name="Cull Faces", items=[('OFF', 'Off', ''), ('FRONT', 'Front', ''), ('BACK', 'Back', '')], update=ScNode.update_value)
-    in_aux_target: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
+    in_aux_target: PointerProperty(type=bpy.types.Object, poll=sc_poll_mesh, update=ScNode.update_value)
     
     def init(self, context):
         super().init(context)
