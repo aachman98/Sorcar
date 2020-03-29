@@ -130,11 +130,12 @@ def register():
     if not (update_each_frame in bpy.app.handlers.frame_change_pre):
         bpy.app.handlers.frame_change_pre.append(update_each_frame)
     
-    kc = bpy.context.window_manager.keyconfigs.addon
-    km = kc.keymaps.new(name="Node Generic", space_type='NODE_EDITOR')
-    kmi = km.keymap_items.new("sc.execute_node", 'E', 'PRESS')
-    kmi.active = True
-    addon_keymaps.append((km, kmi))
+    if (not bpy.app.background):
+        kc = bpy.context.window_manager.keyconfigs.addon
+        km = kc.keymaps.new(name="Node Generic", space_type='NODE_EDITOR')
+        kmi = km.keymap_items.new("sc.execute_node", 'E', 'PRESS')
+        kmi.active = True
+        addon_keymaps.append((km, kmi))
     
     addon_updater_ops.register(bl_info)
     
