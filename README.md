@@ -88,6 +88,10 @@ and more...!
 
 ## Changelog
 
+#### [Unreleased]
+
+- Fixed "Dissolve" node
+
 #### v3.1.6
 
 - Added "Set Dimensions" & "Set Object Name" object operator nodes

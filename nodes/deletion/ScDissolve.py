@@ -20,7 +20,7 @@ class ScDissolve(Node, ScDeletionNode):
         self.inputs.new("ScNodeSocketBool", "Tear Boundary").init("in_boundary")
     
     def functionality(self):
-        bpy.ops.mesh.dissolve_verts(
+        bpy.ops.mesh.dissolve_mode(
             use_verts = self.inputs["Dissolve Vertices"].default_value,
             use_face_split = self.inputs["Face Split"].default_value,
             use_boundary_tear = self.inputs["Tear Boundary"].default_value
