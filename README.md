@@ -90,6 +90,7 @@ and more...!
 
 #### [Unreleased]
 
+- Improved "Custom Object" input node to apply all modifiers
 - Fixed "Dissolve" node
 
 #### v3.1.6

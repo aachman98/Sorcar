@@ -4,8 +4,7 @@ from bpy.props import PointerProperty, BoolProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_operator import ScObjectOperatorNode
-from ...helper import remove_object
-from ...helper import sc_poll_mesh
+from ...helper import remove_object, sc_poll_mesh, apply_all_modifiers
 
 class ScCustomObject(Node, ScObjectOperatorNode):
     bl_idname = "ScCustomObject"
@@ -29,6 +28,7 @@ class ScCustomObject(Node, ScObjectOperatorNode):
     
     def functionality(self):
         bpy.ops.object.duplicate()
+        apply_all_modifiers()
     
     def post_execute(self):
         if (self.inputs["Hide Original"].default_value):
