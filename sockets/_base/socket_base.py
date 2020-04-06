@@ -1,11 +1,12 @@
 import bpy
 
-from bpy.props import StringProperty
+from bpy.props import StringProperty, BoolProperty
 from mathutils import Vector
 from ...helper import print_log, convert_data
 
 class ScNodeSocket:
     default_prop: StringProperty()
+    socket_error: BoolProperty()
 
     def get_label(self):
         return str(self.default_value)
@@ -42,6 +43,8 @@ class ScNodeSocket:
         if (self.is_output):
             layout.label(text=text + ": " + self.get_label())
         else:
+            if (self.socket_error):
+                layout.label(icon='ERROR')
             if (self.is_linked):
                 layout.label(text=text + ": " + self.get_label())
             else:
@@ -56,6 +59,7 @@ class ScNodeSocket:
         if (self.is_output):
             return self.node.execute(forced)
         else:
+            self.socket_error = True
             # if (len(self.links) > 0):
             if (self.is_linked): # self.is_linked doesn't get updated quickly (when using realtime update & modify links)
                 from_node = self.links[0].from_node
@@ -69,11 +73,13 @@ class ScNodeSocket:
                 if (from_socket and from_socket.execute(forced)):
                     ret, data = from_socket.get_data(self.default_type)
                     if(ret):
+                        self.socket_error = False
                         return self.set(data)
                     else:
                         print_log(self.name, msg="No ret")
             else:
                 if (self.default_prop == ""):
                     return False
+                self.socket_error = False
                 return self.set(eval("bpy.data.node_groups['" + self.id_data.name + "'].nodes['" + self.node.name + "']." + self.default_prop))
             return False
