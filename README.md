@@ -90,6 +90,7 @@ and more...!
 
 #### [Unreleased]
 
+- Improved socket base class to show error icon when execution fails
 - Improved "Custom Object" input node to apply all modifiers
 - Fixed "Dissolve" node
 
