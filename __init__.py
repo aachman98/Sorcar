@@ -20,8 +20,10 @@ bl_info = {
     "version": (3, 1, 6),
     "blender": (2, 80, 0),
     "location": "Node Editor",
+    "category": "Node",
     "description": "Create procedural meshes using Node Editor",
-	"category": "Node"
+	"wiki_url": "https://github.com/aachman98/Sorcar/wiki",
+    "tracker_url": "https://github.com/aachman98/Sorcar/issues"
 }
 
 import bpy
