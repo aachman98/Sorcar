@@ -53,11 +53,12 @@ class ScNodeTree(NodeTree):
         self.reset_nodes(True)
         n = self.nodes.get(str(self.node))
         if (n):
-            print_log(msg="---EXECUTE NODE---")
-            if (not n.execute()):
-                print_log(self.name, msg="Failed to execute...")
-            else:
-                print_log(self.name, msg="Executed successfully!")
+            if (hasattr(n, "execute")):
+                print_log(msg="---EXECUTE NODE---")
+                if (not n.execute()):
+                    print_log(self.name, msg="Failed to execute...")
+                else:
+                    print_log(self.name, msg="Executed successfully!")
     
     def set_value(self, node_name="Cube", attr_name="in_size", value=1, refresh=True):
         n = self.nodes.get(node_name)

@@ -57,6 +57,8 @@ class ScNodeSocket:
     def execute(self, forced):
         # Execute node socket to get/set default_value
         if (self.is_output):
+            if (self.node.type == "GROUP_INPUT"):
+                return True
             return self.node.execute(forced)
         else:
             self.socket_error = True
@@ -76,7 +78,7 @@ class ScNodeSocket:
                         self.socket_error = False
                         return self.set(data)
                     else:
-                        print_log(self.name, msg="No ret")
+                        print_log(self.node.name, self.name, "execute", msg="No ret")
             else:
                 if (self.default_prop == ""):
                     return False

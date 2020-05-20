@@ -46,18 +46,19 @@ def apply_all_modifiers():
     while(obj.modifiers):
         bpy.ops.object.modifier_apply(modifier=obj.modifiers[0].name)
 
-def get_override(active=None, edit=False, selected=[]):
+def get_override(active=None, edit=False, selected=[], type='VIEW_3D'):
     override = bpy.context.copy()
-    override["active_object"] = active
-    if (edit):
-        override["edit_object"] = active
-    if (active not in selected):
-        selected.append(active)
-    override["selected_object"] = selected
+    if (type == 'VIEW_3D'):
+        override["active_object"] = active
+        if (edit):
+            override["edit_object"] = active
+        if (active not in selected):
+            selected.append(active)
+        override["selected_object"] = selected
     flag = False
     for window in bpy.data.window_managers[0].windows:
         for area in window.screen.areas:
-            if area.type == 'VIEW_3D':
+            if area.type == type:
                 override["area"] = area
                 override["region"] = [i for i in area.regions if i.type == 'WINDOW'][0]
                 flag = True
