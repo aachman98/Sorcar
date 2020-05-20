@@ -90,9 +90,15 @@ and more...!
 
 #### [Unreleased]
 
+- Added "Node Group" utility node
+- Added "Group Nodes" and "Edit Group" operators to create/modify node groups
+- Added new keymaps for creating and editing node groups (Ctrl+G, Tab)
 - Improved socket base class to show error icon when execution fails
 - Improved "Custom Object" input node to apply all modifiers
+- Improved "get_override" helper method
+- Fixed socket base class to avoid executing node-group input nodes
 - Fixed "Dissolve" node
+- Fixed nodetree execution
 
 #### v3.1.6
 
