@@ -37,6 +37,7 @@ Sorcar is a **procedural modeling node-based system** which utilises Blender and
 | ![sc_automation](https://github.com/aachman98/sc-img-data/raw/master/sc_automation.gif "Automation") | <p style="text-align: left; padding-left: 16px;"><strong>AUTOMATION</strong><br /><em>Modify, Save, Repeat...</em></p> <hr style="padding-left: 16px;" /> <p style="text-align: left; padding-left: 16px;">Use frame number to drive seed value and batch export the meshes in different files.</p> |
 | <p style="text-align: right; padding-right: 16px;"><strong>240+ NODES</strong><br /><em>At your service!</em></p> <hr style="padding-right: 16px;" /> <p style="text-align: right; padding-right: 16px;">A growing list of functions available as nodes (operators & scene settings) including custom inputs, curve/mesh conversion, selection & transform tools, modifiers and component level operators.</p> | ![sc_nodes](https://github.com/aachman98/sc-img-data/raw/master/sc_nodes.gif "200+ Nodes") |
 
+- Node-Groups to collapse big node networks into a single node with custom inputs & outputs
 - Simplified node sockets with internal data conversion for the convenience of users.
 - Colour-coded nodes (preview, error, invalid inputs etc.) for easier debugging.
 - Multi-level heirarchy & auto-registration of classes for easy development of custom nodes in any category (existing or new).
@@ -63,7 +64,7 @@ and more...!
 | | |
 | ![sc_noise](https://github.com/aachman98/sc-img-data/raw/master/sc_noise.png "Noise") | **Noise** </br> Cell (Vector/Float), Fractal, Multi-Fractal, Hetero-Terrain, Ridged, Turbulence (Vector/Float), Variable Lacunarity, Voronoi |
 | | |
-| ![sc_utilities](https://github.com/aachman98/sc-img-data/raw/master/sc_utilities.png "Utilities") | **Utilities** </br> String/Bool/Vector ops, Maths, Clamp, Map, Trigonometry, Get/Set Variables, Scene/Component/Object Info, Custom Python Script |
+| ![sc_utilities](https://github.com/aachman98/sc-img-data/raw/master/sc_utilities.png "Utilities") | **Utilities** </br> String/Bool/Vector ops, Maths, Clamp, Map, Trigonometry, Get/Set Variables, Node-Groups, Scene/Component/Object Info, Custom Python Script |
 | ![sc_flow_control](https://github.com/aachman98/sc-img-data/raw/master/sc_flow_control.png "Flow Control") | **Flow Control** </br> For loop, For-Each loop (Array/Components), If-Else Branch |
 | ![sc_settings](https://github.com/aachman98/sc-img-data/raw/master/sc_settings.png "Settings") | **Settings** </br> Cursor Transform, Edit Mode, Pivot Point, Snapping, Proportional Editing, Transform Orientation |
 
@@ -76,10 +77,9 @@ and more...!
 
 ## Future
 
-1. Node Groups: Collapse big node networks into a single node with custom inputs & outputs
-2. Complete integration to dependency graph
-3. Debugging tools: Watch/track values of node parameters
-4. Node-Viewport link: Create nodes automatically in editor based on actions in 3D viewport
+1. Complete integration with Blender's internal dependency graph
+2. Debugging tools: Watch/track values of node parameters
+3. Node-Viewport link: Create nodes automatically in editor based on actions in 3D viewport
 
 ## Showcase
 
