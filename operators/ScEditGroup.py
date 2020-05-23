@@ -11,7 +11,7 @@ class ScEditGroup(Operator):
     def poll(cls, context):
         return (
             sc_poll_op(context)
-            and context.space_data.node_tree.nodes.active.node_tree
+            and hasattr(context.space_data.node_tree.nodes.active, "node_tree")
         )
 
     def execute(self, context):

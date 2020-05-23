@@ -41,30 +41,42 @@ class ScGroupNodes(Operator):
         group_input.location = Vector((loc_x_in-200, loc_avg[1]))
         group_output.location = Vector((loc_x_out+200, loc_avg[1]))
 
-        # links_external_in = []
-        # links_external_out = []
-        # for n in selected_nodes:
-        #     for i in n.inputs:
-        #         if (i.is_linked):
-        #             l = i.links[0]
-        #             if (not l.from_node in selected_nodes):
-        #                 if (not l in links_external_in):
-        #                     links_external_in.append(l)
-        #     for o in n.outputs:
-        #         if (o.is_linked):
-        #             l = o.links[0]
-        #             if (not l.to_node in selected_nodes):
-        #                 if (not l in links_external_out):
-        #                     links_external_out.append(l)
+        links_external_in = []
+        links_external_out = []
+        for n in selected_nodes:
+            for i in n.inputs:
+                if (i.is_linked):
+                    l = i.links[0]
+                    if (not l.from_node in selected_nodes):
+                        if (not l in links_external_in):
+                            links_external_in.append(l)
+            for o in n.outputs:
+                if (o.is_linked):
+                    l = o.links[0]
+                    if (not l.to_node in selected_nodes):
+                        if (not l in links_external_out):
+                            links_external_out.append(l)
 
         # for link in links_external_in:
         #     node_group.links.new(group_input.outputs[''], group_nodes[link.to_node].inputs[link.to_socket.name])
         # for link in links_external_out:
         #     node_group.links.new(group_nodes[link.from_node].outputs[link.from_socket.name], group_output.inputs[''])
 
+        for link in links_external_in:
+            node_group.links.new(group_input.outputs[''], node_group.nodes[link.to_node.name].inputs[link.to_socket.name])
+        for link in links_external_out:
+            node_group.links.new(node_group.nodes[link.from_node.name].outputs[link.from_socket.name], group_output.inputs[''])
+
         group_node = node_tree.nodes.new("ScNodeGroup")
         group_node.location = loc_avg
         group_node.node_tree = node_group
+        
+        for i in range(0, len(links_external_in)):
+            link = links_external_in[i]
+            node_tree.links.new(link.from_node.outputs[link.from_socket.name], group_node.inputs[i])
+        for i in range(0, len(links_external_out)):
+            link = links_external_out[i]
+            node_tree.links.new(group_node.outputs[i], link.to_node.inputs[link.to_socket.name])
 
         for n in selected_nodes:
             node_tree.nodes.remove(n)
