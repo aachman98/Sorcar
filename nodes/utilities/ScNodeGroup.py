@@ -19,7 +19,11 @@ class ScNodeGroup(ScNode, NodeCustomGroup):
             row.operator("sc.edit_group", text="", icon='NODETREE', emboss=True)
     
     def error_condition(self):
-        return self.node_tree == None
+        return (
+            self.node_tree == None
+            or self.node_tree.nodes.get('Group Input') == None
+            or self.node_tree.nodes.get('Group Output') == None
+        )
     
     def pre_execute(self):
         for i in range(0, len(self.inputs)):
