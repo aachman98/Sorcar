@@ -10,20 +10,21 @@ class ScExportFbx(Node, ScObjectOperatorNode):
     bl_idname = "ScExportFbx"
     bl_label = "Export FBX"
 
-    in_filepath: StringProperty(default="/path/to/dir/")
-    in_filename: StringProperty(default="untitled")
+    in_file: StringProperty(subtype='FILE_PATH', update=ScNode.update_value)
 
     def init(self, context):
         super().init(context)
-        self.inputs.new("ScNodeSocketString", "File Path").init("in_filepath", True)
-        self.inputs.new("ScNodeSocketString", "File Name").init("in_filename", True)
+        self.inputs.new("ScNodeSocketString", "File").init("in_file", True)
     
     def error_condition(self):
         return (
             super().error_condition()
-            or self.inputs["File Path"].default_value == ""
-            or self.inputs["File Name"].default_value == ""
+            or self.inputs["File"].default_value == ""
         )
     
     def functionality(self):
-        bpy.ops.export_scene.fbx(filepath=os.path.join(self.inputs["File Path"].default_value, self.inputs["File Name"].default_value+".fbx"), use_selection=True, use_tspace=True)
+        bpy.ops.export_scene.fbx(
+            filepath = bpy.path.abspath(self.inputs["File"].default_value),
+            use_selection = True,
+            use_tspace = True
+        )

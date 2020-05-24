@@ -10,26 +10,23 @@ class ScImportFbx(Node, ScInputNode):
     bl_idname = "ScImportFbx"
     bl_label = "Import FBX"
 
-    in_filepath: StringProperty(default="/path/to/dir/")
-    in_filename: StringProperty(default="untitled")
+    in_file: StringProperty(subtype='FILE_PATH', update=ScNode.update_value)
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
 
     def init(self, context):
         super().init(context)
-        self.inputs.new("ScNodeSocketString", "File Path").init("in_filepath", True)
-        self.inputs.new("ScNodeSocketString", "File Name").init("in_filename", True)
+        self.inputs.new("ScNodeSocketString", "File").init("in_file", True)
         self.inputs.new("ScNodeSocketBool", "Generate UVs").init("in_uv")
     
     def error_condition(self):
         return (
             super().error_condition()
-            or self.inputs["File Path"].default_value == ""
-            or self.inputs["File Name"].default_value == ""
+            or self.inputs["File"].default_value == ""
         )
     
     def functionality(self):
         bpy.ops.import_scene.fbx(
-            filepath = os.path.join(self.inputs["File Path"].default_value, self.inputs["File Name"].default_value + ".fbx"),
+            filepath = bpy.path.abspath(self.inputs["File"].default_value),
             use_custom_normals = self.inputs["Generate UVs"].default_value
         )
     
