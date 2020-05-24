@@ -94,8 +94,12 @@ and more...!
 - Added "Group Nodes" and "Edit Group" operators to create/modify node groups
 - Added new keymaps for creating and editing node groups (Ctrl+G, Tab)
 - Added "Send To Sverchok" utility node to pass mesh data (verts/edges/faces) to Sverchok node (Requires "Receive From Sorcar" node in Sverchok, W.I.P.)
+- Added "Text Block" constant node to output multi-line string from Text Editor
 - Improved socket base class to show error icon when execution fails
 - Improved "Custom Object" input node to apply all modifiers
+- Improved Import/Export nodes to select directory path using file picker UI
+- Improved "Material Parameter" node to show all available nodes & sockets as a drop-down (search)
+- Improved "Scene Info" node to output world unit scale length
 - Improved "get_override" helper method
 - Fixed socket base class to avoid executing node-group input nodes
 - Fixed "Dissolve" node
