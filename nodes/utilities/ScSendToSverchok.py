@@ -30,7 +30,7 @@ class ScSendToSverchok(Node, ScObjectOperatorNode):
         return (
             super().error_condition()
             or self.prop_tree == None
-            or (not self.prop_tree.nodes[self.prop_node].bl_idname == "ReceiveFromSorcarNode")
+            or (not self.prop_tree.nodes[self.prop_node].bl_idname == "SvReceiveFromSorcarNode")
         )
     
     def pre_execute(self):
