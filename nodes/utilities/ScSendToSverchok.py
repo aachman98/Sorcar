@@ -8,7 +8,7 @@ from ...helper import focus_on_object
 
 class ScSendToSverchok(Node, ScObjectOperatorNode):
     bl_idname = "ScSendToSverchok"
-    bl_label = "Send To Sverchok"
+    bl_label = "Send to Sverchok"
 
     def sv_poll(self, object):
         return object.bl_idname == "SverchCustomTreeType"

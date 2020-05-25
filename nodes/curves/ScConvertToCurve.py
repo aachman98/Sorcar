@@ -8,7 +8,7 @@ from ...helper import focus_on_object
 
 class ScConvertToCurve(Node, ScNode):
     bl_idname = "ScConvertToCurve"
-    bl_label = "Convert To Curve"
+    bl_label = "Convert to Curve"
 
     prop_mesh: PointerProperty(type=bpy.types.Mesh)
 
