@@ -43,6 +43,4 @@ class ScSendToSverchok(Node, ScObjectOperatorNode):
         v = [[list(i.co) for i in obj.data.vertices]]
         e = [[list(i) for i in obj.data.edge_keys]]
         f = [[list(i.vertices) for i in obj.data.polygons]]
-        self.prop_tree.nodes[self.prop_node].verts = repr(v)
-        self.prop_tree.nodes[self.prop_node].edges = repr(e)
-        self.prop_tree.nodes[self.prop_node].faces = repr(f)
+        self.prop_tree.nodes[self.prop_node].set_mesh(repr(v), repr(e), repr(f))
