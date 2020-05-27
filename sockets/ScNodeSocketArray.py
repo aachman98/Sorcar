@@ -13,7 +13,7 @@ class ScNodeSocketArray(NodeSocket, ScNodeSocket):
     default_type: StringProperty(default="ARRAY")
 
     def get_label(self):
-        return str(self.default_value.count(',') + 1)
+        return str(len(eval(self.default_value)))
     
     def draw(self, context, layout, node, text):
         if (self.is_output or self.is_linked):
