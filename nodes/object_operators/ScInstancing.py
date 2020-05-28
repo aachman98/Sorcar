@@ -43,8 +43,8 @@ class ScInstancing(Node, ScObjectOperatorNode):
     
     def functionality(self):
         self.inputs["Object"].default_value.instance_type = self.inputs["Type"].default_value
-        self.inputs["Object"].default_value.show_instancer_for_render = self.inputs["Display Instancer"].default_value
-        self.inputs["Object"].default_value.show_instancer_for_viewport = self.inputs["Render Instancer"].default_value
+        self.inputs["Object"].default_value.show_instancer_for_viewport = self.inputs["Display Instancer"].default_value
+        self.inputs["Object"].default_value.show_instancer_for_render = self.inputs["Render Instancer"].default_value
         self.inputs["Object"].default_value.use_instance_faces_scale = self.inputs["Scale by Face Size"].default_value
         self.inputs["Object"].default_value.instance_faces_scale = self.inputs["Factor"].default_value
         self.inputs["Object"].default_value.use_instance_vertices_rotation = self.inputs["Rotate by Vertex Normal"].default_value
