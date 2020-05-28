@@ -13,34 +13,15 @@ class ScGroupNodes(Operator):
         return sc_poll_op(context)
 
     def execute(self, context):
+        # Get space, path, current nodetree, selected nodes and a newly created group
         space = context.space_data
-        node_tree = space.node_tree
+        path = space.path
+        node_tree = space.path[len(path)-1].node_tree
         node_group = bpy.data.node_groups.new("ScNodeGroup", "ScNodeTree")
-        
-        group_input = node_group.nodes.new("NodeGroupInput")
-        group_output = node_group.nodes.new("NodeGroupOutput")
         selected_nodes = [i for i in node_tree.nodes if i.select]
-        l = len(selected_nodes)
+        nodes_len = len(selected_nodes)
 
-        loc_x_in = 0
-        loc_x_out = 0
-        loc_avg = Vector((0, 0))
-        for n in selected_nodes:
-            loc_avg += n.location/l
-            if (n.location[0] < loc_x_in):
-                loc_x_in = n.location[0]
-            if (n.location[0] > loc_x_out):
-                loc_x_out = n.location[0]
-        
-        if (l > 0):
-            bpy.ops.node.clipboard_copy(get_override(type='NODE_EDITOR'))
-        space.path.append(node_group)
-        if (l > 0):
-            bpy.ops.node.clipboard_paste(get_override(type='NODE_EDITOR'))
-
-        group_input.location = Vector((loc_x_in-200, loc_avg[1]))
-        group_output.location = Vector((loc_x_out+200, loc_avg[1]))
-
+        # Store all links (internal/external) for the selected nodes to be created as group inputs/outputs
         links_external_in = []
         links_external_out = []
         for n in selected_nodes:
@@ -52,32 +33,63 @@ class ScGroupNodes(Operator):
                             links_external_in.append(l)
             for o in n.outputs:
                 if (o.is_linked):
-                    l = o.links[0]
-                    if (not l.to_node in selected_nodes):
-                        if (not l in links_external_out):
-                            links_external_out.append(l)
+                    for l in o.links:
+                        if (not l.to_node in selected_nodes):
+                            if (not l in links_external_out):
+                                links_external_out.append(l)
 
-        # for link in links_external_in:
-        #     node_group.links.new(group_input.outputs[''], group_nodes[link.to_node].inputs[link.to_socket.name])
-        # for link in links_external_out:
-        #     node_group.links.new(group_nodes[link.from_node].outputs[link.from_socket.name], group_output.inputs[''])
-
-        for link in links_external_in:
-            node_group.links.new(group_input.outputs[''], node_group.nodes[link.to_node.name].inputs[link.to_socket.name])
-        for link in links_external_out:
-            node_group.links.new(node_group.nodes[link.from_node.name].outputs[link.from_socket.name], group_output.inputs[''])
-
+        # Calculate the required locations for placement of grouped node and input/output nodes
+        loc_x_in = 0
+        loc_x_out = 0
+        loc_avg = Vector((0, 0))
+        for n in selected_nodes:
+            loc_avg += n.location/nodes_len
+            if (n.location[0] < loc_x_in):
+                loc_x_in = n.location[0]
+            if (n.location[0] > loc_x_out):
+                loc_x_out = n.location[0]
+        
+        # Create and relocate group input & output nodes in the newly created group
+        group_input = node_group.nodes.new("NodeGroupInput")
+        group_output = node_group.nodes.new("NodeGroupOutput")
+        group_input.location = Vector((loc_x_in-200, loc_avg[1]))
+        group_output.location = Vector((loc_x_out+200, loc_avg[1]))
+        
+        # Copy the selected nodes from current nodetree
+        if (nodes_len > 0):
+            bpy.ops.node.clipboard_copy(get_override(type='NODE_EDITOR'))
+        
+        # Create a grouped node with correct location and assign newly created group
         group_node = node_tree.nodes.new("ScNodeGroup")
         group_node.location = loc_avg
         group_node.node_tree = node_group
         
+        # Add overlay to node editor for the newly created group
+        path.append(node_group, node=group_node)
+        
+        # Paste the copied nodes to newly created group
+        if (nodes_len > 0):
+            bpy.ops.node.clipboard_paste(get_override(type='NODE_EDITOR'))
+
+        # Create group input/output links in the newly created group
+        o = group_input.outputs
+        for link in links_external_in:
+            # node_group.links.new(o.get(link.from_socket.name, o[len(o)-1]), node_group.nodes[link.to_node.name].inputs[link.to_socket.name])
+            node_group.links.new(group_input.outputs[''], node_group.nodes[link.to_node.name].inputs[link.to_socket.name])
+        i = group_output.inputs
+        for link in links_external_out:
+            # node_group.links.new(node_group.nodes[link.from_node.name].outputs[link.from_socket.name], i.get(link.to_socket.name, i[len(i)-1]))
+            node_group.links.new(node_group.nodes[link.from_node.name].outputs[link.from_socket.name], group_output.inputs[''])
+        
+        # Add new links to grouped node from original external links
         for i in range(0, len(links_external_in)):
             link = links_external_in[i]
             node_tree.links.new(link.from_node.outputs[link.from_socket.name], group_node.inputs[i])
         for i in range(0, len(links_external_out)):
             link = links_external_out[i]
             node_tree.links.new(group_node.outputs[i], link.to_node.inputs[link.to_socket.name])
-
+        
+        # Remove redundant selected nodes
         for n in selected_nodes:
             node_tree.nodes.remove(n)
 
