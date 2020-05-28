@@ -11,11 +11,16 @@ class ScEditGroup(Operator):
     def poll(cls, context):
         return (
             sc_poll_op(context)
-            and hasattr(context.space_data.node_tree.nodes.active, "node_tree")
         )
 
     def execute(self, context):
         space = context.space_data
-        node = space.node_tree.nodes.active
-        space.path.append(node.node_tree)
+        node_tree = space.node_tree
+        path = space.path
+        node = path[len(path)-1].node_tree.nodes.active
+
+        if hasattr(node, "node_tree"):
+            path.append(node.node_tree, node=node)
+        elif len(path) > 1:
+            path.pop()
         return {"FINISHED"}
