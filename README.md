@@ -18,7 +18,7 @@ Sorcar is a **procedural modeling node-based system** which utilises Blender and
 [Latest Release (v3.1.6)](https://github.com/aachman98/Sorcar/releases/latest)
 </br>*Requirement: Blender 2.80 or later*
 
-1. Download the zip file and install it as a Blender addon (Edit -> Preferences... -> Add-ons-> Install...)
+1. Download the zip file and install it as a Blender addon (Edit -> Preferences... -> Add-ons -> Install...)
 2. Open Sorcar Node Editor (**Do not** remove the 3D viewport as it is required by some operations like extrude, transform, ...)
 3. Click on the + button to create a new tree
 4. Press Shift+A to open the nodes menu. Alternatively, navigate through tabs on the Right panel in the node editor
@@ -105,6 +105,8 @@ and more...!
 - Fixed socket base class to avoid executing node-group input nodes
 - Fixed "Dissolve" node
 - Fixed nodetree execution
+- Fixed "Array" socket label (length of the evaluated array)
+- Fixed "Instancing" node
 
 #### v3.1.6
 
