@@ -93,6 +93,7 @@ and more...!
 - Added "Node Group" utility node
 - Added "Group Nodes" and "Edit Group" operators to create/modify node groups
 - Added new keymaps for creating and editing node groups (Ctrl+G, Tab)
+- Added UI panel base class and 2 new panels: "Node Groups" and "Properties"
 - Added "Send to Sverchok" utility node to pass mesh data (verts/edges/faces) to Sverchok node (Requires "Receive From Sorcar" node in Sverchok nodetree; awaiting PR [#3281](https://github.com/nortikin/sverchok/pull/3281))
 - Added "Receive from Sverchok" input node to fetch mesh data (verts/edges/faces) from Sverchok node (Requires "Send To Sorcar" node in Sverchok nodetree; W.I.P.)
 - Added "Text Block" constant node to output multi-line string from Text Editor
@@ -101,8 +102,9 @@ and more...!
 - Improved "Custom Object" input node to apply all modifiers
 - Improved Import/Export nodes to select directory path using file picker UI
 - Improved "Material Parameter" node to show all available nodes & sockets as a drop-down (search)
-- Improved "Scene Info" node to output world unit scale length
-- Improved "get_override" helper method
+- Improved "Scene Info" node: new output for world unit scale length, removed "Realtime" tree property
+- Improved "get_override" and "sc_poll_op" helper methods
+- Improved all operators: show tooltips, new category (prefix)
 - Fixed socket base class to avoid executing node-group input nodes
 - Fixed "Dissolve" node
 - Fixed nodetree execution
