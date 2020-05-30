@@ -35,8 +35,11 @@ import os
 from bpy.types import NodeTree, Operator, PropertyGroup, AddonPreferences
 from bpy.props import BoolProperty, StringProperty, IntProperty
 from nodeitems_utils import NodeItem
-from .helper import update_each_frame, print_log
+
 from .tree.ScNodeCategory import ScNodeCategory
+from .tree.ScNodeTree import ScNodeTree
+from .helper import update_each_frame, print_log
+
 from . import addon_updater_ops
 
 class SorcarPreferences(AddonPreferences):
@@ -77,9 +80,6 @@ class SorcarPreferences(AddonPreferences):
     def draw(self, context):
         addon_updater_ops.update_settings_ui(self, context)
 
-def import_tree():
-    return getattr(importlib.import_module(".tree.ScNodeTree", __name__), "ScNodeTree")
-
 def import_ops(path="./"):
     out = []
     for i in bpy.path.module_names(path + "operators"):
@@ -92,6 +92,13 @@ def import_sockets(path="./"):
     for i in bpy.path.module_names(path + "sockets"):
         out.append(getattr(importlib.import_module(".sockets." + i[0], __name__), i[0]))
         print_log("IMPORT SOCKET", msg=i[0])
+    return out
+
+def import_ui(path="./"):
+    out = []
+    for i in bpy.path.module_names(path + "ui"):
+        out.append(getattr(importlib.import_module(".ui." + i[0], __name__), i[0]))
+        print_log("IMPORT UI", msg=i[0])
     return out
 
 def import_nodes(path="./"):
@@ -111,12 +118,14 @@ def register():
     path = repr([i for i in addon_utils.modules() if i.bl_info['name'] == "Sorcar"][0]).split("from '")[1].split("__init__.py'>")[0]
     classes_ops = import_ops(path)
     classes_sockets = import_sockets(path)
+    classes_ui = import_ui(path)
     classes_nodes = import_nodes(path)
 
     global all_classes, addon_keymaps
-    all_classes = [import_tree()]
+    all_classes = [ScNodeTree]
     all_classes.extend(classes_ops)
     all_classes.extend(classes_sockets)
+    all_classes.extend(classes_ui)
     all_classes.append(SorcarPreferences)
 
     total_nodes = 0
@@ -146,7 +155,7 @@ def register():
     
     addon_updater_ops.register(bl_info)
     
-    print_log("REGISTERED", msg="{} operators, {} sockets & {} nodes ({} categories)".format(len(classes_ops), len(classes_sockets), total_nodes, len(classes_nodes)))
+    print_log("REGISTERED", msg="{} operators, {} sockets, {} UI & {} nodes ({} categories)".format(len(classes_ops), len(classes_sockets), len(classes_ui), total_nodes, len(classes_nodes)))
 
 def unregister():
     print("------------UNREGISTER SORCAR----------------")
