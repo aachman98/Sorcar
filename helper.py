@@ -2,8 +2,10 @@ import bpy
 from mathutils import Vector
 
 def sc_poll_op(context):
-    if hasattr(context.space_data, "tree_type"):
-        return context.space_data.tree_type == "ScNodeTree"
+    space = context.space_data
+    if hasattr(space, "node_tree"):
+        if (space.node_tree):
+            return space.tree_type == "ScNodeTree"
     return False
 
 def sc_poll_mesh(self, object):
