@@ -94,6 +94,7 @@ and more...!
 - Added "Group Nodes" and "Edit Group" operators to create/modify node groups
 - Added new keymaps for creating and editing node groups (Ctrl+G, Tab)
 - Added "Send to Sverchok" utility node to pass mesh data (verts/edges/faces) to Sverchok node (Requires "Receive From Sorcar" node in Sverchok nodetree; awaiting PR [#3281](https://github.com/nortikin/sverchok/pull/3281))
+- Added "Receive from Sverchok" input node to fetch mesh data (verts/edges/faces) from Sverchok node (Requires "Send To Sorcar" node in Sverchok nodetree; W.I.P.)
 - Added "Text Block" constant node to output multi-line string from Text Editor
 - Added Wiki and Bug Reporter links in add-ons manager ([#127](https://github.com/aachman98/Sorcar/pull/127))
 - Improved socket base class to show error icon when execution fails
