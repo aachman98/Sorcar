@@ -19,10 +19,6 @@ class ScSceneInfo(Node, ScNode):
         self.outputs.new("ScNodeSocketNumber", "Unit Scale")
         self.outputs.new("ScNodeSocketNumber", "System Time")
     
-    def draw_buttons(self, context, layout):
-        super().draw_buttons(context, layout)
-        layout.prop(self.id_data, "prop_realtime")
-    
     def post_execute(self):
         scene = bpy.context.scene
         out = {}
