@@ -4,6 +4,7 @@ from bpy.types import Operator
 from ..helper import sc_poll_op
 
 class ScSaveSelection(Operator):
+    """Save the components of the mesh currently selected"""
     bl_idname = "sc.save_selection"
     bl_label = "Save Selection"
 
