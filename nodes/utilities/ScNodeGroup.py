@@ -16,7 +16,7 @@ class ScNodeGroup(ScNode, NodeCustomGroup):
         if (self == self.id_data.nodes.active):
             row = layout.row(align=True)
             row.prop(self, "node_tree", text="")
-            row.operator("sc.edit_group", text="", icon='NODETREE', emboss=True)
+            row.operator("sorcar.edit_group", text="", icon='NODETREE', emboss=True)
     
     def error_condition(self):
         return (

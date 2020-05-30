@@ -145,9 +145,9 @@ def register():
         kc = bpy.context.window_manager.keyconfigs.addon
         km = kc.keymaps.new(name="Node Generic", space_type='NODE_EDITOR')
         kmi = [
-            km.keymap_items.new("sc.execute_node", 'E', 'PRESS'),
-            km.keymap_items.new("sc.group_nodes", 'G', 'PRESS', ctrl=True),
-            km.keymap_items.new("sc.edit_group", 'TAB', 'PRESS')
+            km.keymap_items.new("sorcar.execute_node", 'E', 'PRESS'),
+            km.keymap_items.new("sorcar.group_nodes", 'G', 'PRESS', ctrl=True),
+            km.keymap_items.new("sorcar.edit_group", 'TAB', 'PRESS')
         ]
         for k in kmi:
             k.active = True

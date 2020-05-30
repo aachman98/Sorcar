@@ -27,7 +27,7 @@ class ScSelectManually(Node, ScSelectionNode):
         if (self.node_executable):
             if (self == context.space_data.edit_tree.nodes.active):
                 if (self == context.space_data.edit_tree.nodes.get(str(context.space_data.edit_tree.node))):
-                    layout.operator("sc.save_selection")
+                    layout.operator("sorcar.save_selection")
     
     def functionality(self):
         bpy.ops.mesh.select_all(action="DESELECT")
