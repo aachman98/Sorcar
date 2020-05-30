@@ -5,7 +5,7 @@ from ..helper import sc_poll_op
 
 class ScExecuteNode(Operator):
     """Execute the selected node (re-evaluates the nodetree)"""
-    bl_idname = "sc.execute_node"
+    bl_idname = "sorcar.execute_node"
     bl_label = "Execute Node"
 
     @classmethod

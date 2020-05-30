@@ -5,7 +5,7 @@ from ..helper import sc_poll_op
 
 class ScEditGroup(Operator):
     """Edit the group referenced by the active node (or exit the current node-group)"""
-    bl_idname = "sc.edit_group"
+    bl_idname = "sorcar.edit_group"
     bl_label = "Edit Group"
 
     @classmethod

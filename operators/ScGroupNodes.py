@@ -6,7 +6,7 @@ from ..helper import sc_poll_op, get_override
 
 class ScGroupNodes(Operator):
     """Create node-group from selected nodes"""
-    bl_idname = "sc.group_nodes"
+    bl_idname = "sorcar.group_nodes"
     bl_label = "Group Nodes"
 
     @classmethod
