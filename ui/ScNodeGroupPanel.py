@@ -6,6 +6,7 @@ from ._base.panel_base import ScPanel
 class ScNodeGroupPanel(Panel, ScPanel):
     bl_label = "Node Groups"
     bl_idname = "NODE_PT_sc_node_group"
+    bl_order = 1
 
     def draw(self, context):
         layout = self.layout
