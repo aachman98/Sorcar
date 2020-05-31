@@ -21,7 +21,9 @@ class ScEditGroup(Operator):
         node = path[len(path)-1].node_tree.nodes.active
 
         if hasattr(node, "node_tree"):
-            path.append(node.node_tree, node=node)
+            if (node.node_tree):
+                path.append(node.node_tree, node=node)
+                return {"FINISHED"}
         elif len(path) > 1:
             path.pop()
-        return {"FINISHED"}
+        return {"CANCELLED"}
