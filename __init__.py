@@ -110,6 +110,16 @@ def import_nodes(path="./"):
             print_log("IMPORT NODE", bpy.path.display_name(cat), msg=i[0])
     return out
 
+def init_keymaps():
+    kc = bpy.context.window_manager.keyconfigs.addon
+    km = kc.keymaps.new(name="Node Generic", space_type='NODE_EDITOR')
+    kmi = [
+        km.keymap_items.new("sorcar.execute_node", 'E', 'PRESS'),
+        km.keymap_items.new("sorcar.group_nodes", 'G', 'PRESS', ctrl=True),
+        km.keymap_items.new("sorcar.edit_group", 'TAB', 'PRESS')
+    ]
+    return km, kmi
+
 all_classes = []
 addon_keymaps = []
 
@@ -142,20 +152,14 @@ def register():
         bpy.app.handlers.frame_change_post.append(update_each_frame)
     
     if (not bpy.app.background):
-        kc = bpy.context.window_manager.keyconfigs.addon
-        km = kc.keymaps.new(name="Node Generic", space_type='NODE_EDITOR')
-        kmi = [
-            km.keymap_items.new("sorcar.execute_node", 'E', 'PRESS'),
-            km.keymap_items.new("sorcar.group_nodes", 'G', 'PRESS', ctrl=True),
-            km.keymap_items.new("sorcar.edit_group", 'TAB', 'PRESS')
-        ]
+        km, kmi = init_keymaps()
         for k in kmi:
             k.active = True
             addon_keymaps.append((km, k))
     
     addon_updater_ops.register(bl_info)
     
-    print_log("REGISTERED", msg="{} operators, {} sockets, {} UI & {} nodes ({} categories)".format(len(classes_ops), len(classes_sockets), len(classes_ui), total_nodes, len(classes_nodes)))
+    print_log("REGISTERED", msg="{} operators, {} sockets, {} UI, {} keymaps & {} nodes ({} categories)".format(len(classes_ops), len(classes_sockets), len(classes_ui), len(addon_keymaps), total_nodes, len(classes_nodes)))
 
 def unregister():
     print("------------UNREGISTER SORCAR----------------")
