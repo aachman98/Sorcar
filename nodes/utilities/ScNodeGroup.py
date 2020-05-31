@@ -26,15 +26,20 @@ class ScNodeGroup(ScNode, NodeCustomGroup):
         )
     
     def pre_execute(self):
+        self.node_tree.reset_nodes(True)
         for i in range(0, len(self.inputs)):
             self.node_tree.nodes['Group Input'].outputs[i].default_value = self.inputs[i].default_value
     
     def functionality(self):
         for i in range(0, len(self.outputs)):
-            self.node_tree.nodes['Group Output'].inputs[i].execute(True)
-
+            if (not self.node_tree.nodes['Group Output'].inputs[i].execute(False)):
+                break
+    
     def post_execute(self):
         out = {}
         for i in range(0, len(self.outputs)):
-            out[self.outputs[i].name] = self.node_tree.nodes['Group Output'].inputs[i].default_value
+            inp = self.node_tree.nodes['Group Output'].inputs[i]
+            if (inp.socket_error):
+                return None
+            out[self.outputs[i].name] = inp.default_value
         return out
