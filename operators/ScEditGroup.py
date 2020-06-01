@@ -16,7 +16,6 @@ class ScEditGroup(Operator):
 
     def execute(self, context):
         space = context.space_data
-        node_tree = space.node_tree
         path = space.path
         node = path[len(path)-1].node_tree.nodes.active
 
