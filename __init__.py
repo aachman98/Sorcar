@@ -17,7 +17,7 @@
 bl_info = {
 	"name": "Sorcar",
     "author": "Punya Aachman",
-    "version": (3, 1, 6),
+    "version": (3, 1, 7),
     "blender": (2, 80, 0),
     "location": "Node Editor",
     "category": "Node",
