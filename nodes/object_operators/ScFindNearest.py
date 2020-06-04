@@ -21,7 +21,7 @@ class ScFindNearest(Node, ScObjectOperatorNode):
         self.inputs.new("ScNodeSocketNumber", "Distance").init("in_distance")
         self.outputs.new("ScNodeSocketVector", "Location")
         self.outputs.new("ScNodeSocketVector", "Normal")
-        self.outputs.new("ScNodeSocketNumber", "Index")
+        self.outputs.new("ScNodeSocketNumber", "Face Index")
         self.outputs.new("ScNodeSocketNumber", "Distance")
         self.outputs.new("ScNodeSocketVector", "Vertex Position")
         self.outputs.new("ScNodeSocketNumber", "Vertex Index")
@@ -37,13 +37,13 @@ class ScFindNearest(Node, ScObjectOperatorNode):
         ret = self.inputs["Object"].default_value.closest_point_on_mesh(self.inputs["Origin"].default_value, distance=self.inputs["Distance"].default_value)
         out["Location"] = ret[1]
         out["Normal"] = ret[2]
-        out["Index"] = ret[3]
+        out["Face Index"] = ret[3]
         out["Distance"] = self.measure_distance(self.inputs["Origin"].default_value, out["Location"])
         current_mode = bpy.context.object.mode
         bpy.ops.object.mode_set(mode='EDIT')
         bm = bmesh.from_edit_mesh(self.inputs["Object"].default_value.data)
         bm.faces.ensure_lookup_table()
-        face = bm.faces[out["Index"]]
+        face = bm.faces[out["Face Index"]]
         closest_vertex = Vector((0,0,0))
         closest_index = -1
         closest_distance = 10 ** 10
