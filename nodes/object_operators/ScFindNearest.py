@@ -23,7 +23,8 @@ class ScFindNearest(Node, ScObjectOperatorNode):
         self.outputs.new("ScNodeSocketVector", "Normal")
         self.outputs.new("ScNodeSocketNumber", "Index")
         self.outputs.new("ScNodeSocketNumber", "Distance")
-        self.outputs.new("ScNodeSocketVector", "Vertex")
+        self.outputs.new("ScNodeSocketVector", "Vertex Position")
+        self.outputs.new("ScNodeSocketNumber", "Vertex Index")
     
     def error_condition(self):
         return(
@@ -44,14 +45,17 @@ class ScFindNearest(Node, ScObjectOperatorNode):
         bm.faces.ensure_lookup_table()
         face = bm.faces[out["Index"]]
         closest_vertex = Vector((0,0,0))
+        closest_index = -1
         closest_distance = 10 ** 10
         for v in face.verts:
             dist = self.measure_distance(v.co, out["Location"])
             if (dist < closest_distance):
                 closest_vertex = Vector(v.co)
+                closest_index = v.index
                 closest_distance = dist
         bpy.ops.object.mode_set(mode=current_mode)
-        out["Vertex"] = closest_vertex
+        out["Vertex Position"] = closest_vertex
+        out["Vertex Index"] = closest_index
         return out
     
     def measure_distance(self, first, second):
