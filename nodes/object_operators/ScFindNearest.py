@@ -1,5 +1,7 @@
 import bpy
-import mathutils
+import bmesh
+from math import sqrt
+from mathutils import Vector
 
 from bpy.props import FloatVectorProperty, FloatProperty
 from bpy.types import Node
@@ -21,18 +23,39 @@ class ScFindNearest(Node, ScObjectOperatorNode):
         self.outputs.new("ScNodeSocketVector", "Normal")
         self.outputs.new("ScNodeSocketNumber", "Index")
         self.outputs.new("ScNodeSocketNumber", "Distance")
+        self.outputs.new("ScNodeSocketVector", "Vertex")
     
     def error_condition(self):
         return(
             super().error_condition()
             or self.inputs["Distance"].default_value < 0.0
         )
-    
+
     def post_execute(self):
         out = super().post_execute()
-        ret = mathutils.bvhtree.BVHTree().FromObject(self.inputs["Object"].default_value, bpy.context.evaluated_depsgraph_get()).find_nearest(self.inputs["Origin"].default_value, self.inputs["Distance"].default_value)
-        out["Location"] = ret[0]
-        out["Normal"] = ret[1]
-        out["Index"] = ret[2]
-        out["Distance"] = ret[3]
+        ret = self.inputs["Object"].default_value.closest_point_on_mesh(self.inputs["Origin"].default_value, distance=self.inputs["Distance"].default_value)
+        out["Location"] = ret[1]
+        out["Normal"] = ret[2]
+        out["Index"] = ret[3]
+        out["Distance"] = self.measure_distance(self.inputs["Origin"].default_value, out["Location"])
+        current_mode = bpy.context.object.mode
+        bpy.ops.object.mode_set(mode='EDIT')
+        bm = bmesh.from_edit_mesh(self.inputs["Object"].default_value.data)
+        bm.faces.ensure_lookup_table()
+        face = bm.faces[out["Index"]]
+        closest_vertex = Vector((0,0,0))
+        closest_distance = 10 ** 10
+        for v in face.verts:
+            dist = self.measure_distance(v.co, out["Location"])
+            if (dist < closest_distance):
+                closest_vertex = Vector(v.co)
+                closest_distance = dist
+        bpy.ops.object.mode_set(mode=current_mode)
+        out["Vertex"] = closest_vertex
         return out
+    
+    def measure_distance(self, first, second):
+        locx = second[0] - first[0]
+        locy = second[1] - first[1]
+        locz = second[2] - first[2]
+        return sqrt((locx)**2 + (locy)**2 + (locz)**2)
