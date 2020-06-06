@@ -49,7 +49,10 @@ class ScNodeSocket:
                 layout.label(text=text + ": " + self.get_label())
             else:
                 if (self.default_prop == ""):
-                    layout.label(text=text)
+                    if (self.node.bl_idname == "ScNodeGroup"):
+                        layout.prop(self, "default_value_update", text=text)
+                    else:
+                        layout.label(text=text)
                 else:
                     layout.prop(self, "hide", icon='RADIOBUT_OFF', icon_only=True, invert_checkbox=True)
                     self.draw_layout(context, layout, node, text)
@@ -81,6 +84,10 @@ class ScNodeSocket:
                         print_log(self.node.name, self.name, "execute", msg="No ret")
             else:
                 if (self.default_prop == ""):
+                    if (self.node.bl_idname == "ScNodeGroup"):
+                        self.socket_error = False
+                        self.default_value = self.default_value_update
+                        return True
                     return False
                 self.socket_error = False
                 return self.set(eval("bpy.data.node_groups['" + self.id_data.name + "'].nodes['" + self.node.name + "']." + self.default_prop))
