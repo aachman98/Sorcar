@@ -3,10 +3,10 @@ import bpy
 from bpy.props import PointerProperty, BoolProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
-from .._base.node_operator import ScObjectOperatorNode
-from ...helper import remove_object, sc_poll_mesh, apply_all_modifiers
+from .._base.node_input import ScInputNode
+from ...helper import focus_on_object, remove_object, sc_poll_mesh, apply_all_modifiers
 
-class ScCustomObject(Node, ScObjectOperatorNode):
+class ScCustomObject(Node, ScInputNode):
     bl_idname = "ScCustomObject"
     bl_label = "Custom Object"
 
@@ -14,23 +14,29 @@ class ScCustomObject(Node, ScObjectOperatorNode):
     in_hide: BoolProperty(default=True, update=ScNode.update_value)
     
     def init(self, context):
-        self.node_executable = True
-        self.use_custom_color = True
-        self.set_color()
+        super().init(context)
         self.inputs.new("ScNodeSocketObject", "Object").init("in_obj", True)
         self.inputs.new("ScNodeSocketBool", "Hide Original").init("in_hide")
-        self.outputs.new("ScNodeSocketObject", "Object")
+    
+    def error_condition(self):
+        return (
+            super().error_condition()
+            or self.inputs["Object"].default_value == None
+        )
     
     def pre_execute(self):
-        remove_object(self.outputs["Object"].default_value)
-        self.inputs["Object"].default_value.hide_set(False)
         super().pre_execute()
+        self.inputs["Object"].default_value.hide_set(False)
+        focus_on_object(self.inputs["Object"].default_value)
     
     def functionality(self):
         bpy.ops.object.duplicate()
         apply_all_modifiers()
     
     def post_execute(self):
-        if (self.inputs["Hide Original"].default_value):
-            self.inputs["Object"].default_value.hide_set(True)
-        return {"Object": bpy.context.active_object}
+        self.inputs["Object"].default_value.hide_set(self.inputs["Hide Original"].default_value)
+        return super().post_execute()
+    
+    def free(self):
+        self.inputs["Object"].default_value.hide_set(False)
+        super().free()
