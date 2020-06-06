@@ -15,19 +15,24 @@ class ScSceneInfo(Node, ScNode):
         self.outputs.new("ScNodeSocketNumber", "End Frame")
         self.outputs.new("ScNodeSocketVector", "Cursor Location")
         self.outputs.new("ScNodeSocketVector", "Cursor Rotation")
-        self.outputs.new("ScNodeSocketArray", "Objects")
+        self.outputs.new("ScNodeSocketObject", "Active Object")
+        self.outputs.new("ScNodeSocketArray", "Selected Objects")
+        self.outputs.new("ScNodeSocketArray", "All Objects")
         self.outputs.new("ScNodeSocketNumber", "Unit Scale")
         self.outputs.new("ScNodeSocketNumber", "System Time")
     
     def post_execute(self):
-        scene = bpy.context.scene
+        c = bpy.context
+        s = c.scene
         out = {}
-        out["Start Frame"] = scene.frame_start
-        out["Current Frame"] = scene.frame_current
-        out["End Frame"] = scene.frame_end
-        out["Cursor Location"] = scene.cursor.location
-        out["Cursor Rotation"] = scene.cursor.rotation_euler
-        out["Objects"] = repr(list(scene.objects))
-        out["Unit Scale"] = scene.unit_settings.scale_length
+        out["Start Frame"] = s.frame_start
+        out["Current Frame"] = s.frame_current
+        out["End Frame"] = s.frame_end
+        out["Cursor Location"] = s.cursor.location
+        out["Cursor Rotation"] = s.cursor.rotation_euler
+        out["Active Object"] = c.object
+        out["Selected Objects"] = repr(list(c.selected_objects))
+        out["All Objects"] = repr(list(s.objects))
+        out["Unit Scale"] = s.unit_settings.scale_length
         out["System Time"] = time.time()
         return out
