@@ -3,6 +3,7 @@ import bpy
 from bpy.props import StringProperty
 from bpy.types import NodeSocket
 from ._base.socket_base import ScNodeSocket
+from ..nodes._base.node_base import ScNode
 
 class ScNodeSocketArray(NodeSocket, ScNodeSocket):
     bl_idname = "ScNodeSocketArray"
@@ -10,6 +11,7 @@ class ScNodeSocketArray(NodeSocket, ScNodeSocket):
     color = (0.0, 0.0, 1.0, 1.0)
 
     default_value: StringProperty(default="[]")
+    default_value_update: StringProperty(default="[]", update=ScNode.update_value)
     default_type: StringProperty(default="ARRAY")
 
     def get_label(self):
