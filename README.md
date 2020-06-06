@@ -72,14 +72,14 @@ and more...!
 
 1. Export nodes as python code
 2. Send to UE4/Unity (live-link)
-3. Object constraint nodes
-4. Point scatter & voronoi fracture nodes
+3. Point scatter & voronoi fracture nodes
+4. Debugging tools: Watch/track values of node parameters
 
 ## Future
 
 1. Complete integration with Blender's internal dependency graph
-2. Debugging tools: Watch/track values of node parameters
-3. Node-Viewport link: Create nodes automatically in editor based on actions in 3D viewport
+2. Node-Viewport link: Create nodes automatically in editor based on actions in 3D viewport
+3. Landscape (noise/masking/erosion) and Foliage (grass/bush/trees) nodes
 
 ## Showcase
 
@@ -97,14 +97,18 @@ and more...!
 - Added "Send to Sverchok" utility node to pass mesh data (verts/edges/faces) to Sverchok node (Requires "Receive From Sorcar" node in Sverchok nodetree; awaiting PR [#3281](https://github.com/nortikin/sverchok/pull/3281))
 - Added "Receive from Sverchok" input node to fetch mesh data (verts/edges/faces) from Sverchok node (Requires "Send To Sorcar" node in Sverchok nodetree; W.I.P.)
 - Added "Text Block" constant node to output multi-line string from Text Editor
+- Added node interface base class and sub-classes for all sockets to support node-groups (with custom properties)
 - Added Wiki and Bug Reporter links in add-ons manager ([#127](https://github.com/aachman98/Sorcar/pull/127))
+- Improved object input nodes to clean up geometry when removed
 - Improved socket base class to show error icon when execution fails
-- Improved "Custom Object" input node to apply all modifiers
+- Improved "Custom Object" input node: inherit from input base class, apply all modifiers before execution
 - Improved Import/Export nodes to select directory path using file picker UI
 - Improved "Material Parameter" node to show all available nodes & sockets as a drop-down (search)
-- Improved "Scene Info" node: new output for world unit scale length, removed "Realtime" tree property
+- Improved "Scene Info" node: added new outputs for world unit scale length, active/selected/all objects from the scene; removed "Realtime" tree property
+- Improved "Duplicate Object" node: added "Linked" input socket
 - Improved "get_override" and "sc_poll_op" helper methods
 - Improved all operators: show tooltips, new category (prefix)
+- Improved all socket base classes to support node-groups
 - Fixed socket base class to avoid executing node-group input nodes
 - Fixed "Dissolve" node
 - Fixed nodetree execution
