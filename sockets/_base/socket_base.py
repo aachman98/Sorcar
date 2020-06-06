@@ -35,9 +35,9 @@ class ScNodeSocket:
     def draw_color(self, context, node):
         return self.color
     
-    def draw_layout(self, context, layout, node, text):
+    def draw_layout(self, context, layout, node, prop, text):
         # Draw overridable custom layout of socket
-        layout.prop(node, self.default_prop, text=text)
+        layout.prop(node, prop, text=text)
     
     def draw(self, context, layout, node, text):
         if (self.is_output):
@@ -49,13 +49,13 @@ class ScNodeSocket:
                 layout.label(text=text + ": " + self.get_label())
             else:
                 if (self.default_prop == ""):
-                    if (self.node.bl_idname == "ScNodeGroup"):
-                        layout.prop(self, "default_value_update", text=text)
+                    if (self.node.bl_idname == "ScNodeGroup" and [i for i in node.node_tree.inputs if i.identifier==self.identifier][0].show_prop):
+                        self.draw_layout(context, layout, self, "default_value_update", text)
                     else:
                         layout.label(text=text)
                 else:
                     layout.prop(self, "hide", icon='RADIOBUT_OFF', icon_only=True, invert_checkbox=True)
-                    self.draw_layout(context, layout, node, text)
+                    self.draw_layout(context, layout, node, self.default_prop, text)
     
     def execute(self, forced):
         # Execute node socket to get/set default_value
@@ -84,7 +84,7 @@ class ScNodeSocket:
                         print_log(self.node.name, self.name, "execute", msg="No ret")
             else:
                 if (self.default_prop == ""):
-                    if (self.node.bl_idname == "ScNodeGroup"):
+                    if (self.node.bl_idname == "ScNodeGroup" and [i for i in self.node.node_tree.inputs if i.identifier==self.identifier][0].show_prop):
                         self.socket_error = False
                         self.default_value = self.default_value_update
                         return True
