@@ -10,4 +10,7 @@ class ScUtilitiesPanel(Panel, ScPanel):
 
     def draw(self, context):
         layout = self.layout
+        layout.operator("sorcar.execute_node")
+        layout.operator("sorcar.clear_preview")
+        layout.separator()
         layout.operator("node.join", text="Frame (Comment)", icon='SEQ_STRIP_META')
