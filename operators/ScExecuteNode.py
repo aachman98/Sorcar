@@ -14,7 +14,7 @@ class ScExecuteNode(Operator):
 
     def execute(self, context):
         curr_tree = context.space_data.edit_tree
-        if (curr_tree.bl_idname == "ScNodeTree" and curr_tree.nodes.active):
+        if (curr_tree.nodes.active):
             curr_tree.node = curr_tree.nodes.active.name
             curr_tree.execute_node()
             return {"FINISHED"}
