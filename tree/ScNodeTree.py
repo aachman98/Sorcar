@@ -13,6 +13,8 @@ class ScNodeTree(NodeTree):
     links_hash = 0
     variables: StringProperty(default="{}")
 
+    prop_clear_vars: BoolProperty(name="Clear variables", default=True)
+
     def update_realtime(self, context):
         if not (update_each_frame in bpy.app.handlers.frame_change_post):
             bpy.app.handlers.frame_change_post.append(update_each_frame)
@@ -53,6 +55,8 @@ class ScNodeTree(NodeTree):
         self.reset_nodes(True)
         n = self.nodes.get(str(self.node))
         if (n):
+            if (self.prop_clear_vars):
+                self.variables = "{}";
             if (hasattr(n, "execute")):
                 print_log(msg="---EXECUTE NODE---")
                 if (not n.execute()):
