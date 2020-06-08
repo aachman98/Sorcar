@@ -13,3 +13,4 @@ class ScTreePropertiesPanel(Panel, ScPanel):
         nt = context.space_data.node_tree
         layout.label(text="Preview node: " + str(nt.node), icon='NODE')
         layout.prop(nt, "prop_realtime")
+        layout.prop(nt, "prop_clear_vars")

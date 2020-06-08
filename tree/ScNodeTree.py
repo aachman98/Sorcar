@@ -13,13 +13,12 @@ class ScNodeTree(NodeTree):
     links_hash = 0
     variables: StringProperty(default="{}")
 
-    prop_clear_vars: BoolProperty(name="Clear variables", default=True)
-
     def update_realtime(self, context):
         if not (update_each_frame in bpy.app.handlers.frame_change_post):
             bpy.app.handlers.frame_change_post.append(update_each_frame)
         return None
     prop_realtime: BoolProperty(name="Realtime", update=update_realtime)
+    prop_clear_vars: BoolProperty(name="Clear variables", default=True)
 
     def get_links_hash(self):
         links = self.links
