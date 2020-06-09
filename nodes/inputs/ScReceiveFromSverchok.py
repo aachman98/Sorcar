@@ -794,11 +794,17 @@ class ScReceiveFromSverchok(Node, ScInputNode):
         [206, 202, 203, 207],
         [190, 149, 151, 153, 155, 157, 254, 242, 238, 235, 231, 227, 223, 219, 215, 211, 207, 203, 199, 193, 191]
     ]]''')
+    prop_verts_mask: StringProperty(default=repr([[True]*256]))
+    prop_edges_mask: StringProperty(default=repr([[True]*386]))
+    prop_faces_mask: StringProperty(default=repr([[True]*136]))
     
     def functionality(self):
         verts = eval(self.prop_verts)
         edges = eval(self.prop_edges)
         faces = eval(self.prop_faces)
+        verts_mask = eval(self.prop_verts_mask)
+        edges_mask = eval(self.prop_edges_mask)
+        faces_mask = eval(self.prop_faces_mask)
         l = len(verts)
         objects = []
         
@@ -806,6 +812,12 @@ class ScReceiveFromSverchok(Node, ScInputNode):
             bpy.ops.object.add(type = "MESH", align = "CURSOR")
             o = bpy.context.active_object
             o.data.from_pydata(verts[i], edges[i], faces[i])
+            for j in range (0, len(verts_mask[i])):
+                o.data.vertices[j].select = verts_mask[i][j]
+            for j in range (0, len(edges_mask[i])):
+                o.data.edges[j].select = edges_mask[i][j]
+            for j in range (0, len(faces_mask[i])):
+                o.data.polygons[j].select = faces_mask[i][j]
             objects.append(o)
         
         if (l > 0):
