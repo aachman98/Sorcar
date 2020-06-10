@@ -88,6 +88,16 @@ and more...!
 
 ## Changelog
 
+#### [Unreleased]
+
+- Added "Default" input socket in "Get Variable" node to set value if variable not initialised
+- Added "Clear Variables" nodetree property in "Properties" UI panel to clear data on re-evaluation
+- Added "Clear Preview" operator (shortcut: Alt+E) to clear current preview node
+- Added "Execute Node" & "Clear Preview" ops to "Utilities" UI panel
+- Improved "Send to Sverchok" node to include selection mask with mesh data sent
+- Improved "Receive from Sverchok" node to set selection mask to mesh data received
+- Improved "Execute Node" operator: removed redundant tree type check
+
 #### 3.2.0
 
 - Added "Node Group" utility node
