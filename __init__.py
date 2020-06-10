@@ -115,6 +115,7 @@ def init_keymaps():
     km = kc.keymaps.new(name="Node Generic", space_type='NODE_EDITOR')
     kmi = [
         km.keymap_items.new("sorcar.execute_node", 'E', 'PRESS'),
+        km.keymap_items.new("sorcar.clear_preview", 'E', 'PRESS', alt=True),
         km.keymap_items.new("sorcar.group_nodes", 'G', 'PRESS', ctrl=True),
         km.keymap_items.new("sorcar.edit_group", 'TAB', 'PRESS')
     ]
