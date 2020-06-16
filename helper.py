@@ -33,8 +33,11 @@ def focus_on_object(obj, edit=False):
 
 def remove_object(obj):
     if (obj):
-        data = obj.data
-        type = obj.type
+        try:
+            data = obj.data
+            type = obj.type
+        except:
+            return
         bpy.data.objects.remove(obj, do_unlink=True, do_id_user=True)
         if hasattr(data, "users"):
             if data.users == 0:
@@ -43,10 +46,12 @@ def remove_object(obj):
                 elif (type in ['CURVE', 'FONT']):
                     bpy.data.curves.remove(data, do_unlink=True, do_id_user=True)
 
-def apply_all_modifiers():
-    obj = bpy.context.active_object
-    while(obj.modifiers):
-        bpy.ops.object.modifier_apply(modifier=obj.modifiers[0].name)
+def apply_all_modifiers(object):
+    if (object):
+        if (object.name in bpy.context.view_layer.objects):
+            bpy.context.view_layer.objects.active = object
+            while(object.modifiers):
+                bpy.ops.object.modifier_apply(modifier=object.modifiers[0].name)
 
 def get_override(active=None, edit=False, selected=[], type='VIEW_3D'):
     override = bpy.context.copy()
