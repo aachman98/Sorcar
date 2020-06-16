@@ -44,11 +44,6 @@ class ScScatter(Node, ScObjectOperatorNode):
     
     def pre_execute(self):
         super().pre_execute()
-        for obj in self.prop_obj_array[1:-1].split(', '):
-            try:
-                remove_object(eval(obj))
-            except:
-                print_log(self.name, None, "pre_execute", "Invalid object: " + obj)
         self.prop_obj_array = "[]"
     
     def functionality(self):
@@ -65,6 +60,7 @@ class ScScatter(Node, ScObjectOperatorNode):
             bpy.ops.object.select_grouped(type='CHILDREN_RECURSIVE')
             for i in arr_inst:
                 i.parent = None
+                self.id_data.register_object(i)
             o.instance_type = 'NONE'
         else:
             if (self.inputs["Component"].default_value == 'FACES'):
@@ -95,6 +91,7 @@ class ScScatter(Node, ScObjectOperatorNode):
                 temp = eval(self.prop_obj_array)
                 temp.append(bpy.context.active_object)
                 self.prop_obj_array = repr(temp)
+                self.id_data.register_object(bpy.context.active_object)
                 if (self.inputs["Type"].default_value == 'RAND'):
                     self.inputs["Scatter Object"].execute(True)
     
@@ -102,3 +99,12 @@ class ScScatter(Node, ScObjectOperatorNode):
         out = super().post_execute()
         out["Scattered Objects"] = self.prop_obj_array
         return out
+    
+    def free(self):
+        for object in self.prop_obj_array[1:-1].split(', '):
+            try:
+                obj = eval(object)
+            except:
+                print_log(self.id_data.name, self.name, "free", "Invalid object: " + object)
+                continue
+            self.id_data.unregister_object(obj)

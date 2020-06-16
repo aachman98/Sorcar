@@ -30,8 +30,8 @@ class ScText(Node, ScNode):
         )
     
     def pre_execute(self):
-        if (self.out_curve):
-            remove_object(self.out_curve)
+        if (bpy.ops.object.mode_set.poll()):
+            bpy.ops.object.mode_set(mode="OBJECT")
     
     def functionality(self):
         bpy.ops.object.text_add(
@@ -42,7 +42,10 @@ class ScText(Node, ScNode):
     def post_execute(self):
         self.out_curve = bpy.context.active_object
         self.out_curve.name = self.inputs["Name"].default_value
-        if (self.out_curve.data):
-            self.out_curve.data.name = self.out_curve.name
-            self.out_curve.data.body = self.inputs["Text"].default_value
+        self.out_curve.data.name = self.out_curve.name
+        self.out_curve.data.body = self.inputs["Text"].default_value
+        self.id_data.register_object(self.out_curve)
         return {"Curve": self.out_curve}
+    
+    def free(self):
+        self.id_data.unregister_object(self.out_curve)

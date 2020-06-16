@@ -2,7 +2,7 @@ import bpy
 
 from bpy.props import BoolProperty, StringProperty
 from bpy.types import NodeTree
-from ..helper import print_log, update_each_frame
+from ..helper import print_log, update_each_frame, remove_object
 
 class ScNodeTree(NodeTree):
     bl_idname = 'ScNodeTree'
@@ -11,7 +11,7 @@ class ScNodeTree(NodeTree):
 
     node = None
     links_hash = 0
-    variables: StringProperty(default="{}")
+    objects = []
 
     def update_realtime(self, context):
         if not (update_each_frame in bpy.app.handlers.frame_change_post):
@@ -19,12 +19,26 @@ class ScNodeTree(NodeTree):
         return None
     prop_realtime: BoolProperty(name="Realtime", update=update_realtime)
     prop_clear_vars: BoolProperty(name="Clear variables", default=True)
+    prop_variables: StringProperty(default="{}")
+
+    def register_object(self, object):
+        self.objects.append(object)
+    
+    def unregister_object(self, object):
+        if object in self.objects:
+            remove_object(object)
+            self.objects.remove(object)
+    
+    def unregister_all_objects(self):
+        for object in self.objects:
+            remove_object(object)
+        self.objects = []
 
     def get_links_hash(self):
         links = self.links
         links_data = []
         for link in links:
-            links_data.append((link.from_node.name+":"+link.from_socket.name, link.to_node.name+":"+link.to_socket.name))
+            links_data.append((link.from_node.name+":"+link.from_socket.identifier, link.to_node.name+":"+link.to_socket.identifier))
         return hash(str(links_data))
     
     def reset_nodes(self, execute):
@@ -55,7 +69,8 @@ class ScNodeTree(NodeTree):
         n = self.nodes.get(str(self.node))
         if (n):
             if (self.prop_clear_vars):
-                self.variables = "{}";
+                self.prop_variables = "{}"
+            self.unregister_all_objects()
             if (hasattr(n, "execute")):
                 print_log(msg="---EXECUTE NODE---")
                 if (not n.execute()):

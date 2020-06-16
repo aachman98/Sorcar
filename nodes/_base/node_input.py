@@ -22,7 +22,6 @@ class ScInputNode(ScNode):
     def pre_execute(self):
         if (bpy.ops.object.mode_set.poll()):
             bpy.ops.object.mode_set(mode="OBJECT")
-        remove_object(self.out_mesh)
     
     def post_execute(self):
         out = {}
@@ -31,7 +30,8 @@ class ScInputNode(ScNode):
         if (self.out_mesh.data):
             self.out_mesh.data.name = self.out_mesh.name
         out["Object"] = self.out_mesh
+        self.id_data.register_object(self.out_mesh)
         return out
     
     def free(self):
-        remove_object(self.out_mesh)
+        self.id_data.unregister_object(self.out_mesh)

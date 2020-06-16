@@ -1,6 +1,6 @@
 import bpy
 
-from bpy.props import EnumProperty
+from bpy.props import EnumProperty, PointerProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_operator import ScEditOperatorNode
@@ -11,6 +11,7 @@ class ScSeparate(Node, ScEditOperatorNode):
     bl_label = "Separate"
     
     in_type: EnumProperty(items=[('SELECTED', 'Selected', ''), ('MATERIAL', 'Material', ''), ('LOOSE', 'Loose', '')], default='SELECTED', update=ScNode.update_value)
+    out_mesh: PointerProperty(type=bpy.types.Object)
     
     def init(self, context):
         super().init(context)
@@ -23,10 +24,6 @@ class ScSeparate(Node, ScEditOperatorNode):
             or (not self.inputs["Type"].default_value in ['SELECTED', 'MATERIAL', 'LOOSE'])
         )
     
-    def pre_execute(self):
-        remove_object(self.outputs["Separated Object"].default_value)
-        super().pre_execute()
-    
     def functionality(self):
         bpy.ops.mesh.separate(
             type = self.inputs["Type"].default_value
@@ -35,7 +32,12 @@ class ScSeparate(Node, ScEditOperatorNode):
     def post_execute(self):
         ret = super().post_execute()
         if (len(bpy.context.selected_objects) < 2):
-            ret["Separated Object"] = None
+            self.out_mesh = None
         else:
-            ret["Separated Object"] = bpy.context.selected_objects[1]
+            self.out_mesh = bpy.context.selected_objects[1]
+            self.id_data.register_object(self.out_mesh)
+        ret["Separated Object"] = self.out_mesh
         return ret
+    
+    def free(self):
+        self.id_data.unregister_object(self.out_mesh)

@@ -27,6 +27,7 @@ class ScNodeGroup(ScNode, NodeCustomGroup):
     
     def pre_execute(self):
         self.node_tree.reset_nodes(True)
+        self.node_tree.objects = []
         for i in range(0, len(self.inputs)):
             self.node_tree.nodes['Group Input'].outputs[i].default_value = self.inputs[i].default_value
     
@@ -34,6 +35,7 @@ class ScNodeGroup(ScNode, NodeCustomGroup):
         for i in range(0, len(self.outputs)):
             if (not self.node_tree.nodes['Group Output'].inputs[i].execute(False)):
                 break
+        self.id_data.objects.extend(self.node_tree.objects)
     
     def post_execute(self):
         out = []
@@ -51,3 +53,6 @@ class ScNodeGroup(ScNode, NodeCustomGroup):
             if not (self.outputs[i].set(out[i])):
                 return False
         return True
+    
+    def free(self):
+        self.node_tree.unregister_all_objects()

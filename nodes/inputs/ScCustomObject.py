@@ -25,18 +25,19 @@ class ScCustomObject(Node, ScInputNode):
         )
     
     def pre_execute(self):
-        super().pre_execute()
         self.inputs["Object"].default_value.hide_set(False)
         focus_on_object(self.inputs["Object"].default_value)
     
     def functionality(self):
         bpy.ops.object.duplicate()
-        apply_all_modifiers()
     
     def post_execute(self):
+        out = super().post_execute()
+        apply_all_modifiers(self.out_mesh)
         self.inputs["Object"].default_value.hide_set(self.inputs["Hide Original"].default_value)
-        return super().post_execute()
+        return out
     
     def free(self):
-        self.inputs["Object"].default_value.hide_set(False)
         super().free()
+        if (self.inputs["Object"].default_value):
+            self.inputs["Object"].default_value.hide_set(False)

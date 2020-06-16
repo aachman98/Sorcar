@@ -30,9 +30,9 @@ class ScSetVariable(Node, ScNode):
         )
     
     def functionality(self):
-        variables = eval(self.prop_nodetree.variables)
+        variables = eval(self.prop_nodetree.prop_variables)
         variables[self.inputs["Name"].default_value] = self.inputs["Value"].default_value
-        self.prop_nodetree.variables = repr(variables)
+        self.prop_nodetree.prop_variables = repr(variables)
     
     def post_execute(self):
         out = {}

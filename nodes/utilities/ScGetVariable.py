@@ -29,10 +29,10 @@ class ScGetVariable(Node, ScNode):
         )
     
     def post_execute(self):
-        variables = eval(self.prop_nodetree.variables)
+        variables = eval(self.prop_nodetree.prop_variables)
         if (not self.inputs["Name"].default_value in variables):
             variables[self.inputs["Name"].default_value] = self.inputs["Default"].default_value
-            self.prop_nodetree.variables = repr(variables)
+            self.prop_nodetree.prop_variables = repr(variables)
         out = {}
         out["Value"] = variables[self.inputs["Name"].default_value]
         return out
