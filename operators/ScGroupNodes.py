@@ -17,7 +17,7 @@ class ScGroupNodes(Operator):
         # Get space, path, current nodetree, selected nodes and a newly created group
         space = context.space_data
         path = space.path
-        node_tree = space.path[len(path)-1].node_tree
+        node_tree = space.path[-1].node_tree
         node_group = bpy.data.node_groups.new("ScNodeGroup", "ScNodeTree")
         selected_nodes = [i for i in node_tree.nodes if i.select]
         nodes_len = len(selected_nodes)

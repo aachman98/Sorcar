@@ -22,7 +22,7 @@ class ScModifierNode(ScNode):
     def pre_execute(self):
         focus_on_object(self.inputs["Object"].default_value)
         bpy.ops.object.modifier_add(type=self.prop_mod_type)
-        self.prop_mod_name = bpy.context.object.modifiers[len(bpy.context.object.modifiers)-1].name
+        self.prop_mod_name = bpy.context.object.modifiers[-1].name
     
     def post_execute(self):
         bpy.ops.object.modifier_apply(apply_as='DATA', modifier=self.prop_mod_name)

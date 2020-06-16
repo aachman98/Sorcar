@@ -1,6 +1,6 @@
 import bpy
 
-from bpy.props import EnumProperty, FloatProperty, BoolProperty, FloatVectorProperty
+from bpy.props import FloatProperty, BoolProperty, FloatVectorProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_transform import ScTransformNode

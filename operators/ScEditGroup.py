@@ -17,7 +17,7 @@ class ScEditGroup(Operator):
     def execute(self, context):
         space = context.space_data
         path = space.path
-        node = path[len(path)-1].node_tree.nodes.active
+        node = path[-1].node_tree.nodes.active
 
         if hasattr(node, "node_tree"):
             if (node.node_tree):
