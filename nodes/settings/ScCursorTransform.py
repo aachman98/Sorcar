@@ -5,9 +5,9 @@ from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_setting import ScSettingNode
 
-class ScCursor(Node, ScSettingNode):
-    bl_idname = "ScCursor"
-    bl_label = "Cursor"
+class ScCursorTransform(Node, ScSettingNode):
+    bl_idname = "ScCursorTransform"
+    bl_label = "Cursor Transform"
 
     in_location: FloatVectorProperty(update=ScNode.update_value)
     in_rotation: FloatVectorProperty(unit="ROTATION", update=ScNode.update_value)

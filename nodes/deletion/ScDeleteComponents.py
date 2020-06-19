@@ -5,9 +5,9 @@ from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_deletion import ScDeletionNode
 
-class ScDelete(Node, ScDeletionNode):
-    bl_idname = "ScDelete"
-    bl_label = "Delete"
+class ScDeleteComponents(Node, ScDeletionNode):
+    bl_idname = "ScDeleteComponents"
+    bl_label = "Delete Components"
     
     in_type: EnumProperty(items=[("VERT", "Vertices", ""), ("EDGE", "Edges", ""), ("FACE", "Faces", ""), ("EDGE_FACE", "Edges And Faces", ""), ("ONLY_FACE", "Only Faces", "")], default="VERT", update=ScNode.update_value)
     

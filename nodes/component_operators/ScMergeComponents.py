@@ -5,9 +5,9 @@ from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_operator import ScEditOperatorNode
 
-class ScMerge(Node, ScEditOperatorNode):
-    bl_idname = "ScMerge"
-    bl_label = "Merge"
+class ScMergeComponents(Node, ScEditOperatorNode):
+    bl_idname = "ScMergeComponents"
+    bl_label = "Merge Components"
     
     in_type: EnumProperty(items=[('FIRST', 'First', ''), ('LAST', 'Last', ''), ('CENTER', 'Center', ''), ('CURSOR', 'Cursor', ''), ('COLLAPSE', 'Collapse', '')], default='CENTER', update=ScNode.update_value)
     in_uvs: BoolProperty(update=ScNode.update_value)
