@@ -22,7 +22,8 @@ class ScNodeTree(NodeTree):
     prop_variables: StringProperty(default="{}")
 
     def register_object(self, object):
-        self.objects.append(object)
+        if (object not in self.objects):
+            self.objects.append(object)
     
     def unregister_object(self, object):
         if object in self.objects:
