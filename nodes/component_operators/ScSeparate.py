@@ -1,28 +1,32 @@
 import bpy
 
-from bpy.props import EnumProperty, PointerProperty
+from bpy.props import EnumProperty, StringProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_operator import ScEditOperatorNode
-from ...helper import remove_object
+from ...helper import print_log
 
 class ScSeparate(Node, ScEditOperatorNode):
     bl_idname = "ScSeparate"
     bl_label = "Separate"
     
     in_type: EnumProperty(items=[('SELECTED', 'Selected', ''), ('MATERIAL', 'Material', ''), ('LOOSE', 'Loose', '')], default='SELECTED', update=ScNode.update_value)
-    out_mesh: PointerProperty(type=bpy.types.Object)
+    prop_obj_array: StringProperty(default="[]")
     
     def init(self, context):
         super().init(context)
         self.inputs.new("ScNodeSocketString", "Type").init("in_type", True)
-        self.outputs.new("ScNodeSocketObject", "Separated Object")
+        self.outputs.new("ScNodeSocketArray", "Separated Objects")
     
     def error_condition(self):
         return(
             super().error_condition()
             or (not self.inputs["Type"].default_value in ['SELECTED', 'MATERIAL', 'LOOSE'])
         )
+    
+    def pre_execute(self):
+        super().pre_execute()
+        self.prop_obj_array = "[]"
     
     def functionality(self):
         bpy.ops.mesh.separate(
@@ -32,12 +36,19 @@ class ScSeparate(Node, ScEditOperatorNode):
     def post_execute(self):
         ret = super().post_execute()
         if (len(bpy.context.selected_objects) < 2):
-            self.out_mesh = None
+            self.prop_obj_array = "[]"
         else:
-            self.out_mesh = bpy.context.selected_objects[1]
-            self.id_data.register_object(self.out_mesh)
-        ret["Separated Object"] = self.out_mesh
+            self.prop_obj_array = repr(list(bpy.context.selected_objects))
+            for object in bpy.context.selected_objects:
+                self.id_data.register_object(object)
+        ret["Separated Objects"] = self.prop_obj_array
         return ret
     
     def free(self):
-        self.id_data.unregister_object(self.out_mesh)
+        for object in self.prop_obj_array[1:-1].split(', '):
+            try:
+                obj = eval(object)
+            except:
+                print_log(self.id_data.name, self.name, "free", "Invalid object: " + object)
+                continue
+            self.id_data.unregister_object(obj)
