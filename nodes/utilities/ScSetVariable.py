@@ -29,10 +29,12 @@ class ScSetVariable(Node, ScNode):
             or self.inputs["Name"].default_value == ""
         )
     
+    def pre_execute(self):
+        if not hasattr(self.prop_nodetree, "variables"):
+            self.prop_nodetree.variables = {}
+    
     def functionality(self):
-        variables = eval(self.prop_nodetree.prop_variables)
-        variables[self.inputs["Name"].default_value] = self.inputs["Value"].default_value
-        self.prop_nodetree.prop_variables = repr(variables)
+        self.prop_nodetree.variables[self.inputs["Name"].default_value] = self.inputs["Value"].default_value
     
     def post_execute(self):
         out = {}
