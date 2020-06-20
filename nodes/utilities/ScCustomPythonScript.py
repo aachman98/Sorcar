@@ -29,6 +29,16 @@ class ScCustomPythonScript(Node, ScNode):
         print_log(self.name, None, None, self.inputs["Script"].default_value)
     
     def functionality(self):
+        _C = bpy.context
+        _D = bpy.data
+        _O = bpy.ops
+        _S = _C.scene
+        _N = self
+        _NT = self.id_data
+        if not hasattr(_NT, "variables"):
+            _NT.variables = {}
+        _VAR = _NT.variables
+        _IN = self.inputs["In"].default_value
         for i in range(0, int(self.inputs["Repeat"].default_value)):
             exec(self.inputs["Script"].default_value)
 
