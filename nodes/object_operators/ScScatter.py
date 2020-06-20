@@ -1,7 +1,7 @@
 import bpy
 
 from mathutils import Vector
-from bpy.props import PointerProperty, StringProperty, EnumProperty
+from bpy.props import PointerProperty, StringProperty, EnumProperty, BoolProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_operator import ScObjectOperatorNode
@@ -16,6 +16,7 @@ class ScScatter(Node, ScObjectOperatorNode):
     in_obj: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
     in_type: EnumProperty(items=[('INST', 'Instanced', ''), ('MAN', 'Manual', ''), ('RAND', 'Random', '')], default='INST', update=ScNode.update_value)
     in_component: EnumProperty(items=[("FACES", "Faces", ""), ("VERTS", "Vertices", ""), ("EDGES", "Edges", "")], default="FACES", update=ScNode.update_value)
+    in_hide: BoolProperty(default=True, update=ScNode.update_value)
     prop_obj_array: StringProperty(default="[]")
 
     def init(self, context):
@@ -23,6 +24,7 @@ class ScScatter(Node, ScObjectOperatorNode):
         self.inputs.new("ScNodeSocketObject", "Scatter Object").init("in_obj", True)
         self.inputs.new("ScNodeSocketString", "Type").init("in_type", True)
         self.inputs.new("ScNodeSocketString", "Component").init("in_component", True)
+        self.inputs.new("ScNodeSocketBool", "Hide Original").init("in_hide")
         self.outputs.new("ScNodeSocketArray", "Scattered Objects")
     
     def draw_buttons(self, context, layout):
@@ -45,6 +47,7 @@ class ScScatter(Node, ScObjectOperatorNode):
     def pre_execute(self):
         super().pre_execute()
         self.prop_obj_array = "[]"
+        self.inputs["Scatter Object"].default_value.hide_set(False)
     
     def functionality(self):
         if (self.inputs["Type"].default_value == 'INST'):
@@ -98,6 +101,8 @@ class ScScatter(Node, ScObjectOperatorNode):
     def post_execute(self):
         out = super().post_execute()
         out["Scattered Objects"] = self.prop_obj_array
+        if (self.inputs['Hide Original'].default_value):
+            self.inputs["Scatter Object"].default_value.hide_set(True)
         return out
     
     def free(self):
