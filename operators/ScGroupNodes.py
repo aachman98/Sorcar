@@ -14,12 +14,18 @@ class ScGroupNodes(Operator):
         return sc_poll_op(context)
 
     def execute(self, context):
-        # Get space, path, current nodetree, selected nodes and a newly created group
+        # Get space, path, current nodetree, selected nodes (except group input/output) and a newly created group
         space = context.space_data
         path = space.path
         node_tree = space.path[-1].node_tree
         node_group = bpy.data.node_groups.new("ScNodeGroup", "ScNodeTree")
-        selected_nodes = [i for i in node_tree.nodes if i.select]
+        selected_nodes = []
+        for n in node_tree.nodes:
+            if n.select:
+                if n.bl_idname in ['NodeGroupInput', 'NodeGroupOutput']:
+                    n.select = False
+                else:
+                    selected_nodes.append(n)
         nodes_len = len(selected_nodes)
 
         # Store all links (internal/external) for the selected nodes to be created as group inputs/outputs
