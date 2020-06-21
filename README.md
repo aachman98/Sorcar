@@ -90,13 +90,21 @@ and more...!
 
 #### [Unreleased]
 
+- Added support for object registration & unregistration on each evaluation (handled by nodetree instead of individual nodes)
+- Added custom variables in "Custom Python Script" node: _C (bpy context), _D (bpy data), _O (bpy ops), _S (context scene), _N (self node), _NT (self nodetree), _VAR (nodetree variables), _IN (input socket data)
 - Added "Default" input socket in "Get Variable" node to set value if variable not initialised
+- Added "Hide Original" bool input prop in "Scatter" node
 - Added "Clear Variables" nodetree property in "Properties" UI panel to clear data on re-evaluation
 - Added "Clear Preview" operator (shortcut: Alt+E) to clear current preview node
 - Added "Execute Node" & "Clear Preview" ops to "Utilities" UI panel
 - Improved "Send to Sverchok" node to include selection mask with mesh data sent
 - Improved "Receive from Sverchok" node to set selection mask to mesh data received
+- Improved "Get/Set Variable" nodes to initialise empty variable in nodetree before accessing property
 - Improved "Execute Node" operator: removed redundant tree type check
+- Improved "apply_all_modifiers" & "remove_object" helper methods
+- Fixed "Separate" node: object array output instead of single object
+- Renamed "Merge" & "Delete" nodes: added "Component" suffix
+- Renamed "Cursor" node to "Cursor Transform"
 
 #### 3.2.0
 
