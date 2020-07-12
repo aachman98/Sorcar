@@ -4,9 +4,9 @@ import bmesh
 from bpy.props import IntProperty, BoolProperty, EnumProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
-from .._base.node_selection import ScSelectionNode
+from .._base.node_operator import ScEditOperatorNode
 
-class ScSelectVerticesByConnections(Node, ScSelectionNode):
+class ScSelectVerticesByConnections(Node, ScEditOperatorNode):
     bl_idname = "ScSelectVerticesByConnections"
     bl_label = "Select Vertices by Connections"
 
@@ -22,8 +22,11 @@ class ScSelectVerticesByConnections(Node, ScSelectionNode):
         return (
             super().error_condition()
             or int(self.inputs["Connections"].default_value) < 0
-            or (not 'VERT' in self.inputs["Selection Type"].default_value)
         )
+    
+    def pre_execute(self):
+        super().pre_execute()
+        bpy.context.tool_settings.mesh_select_mode = [True, False, False]
 
     def functionality(self):
         bm = bmesh.from_edit_mesh(self.inputs["Object"].default_value.data)
