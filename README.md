@@ -15,8 +15,8 @@ Sorcar is a **procedural modeling node-based system** which utilises Blender and
 
 ## Release & Instructions
 
-[Latest Release (v3.2.0)](https://github.com/aachman98/Sorcar/releases/latest)
-</br>*Requirement: Blender 2.80 or later*
+[Latest Release (v3.2.1)](https://github.com/aachman98/Sorcar/releases/latest)
+</br>*Requirement: Blender 2.81 or later*
 
 1. Download the zip file and install it as a Blender addon (Edit -> Preferences... -> Add-ons -> Install...)
 2. Open Sorcar Node Editor (**Do not** remove the 3D viewport as it is required by some operations like extrude, transform, ...)
@@ -88,7 +88,7 @@ and more...!
 
 ## Changelog
 
-#### [Unreleased]
+#### v3.2.1
 
 - Added support for object registration & unregistration on each evaluation (handled by nodetree instead of individual nodes)
 - Added custom variables in "Custom Python Script" node: _C (bpy context), _D (bpy data), _O (bpy ops), _S (context scene), _N (self node), _NT (self nodetree), _VAR (nodetree variables), _IN (input socket data)
@@ -109,7 +109,7 @@ and more...!
 - Renamed "Merge" & "Delete" nodes: added "Component" suffix
 - Renamed "Cursor" node to "Cursor Transform"
 
-#### 3.2.0
+#### v3.2.0
 
 - Added "Node Group" utility node
 - Added "Group Nodes" and "Edit Group" operators to create/modify node groups
