@@ -30,6 +30,6 @@ class ScFlushStacktrace(Operator):
             for log in logs:
                 print(log)
                 if (self.prop_save):
-                    t.write(log[0] + '\n')
+                    t.write(log + '\n')
             return {"FINISHED"}
         return {"CANCELLED"}
