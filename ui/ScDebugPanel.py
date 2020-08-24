@@ -13,6 +13,7 @@ class ScDebugPanel(Panel, ScPanel):
         layout = self.layout
         nt = context.space_data.node_tree
         n = nt.nodes.active
+        layout.operator("sorcar.flush_stacktrace")
         if (n):
             arr_in = []
             arr_prop = []
