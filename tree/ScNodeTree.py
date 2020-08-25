@@ -1,8 +1,10 @@
 import bpy
+# import linecache
 
 from bpy.props import BoolProperty, StringProperty
 from bpy.types import NodeTree
-from ..helper import print_log, update_each_frame, remove_object
+from ..helper import update_each_frame, remove_object
+from ..debug import log, clear_logs, print_traceback
 
 class ScNodeTree(NodeTree):
     bl_idname = 'ScNodeTree'
@@ -12,7 +14,7 @@ class ScNodeTree(NodeTree):
     node = None
     links_hash = 0
     objects = []
-    variables: {}
+    variables = {}
 
     def update_realtime(self, context):
         if not (update_each_frame in bpy.app.handlers.frame_change_post):
@@ -70,15 +72,19 @@ class ScNodeTree(NodeTree):
         n = self.nodes.get(str(self.node))
         if (n):
             if (self.prop_clear_vars):
-                self.variables = {}
+                self.variables.clear()
+            clear_logs()
             self.unregister_all_objects()
             if (hasattr(n, "execute")):
-                print_log(msg="---EXECUTE NODE---")
-                if (not n.execute()):
-                    print_log(self.name, msg="Failed to execute...")
-                else:
-                    print_log(self.name, msg="Executed successfully!")
-    
+                log(self.name, n.name, msg="EXECUTING NODE...")
+                try:
+                    if (not n.execute()):
+                        log(self.name, msg="EXECUTION FAILED")
+                    else:
+                        log(self.name, msg="EXECUTION SUCCESSFUL")
+                except:
+                    print_traceback()
+
     def set_value(self, node_name="Cube", attr_name="in_size", value=1, refresh=True):
         n = self.nodes.get(node_name)
         if (n):
