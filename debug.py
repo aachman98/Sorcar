@@ -1,15 +1,32 @@
+import bpy
+import traceback
+
 from datetime import datetime
 
-# Log levels:
-# 1. Info - Reg/unreg, updater, version, etc.
-# 2. Dataflow - Node-trees, nodes, node-groups, etc.
-# 3. All - Node functions, socket functions, error conditions, etc.
-#
-# Sample log: ("[2020-08-24 18:51:23,143602] SORCAR: ...log message...", 1)
-sc_logs = []
+sc_logs = [] # Sample log: ("SORCAR [2020-08-24 18:51:23,143602] (INFO): ...log message...", 1)
+
+def str_to_level(str='INFO'):
+    if str == 'NONE':
+        return 0
+    elif str == 'INFO':
+        return 1
+    elif str == 'DEBUG':
+        return 2
+    elif str == 'TRACE':
+        return 3
+
+def level_to_str(level=1):
+    if level == 0:
+        return 'NONE'
+    elif level == 1:
+        return 'INFO'
+    elif level == 2:
+        return 'DEBUG'
+    elif level == 3:
+        return 'TRACE'
 
 def log(parent=None, child=None, func=None, msg="", level=1):
-    log = datetime.now().strftime('[%d-%h-%Y %T,%f] ') + "SORCAR: "
+    log = "SORCAR " + datetime.now().strftime('[%d-%h-%Y %T,%f]') + " (" + level_to_str(level) + "): "
     if (parent):
         log += parent + ": "
     if (child):
@@ -18,6 +35,8 @@ def log(parent=None, child=None, func=None, msg="", level=1):
         log += func + "(): "
     log += msg
     sc_logs.append((log, level))
+    if (str_to_level(bpy.context.preferences.addons.get(__package__).preferences.log_level) >= level):
+        print(log)
 
 def flush_logs(level=1):
     logs = []
@@ -28,3 +47,6 @@ def flush_logs(level=1):
 
 def clear_logs():
     sc_logs.clear()
+
+def print_traceback():
+    log(msg="ERROR\n"+traceback.format_exc())

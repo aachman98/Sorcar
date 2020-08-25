@@ -33,7 +33,7 @@ import importlib
 import os
 
 from bpy.types import NodeTree, Operator, PropertyGroup, AddonPreferences
-from bpy.props import BoolProperty, StringProperty, IntProperty
+from bpy.props import BoolProperty, StringProperty, IntProperty, EnumProperty
 from nodeitems_utils import NodeItem
 
 from .tree.ScNodeCategory import ScNodeCategory
@@ -46,6 +46,18 @@ class SorcarPreferences(AddonPreferences):
     bl_idname = __package__
     bl_label = "Sorcar Preferences"
 
+    log_level: EnumProperty(
+    name = "Log Level",
+    description = "Maximum level of logs to print to console",
+    items = [
+        ('NONE', '0: None', 'No logs'),
+        ('INFO', '1: Info', 'Register/unregister, addon-updater, versions, etc.'),
+        ('DEBUG', '2: Dataflow', 'Node-trees, nodes, node-groups, etc.'),
+        ('TRACE', '3: All', 'Node functions, socket functions, error conditions, etc.')
+    ],
+    default = 'INFO',
+    )
+    # Addon updater properties
     auto_check_update: BoolProperty(
     name = "Auto-check for Update",
     description = "If enabled, auto-check for updates using an interval",
@@ -77,28 +89,30 @@ class SorcarPreferences(AddonPreferences):
         min=0,
         max=59
     )
+
     def draw(self, context):
+        self.layout.prop(self, "log_level")
         addon_updater_ops.update_settings_ui(self, context)
 
 def import_ops(path="./"):
     out = []
     for i in bpy.path.module_names(path + "operators"):
         out.append(getattr(importlib.import_module(".operators." + i[0], __name__), i[0]))
-        print_log("IMPORT OP", msg=i[0])
+        # print_log("IMPORT OP", msg=i[0])
     return out
 
 def import_sockets(path="./"):
     out = []
     for i in bpy.path.module_names(path + "sockets"):
         out.append(getattr(importlib.import_module(".sockets." + i[0], __name__), i[0]))
-        print_log("IMPORT SOCKET", msg=i[0])
+        # print_log("IMPORT SOCKET", msg=i[0])
     return out
 
 def import_ui(path="./"):
     out = []
     for i in bpy.path.module_names(path + "ui"):
         out.append(getattr(importlib.import_module(".ui." + i[0], __name__), i[0]))
-        print_log("IMPORT UI", msg=i[0])
+        # print_log("IMPORT UI", msg=i[0])
     return out
 
 def import_nodes(path="./"):
@@ -107,7 +121,7 @@ def import_nodes(path="./"):
         out[cat] = []
         for i in bpy.path.module_names(path + "nodes/" + cat):
             out[cat].append(getattr(importlib.import_module(".nodes." + cat + "." + i[0], __name__), i[0]))
-            print_log("IMPORT NODE", bpy.path.display_name(cat), msg=i[0])
+            # print_log("IMPORT NODE", bpy.path.display_name(cat), msg=i[0])
     return out
 
 def init_keymaps():
@@ -125,7 +139,7 @@ all_classes = []
 addon_keymaps = []
 
 def register():
-    print("-------------REGISTER SORCAR-------------")
+    print_log(msg="REGISTERING...")
     path = repr([i for i in addon_utils.modules() if i.bl_info['name'] == "Sorcar"][0]).split("from '")[1].split("__init__.py'>")[0]
     classes_ops = import_ops(path)
     classes_sockets = import_sockets(path)
@@ -163,13 +177,13 @@ def register():
     print_log("REGISTERED", msg="{} operators, {} sockets, {} UI, {} keymaps & {} nodes ({} categories)".format(len(classes_ops), len(classes_sockets), len(classes_ui), len(addon_keymaps), total_nodes, len(classes_nodes)))
 
 def unregister():
-    print("------------UNREGISTER SORCAR----------------")
+    print_log(msg="UNREGISTERING...")
     global all_classes, addon_keymaps
     all_classes.reverse()
 
     for i in all_classes:
         bpy.utils.unregister_class(i)
-        print_log("UNREGISTER", i.bl_idname, None, i.bl_label)
+        # print_log("UNREGISTER", i.bl_idname, None, i.bl_label)
     nodeitems_utils.unregister_node_categories("sc_node_categories")
     if (update_each_frame in bpy.app.handlers.frame_change_post):
         bpy.app.handlers.frame_change_post.remove(update_each_frame)
