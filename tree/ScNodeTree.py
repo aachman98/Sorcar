@@ -23,18 +23,22 @@ class ScNodeTree(NodeTree):
     prop_realtime: BoolProperty(name="Realtime", update=update_realtime)
     prop_clear_vars: BoolProperty(name="Clear variables", default=True)
 
-    def register_object(self, object):
-        if (object not in self.objects):
-            self.objects.append(object)
+    def register_object(self, obj):
+        if (obj not in self.objects):
+            log(self.name, None, "register_object", "Register object \""+obj.name+"\"", 2)
+            self.objects.append(obj)
     
-    def unregister_object(self, object):
-        if object in self.objects:
-            remove_object(object)
-            self.objects.remove(object)
+    def unregister_object(self, obj):
+        if obj in self.objects:
+            log(self.name, None, "unregister_object", "Unregister object \""+obj.name+"\"", 2)
+            remove_object(obj)
+            self.objects.remove(obj)
     
     def unregister_all_objects(self):
-        for object in self.objects:
-            remove_object(object)
+        log(self.name, None, "unregister_all_objects", "Objects="+str(len(self.objects)), 2)
+        for obj in self.objects:
+            log(self.name, None, "unregister_all_objects", "Object="+obj.name, 3)
+            remove_object(obj)
         self.objects = []
 
     def get_links_hash(self):
@@ -42,9 +46,12 @@ class ScNodeTree(NodeTree):
         links_data = []
         for link in links:
             links_data.append((link.from_node.name+":"+link.from_socket.identifier, link.to_node.name+":"+link.to_socket.identifier))
-        return hash(str(links_data))
+        h = hash(str(links_data))
+        log(self.name, None, "get_links_hash", "Hash="+str(h), 3)
+        return h
     
     def reset_nodes(self, execute):
+        log(self.name, None, "reset_nodes", "Execute="+str(execute), 2)
         if (not self.nodes.get(str(self.node))):
             self.node = None
         for i in self.nodes:
@@ -52,9 +59,11 @@ class ScNodeTree(NodeTree):
                 i.reset(execute)
     
     def update_links(self):
+        log(self.name, None, "update_links", "Links="+str(len(self.links)), 2)
         for i in self.links:
             if not (i.to_socket.bl_rna.name == i.from_socket.bl_rna.name):
                 if (i.to_socket.bl_rna.name == "ScNodeSocketArrayPlaceholder"):
+                    log(self.name, None, "update_links", "FromNode="+i.from_node+", FromSocket="+i.from_socket+", ToNode="+i.to_node+", ToSocket="+i.to_socket, 3)
                     new_socket = i.to_node.inputs.new(i.from_socket.bl_rna.name, i.from_socket.bl_label)
                     self.links.new(i.from_socket, new_socket)
                     self.links.remove(i)
@@ -76,24 +85,32 @@ class ScNodeTree(NodeTree):
             clear_logs()
             self.unregister_all_objects()
             if (hasattr(n, "execute")):
-                log(self.name, n.name, msg="EXECUTING NODE...")
+                log(self.name, n.name, msg="BEGIN EXECUTION", level=2)
                 try:
                     if (not n.execute()):
-                        log(self.name, msg="EXECUTION FAILED")
+                        log(self.name, msg="EXECUTION FAILED", level=2)
                     else:
-                        log(self.name, msg="EXECUTION SUCCESSFUL")
+                        log(self.name, msg="EXECUTION SUCCESSFUL", level=2)
                 except:
                     print_traceback()
+        else:
+            log(self.name, None, "execute_node", "Node not found", 2)
 
     def set_value(self, node_name="Cube", attr_name="in_size", value=1, refresh=True):
         n = self.nodes.get(node_name)
         if (n):
+            log(self.name, node_name, "set_value", "Key="+attr_name+", Value="+repr(value)+", Refresh="+str(refresh))
             setattr(n, attr_name, value)
             if (refresh):
                 self.execute_node();
+        else:
+            log(self.name, None, "set_value", "Node not found")
     
     def set_preview(self, node_name="Cube"):
         n = self.nodes.get(node_name)
         if (n):
+            log(self.name, node_name, "set_preview", "Set as preview node")
             self.node = n.name
             self.execute_node();
+        else:
+            log(self.name, None, "set_preview", "Node not found")
