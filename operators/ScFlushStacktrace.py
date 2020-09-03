@@ -25,11 +25,15 @@ class ScFlushStacktrace(Operator):
         curr_tree = context.space_data.edit_tree
         logs = flush_logs(self.prop_level)
         if (len(logs) > 0):
+            str = "sc_" + time.strftime('%Y-%m-%d_%H-%M-%S') + ".log"
             if (self.prop_save):
-                t = bpy.data.texts.new("sc_" + time.strftime('%Y-%m-%d_%H-%M-%S') + ".log")
+                text = bpy.data.texts.new(str)
+            ########## sc_2020-09-04_02-02-37.log ##########
+            print("#"*10+" "+str+" "+"#"*10)
             for log in logs:
                 print(log)
                 if (self.prop_save):
-                    t.write(log + '\n')
+                    text.write(log + '\n')
+            print("#"*48)
             return {"FINISHED"}
         return {"CANCELLED"}
