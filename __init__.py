@@ -38,7 +38,8 @@ from nodeitems_utils import NodeItem
 
 from .tree.ScNodeCategory import ScNodeCategory
 from .tree.ScNodeTree import ScNodeTree
-from .helper import update_each_frame, print_log
+from .helper import update_each_frame
+from .debug import log
 
 from . import addon_updater_ops
 
@@ -98,21 +99,21 @@ def import_ops(path="./"):
     out = []
     for i in bpy.path.module_names(path + "operators"):
         out.append(getattr(importlib.import_module(".operators." + i[0], __name__), i[0]))
-        # print_log("IMPORT OP", msg=i[0])
+        log("IMPORT", "Operator", msg=i[0], level=2)
     return out
 
 def import_sockets(path="./"):
     out = []
     for i in bpy.path.module_names(path + "sockets"):
         out.append(getattr(importlib.import_module(".sockets." + i[0], __name__), i[0]))
-        # print_log("IMPORT SOCKET", msg=i[0])
+        log("IMPORT", "Socket", msg=i[0], level=2)
     return out
 
 def import_ui(path="./"):
     out = []
     for i in bpy.path.module_names(path + "ui"):
         out.append(getattr(importlib.import_module(".ui." + i[0], __name__), i[0]))
-        # print_log("IMPORT UI", msg=i[0])
+        log("IMPORT", "UI Panel", msg=i[0], level=2)
     return out
 
 def import_nodes(path="./"):
@@ -121,7 +122,7 @@ def import_nodes(path="./"):
         out[cat] = []
         for i in bpy.path.module_names(path + "nodes/" + cat):
             out[cat].append(getattr(importlib.import_module(".nodes." + cat + "." + i[0], __name__), i[0]))
-            # print_log("IMPORT NODE", bpy.path.display_name(cat), msg=i[0])
+            log("IMPORT", "Node ("+bpy.path.display_name(cat)+")", msg=i[0], level=2)
     return out
 
 def init_keymaps():
@@ -139,7 +140,7 @@ all_classes = []
 addon_keymaps = []
 
 def register():
-    print_log(msg="REGISTERING...")
+    log(msg="REGISTERING...", level=2)
     path = repr([i for i in addon_utils.modules() if i.bl_info['name'] == "Sorcar"][0]).split("from '")[1].split("__init__.py'>")[0]
     classes_ops = import_ops(path)
     classes_sockets = import_sockets(path)
@@ -174,16 +175,16 @@ def register():
     
     addon_updater_ops.register(bl_info)
     
-    print_log("REGISTERED", msg="{} operators, {} sockets, {} UI, {} keymaps & {} nodes ({} categories)".format(len(classes_ops), len(classes_sockets), len(classes_ui), len(addon_keymaps), total_nodes, len(classes_nodes)))
+    log("REGISTERED", msg="{} operators, {} sockets, {} UI, {} keymaps & {} nodes ({} categories)".format(len(classes_ops), len(classes_sockets), len(classes_ui), len(addon_keymaps), total_nodes, len(classes_nodes)))
 
 def unregister():
-    print_log(msg="UNREGISTERING...")
+    log(msg="UNREGISTERING...", level=2)
     global all_classes, addon_keymaps
     all_classes.reverse()
 
     for i in all_classes:
         bpy.utils.unregister_class(i)
-        # print_log("UNREGISTER", i.bl_idname, None, i.bl_label)
+        log("UNREGISTER", i.bl_idname, msg=i.bl_label, level=2)
     nodeitems_utils.unregister_node_categories("sc_node_categories")
     if (update_each_frame in bpy.app.handlers.frame_change_post):
         bpy.app.handlers.frame_change_post.remove(update_each_frame)
@@ -194,4 +195,4 @@ def unregister():
     
     addon_updater_ops.unregister()
 
-    print_log("UNREGISTERED", msg=str(len(all_classes)) + " classes")
+    log("UNREGISTERED", msg=str(len(all_classes)) + " classes")

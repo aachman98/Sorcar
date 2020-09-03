@@ -16,18 +16,18 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
+import bpy
 import os
 
-import bpy
 from bpy.app.handlers import persistent
+from .debug import log
 
 # updater import, import safely
 # Prevents popups for users with invalid python installs e.g. missing libraries
 try:
 	from .addon_updater import Updater as updater
 except Exception as e:
-	print("ERROR INITIALIZING UPDATER")
-	print(str(e))
+	log("UPDATER", "ERROR INITIALIZING", msg=str(e))
 	class Singleton_updater_none(object):
 		def __init__(self):
 			self.addon = None
@@ -191,9 +191,9 @@ class addon_updater_install_popup(bpy.types.Operator):
 			# should return 0, if not something happened
 			if updater.verbose:
 				if res==0:
-					print("Updater returned successful")
+					log("UPDATER", msg="Returned successful")
 				else:
-					print("Updater returned {}, error occurred".format(res))
+					log("UPDATER", "ERROR", msg="Returned {}, error occurred".format(res))
 		elif updater.update_ready == None:
 			_ = updater.check_for_update(now=True)
 
@@ -202,7 +202,7 @@ class addon_updater_install_popup(bpy.types.Operator):
 			getattr(getattr(bpy.ops, atr[0]),atr[1])('INVOKE_DEFAULT')
 		else:
 			if updater.verbose:
-				print("Doing nothing, not ready for update")
+				log("UPDATER", msg="Doing nothing, not ready for update")
 		return {'FINISHED'}
 
 
@@ -228,7 +228,7 @@ class addon_updater_check_now(bpy.types.Operator):
 		settings = get_user_preferences(context)
 		if not settings:
 			if updater.verbose:
-				print("Could not get {} preferences, update check skipped".format(
+				log("UPDATER", msg="Could not get {} preferences, update check skipped".format(
 					__package__))
 			return {'CANCELLED'}
 		updater.set_check_interval(enable=settings.auto_check_update,
@@ -281,8 +281,8 @@ class addon_updater_update_now(bpy.types.Operator):
 
 				# should return 0, if not something happened
 				if updater.verbose:
-					if res==0: print("Updater returned successful")
-					else: print("Updater returned "+str(res)+", error occurred")
+					if res==0: log("UPDATER", msg="Returned successful")
+					else: log("UPDATER", "ERROR", msg="Returned "+str(res)+", error occurred")
 			except Exception as e:
 				updater._error = "Error trying to run update"
 				updater._error_msg = str(e)
@@ -372,10 +372,10 @@ class addon_updater_update_target(bpy.types.Operator):
 		# should return 0, if not something happened
 		if res==0:
 			if updater.verbose:
-				print("Updater returned successful")
+				log("UPDATER", msg="Returned successful")
 		else:
 			if updater.verbose:
-				print("Updater returned "+str(res)+", error occurred")
+				log("UPDATER", "ERROR", msg="Returned "+str(res))
 			return {'CANCELLED'}
 
 		return {'FINISHED'}
@@ -647,8 +647,7 @@ def updater_run_install_popup_handler(scene):
 			# user probably manually installed to get the up to date addon
 			# in here. Clear out the update flag using this function
 			if updater.verbose:
-				print("{} updater: appears user updated, clearing flag".format(\
-						updater.addon))
+				log("UPDATER", msg="Appears user updated, clearing flag")
 			updater.json_reset_restore()
 			return
 	atr = addon_updater_install_popup.bl_idname.split(".")
@@ -693,7 +692,7 @@ def post_update_callback(module_name, res=None):
 		# this is the same code as in conditional at the end of the register function
 		# ie if "auto_reload_post_update" == True, comment out this code
 		if updater.verbose:
-			print("{} updater: Running post update callback".format(updater.addon))
+			log("UPDATER", msg="Running post update callback")
 		#bpy.app.handlers.scene_update_post.append(updater_run_success_popup_handler)
 
 		atr = addon_updater_updated_successful.bl_idname.split(".")
@@ -748,8 +747,7 @@ def check_for_update_background():
 	# this function should take a bool input, if true: update ready
 	# if false, no update ready
 	if updater.verbose:
-		print("{} updater: Running background check for update".format(\
-				updater.addon))
+		log("UPDATER", msg="Running background check for update")
 	updater.check_for_update_async(background_update_callback)
 	ran_background_check = True
 
@@ -764,8 +762,7 @@ def check_for_update_nonthreaded(self, context):
 	settings = get_user_preferences(bpy.context)
 	if not settings:
 		if updater.verbose:
-			print("Could not get {} preferences, update check skipped".format(
-				__package__))
+			log("UPDATER", msg="Could not get {} preferences, update check skipped".format(__package__))
 		return
 	updater.set_check_interval(enable=settings.auto_check_update,
 				months=settings.updater_intrval_months,
@@ -779,7 +776,7 @@ def check_for_update_nonthreaded(self, context):
 		atr = addon_updater_install_popup.bl_idname.split(".")
 		getattr(getattr(bpy.ops, atr[0]),atr[1])('INVOKE_DEFAULT')
 	else:
-		if updater.verbose: print("No update ready")
+		if updater.verbose: log("UPDATER", msg="No update ready")
 		self.report({'INFO'}, "No update ready")
 
 
@@ -1251,7 +1248,7 @@ def register(bl_info):
 	"""Registering the operators in this module"""
 	# safer failure in case of issue loading module
 	if updater.error:
-		print("Exiting updater registration, " + updater.error)
+		log("UPDATER", "ERROR", msg="Exiting registration, " + updater.error)
 		return
 	updater.clear_state() # clear internal vars, avoids reloading oddities
 
