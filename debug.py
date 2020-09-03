@@ -35,7 +35,11 @@ def log(parent=None, child=None, func=None, msg="", level=1):
         log += func + "(): "
     log += msg
     sc_logs.append((log, level))
-    if (str_to_level(bpy.context.preferences.addons.get(__package__).preferences.log_level) >= level):
+    try:
+        min_level = str_to_level(bpy.context.preferences.addons.get(__package__).preferences.log_level)
+    except:
+        min_level = 1
+    if (min_level >= level):
         print(log)
 
 def flush_logs(level=1):
