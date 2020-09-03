@@ -1,5 +1,6 @@
 import bpy
 from mathutils import Vector
+from .debug import log
 
 def sc_poll_op(context):
     space = context.space_data
@@ -26,10 +27,15 @@ def focus_on_object(obj, edit=False):
         bpy.ops.object.select_all(action="DESELECT")
     if (obj):
         if (obj.name in bpy.context.view_layer.objects):
+            log("HELPER", obj.name, "focus_on_object", "Edit="+str(edit), 2)
             bpy.context.view_layer.objects.active = obj
             obj.select_set(True)
             if (edit):
                 bpy.ops.object.mode_set(mode="EDIT")
+        else:
+            log("HELPER", None, "focus_on_object", "Object \""+obj.name+"\" not found in view layer", 3)
+    else:
+        log("HELPER", None, "focus_on_object", "Object not found", 3)
 
 def remove_object(obj):
     if (obj):
@@ -37,21 +43,34 @@ def remove_object(obj):
             data = obj.data
             type = obj.type
         except:
+            log("HELPER", None, "remove_object", "Data/type not found for object \""+obj.name+"\"", 3)
             return
+        log("HELPER", obj.name, "remove_object", "Removing from scene", 2)
         bpy.data.objects.remove(obj, do_unlink=True, do_id_user=True)
         if hasattr(data, "users"):
             if data.users == 0:
+                log("HELPER", data.name, "remove_object", "Type="+type, 2)
                 if (type == 'MESH'):
                     bpy.data.meshes.remove(data, do_unlink=True, do_id_user=True)
                 elif (type in ['CURVE', 'FONT']):
                     bpy.data.curves.remove(data, do_unlink=True, do_id_user=True)
+                else:
+                    log("HELPER", data.name, "remove_object", "Undetermined type, cannot remove", 2)
+    else:
+        log("HELPER", None, "remove_object", "Object not found", 3)
 
-def apply_all_modifiers(object):
-    if (object):
-        if (object.name in bpy.context.view_layer.objects):
-            bpy.context.view_layer.objects.active = object
-            while(object.modifiers):
-                bpy.ops.object.modifier_apply(modifier=object.modifiers[0].name)
+def apply_all_modifiers(obj):
+    if (obj):
+        if (obj.name in bpy.context.view_layer.objects):
+            log("HELPER", obj.name, "apply_all_modifiers", "Modifiers="+str(len(obj.modifiers)), 2)
+            bpy.context.view_layer.objects.active = obj
+            while(obj.modifiers):
+                log("HELPER", obj.name, "apply_all_modifiers", "Modifier="+obj.modifiers[0].name, 3)
+                bpy.ops.object.modifier_apply(modifier=obj.modifiers[0].name)
+        else:
+            log("HELPER", None, "apply_all_modifiers", "Object \""+obj.name+"\" not found in view layer", 3)
+    else:
+        log("HELPER", None, "apply_all_modifiers", "Object not found", 3)
 
 def get_override(active=None, edit=False, selected=[], type='VIEW_3D'):
     override = bpy.context.copy()
@@ -72,10 +91,11 @@ def get_override(active=None, edit=False, selected=[], type='VIEW_3D'):
                 break
         if (flag):
             break
+    log("HELPER", None, "get_override", "Override="+str(override), 3)
     return override
 
 def print_log(parent=None, child=None, func=None, msg=""):
-    log = "SORCAR: "
+    log = "<DEPRICATED> SORCAR: "
     if (parent):
         log += parent + ": "
     if (child):
@@ -92,6 +112,7 @@ def update_each_frame(scene):
                 i.execute_node()
 
 def convert_data(data, from_type=None, to_type=None):
+    log("HELPER", None, "convert_data", "Data="+str(data)+", From="+str(data)+", To="+str(data), 3)
     if (data == None or from_type == None or to_type == None):
         return False, None
     try:
@@ -249,6 +270,7 @@ def convert_data(data, from_type=None, to_type=None):
         return False, None
 
 def selection_type_to_string(sel_type):
+    log("HELPER", None, "selection_type_to_string", "Selection="+repr(sel_type), 3)
     out = []
     if "VERT" in sel_type:
         out.append("Vertex")
