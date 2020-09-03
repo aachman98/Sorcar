@@ -112,9 +112,9 @@ def update_each_frame(scene):
                 i.execute_node()
 
 def convert_data(data, from_type=None, to_type=None):
-    log("HELPER", None, "convert_data", "Data="+str(data)+", From="+str(data)+", To="+str(data), 3)
     if (data == None or from_type == None or to_type == None):
         return False, None
+    log("HELPER", None, "convert_data", "Data="+str(data)+", From="+from_type+", To="+to_type, 3)
     try:
         if (to_type == "NUMBER"):
             if (from_type == "NUMBER"):
