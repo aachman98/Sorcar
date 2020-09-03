@@ -13,14 +13,18 @@ class ScEditOperatorNode(ScNode):
     
     def error_condition(self):
         return (
-            self.inputs["Object"].default_value == None
+            super().error_condition()
+            or self.inputs["Object"].default_value == None
         )
     
     def pre_execute(self):
+        super().pre_execute()
         focus_on_object(self.inputs["Object"].default_value, True)
     
     def post_execute(self):
-        return {"Object": self.inputs["Object"].default_value}
+        out = super().post_execute()
+        out["Object"] = self.inputs["Object"].default_value
+        return out
 
 class ScObjectOperatorNode(ScNode):
     def init(self, context):
@@ -31,14 +35,18 @@ class ScObjectOperatorNode(ScNode):
     
     def error_condition(self):
         return (
-            self.inputs["Object"].default_value == None
+            super().error_condition()
+            or self.inputs["Object"].default_value == None
         )
     
     def pre_execute(self):
+        super().pre_execute()
         focus_on_object(self.inputs["Object"].default_value)
     
     def post_execute(self):
-        return {"Object": self.inputs["Object"].default_value}
+        out = super().post_execute()
+        out["Object"] = self.inputs["Object"].default_value
+        return out
 
 class ScCurveOperatorNode(ScNode):
     def init(self, context):
@@ -49,11 +57,15 @@ class ScCurveOperatorNode(ScNode):
     
     def error_condition(self):
         return (
-            self.inputs["Curve"].default_value == None
+            super().error_condition()
+            or self.inputs["Curve"].default_value == None
         )
     
     def pre_execute(self):
+        super().pre_execute()
         focus_on_object(self.inputs["Curve"].default_value)
     
     def post_execute(self):
-        return {"Curve": self.inputs["Curve"].default_value}
+        out = super().post_execute()
+        out["Curve"] = self.inputs["Curve"].default_value
+        return out

@@ -17,11 +17,15 @@ class ScTransformNode(ScNode):
     
     def error_condition(self):
         return (
-            self.inputs["Object"].default_value == None
+            super().error_condition()
+            or self.inputs["Object"].default_value == None
         )
     
     def pre_execute(self):
+        super().pre_execute()
         focus_on_object(self.inputs["Object"].default_value, self.inputs["Edit Mode"].default_value)
     
     def post_execute(self):
-        return {"Object": self.inputs["Object"].default_value}
+        out = super().post_execute()
+        out["Object"] = self.inputs["Object"].default_value
+        return out

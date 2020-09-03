@@ -12,8 +12,11 @@ class ScSettingNode(ScNode):
     
     def error_condition(self):
         return (
-            self.inputs["In"].default_value == None
+            super().error_condition()
+            or self.inputs["In"].default_value == None
         )
     
     def post_execute(self):
-        return {"Out": self.inputs["In"].default_value}
+        out = super().post_execute()
+        out["Out"] = self.inputs["In"].default_value
+        return out

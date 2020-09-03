@@ -16,15 +16,17 @@ class ScInputNode(ScNode):
     
     def error_condition(self):
         return (
-            self.inputs["Name"].default_value == ""
+            super().error_condition()
+            or self.inputs["Name"].default_value == ""
         )
     
     def pre_execute(self):
+        super().pre_execute()
         if (bpy.ops.object.mode_set.poll()):
             bpy.ops.object.mode_set(mode="OBJECT")
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         self.out_mesh = bpy.context.active_object
         self.out_mesh.name = self.inputs["Name"].default_value
         if (self.out_mesh.data):
@@ -35,3 +37,4 @@ class ScInputNode(ScNode):
     
     def free(self):
         self.id_data.unregister_object(self.out_mesh)
+        super().free()

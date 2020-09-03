@@ -2,6 +2,7 @@ import bpy
 
 from bpy.props import BoolProperty
 from ...helper import print_log
+from ...debug import log
 
 class ScNode:
     node_executable: BoolProperty()
@@ -16,16 +17,17 @@ class ScNode:
         if (hasattr(context.space_data, "edit_tree") and context.space_data.edit_tree.bl_idname == "ScNodeTree"):
             context.space_data.edit_tree.execute_node()
         else:
-            print_log("ScNode", None, "update_value", "Context is not Sorcar node tree")
+            log(self.id_data.name, self.name, "update_value", "Context is not Sorcar node-tree")
         return None
     
     def reset(self, execute):
-        # Reset node for next execution
+        log(self.id_data.name, self.name, "reset", "Execute="+str(execute), 3)
         if (execute):
             self.first_time = True
         self.set_color()
     
     def set_color(self):
+        log(self.id_data.name, self.name, "set_color", "Error="+str(self.node_error)+", Preview="+str(self == self.id_data.nodes.get(str(self.id_data.node))), 3)
         if (self.node_error and self == self.id_data.nodes.get(str(self.id_data.node))):
             self.color = (0.1, 0.1, 0.3)
         elif (self.node_error):
@@ -36,7 +38,7 @@ class ScNode:
             self.color = (0.334, 0.334, 0.334)
     
     def init(self, context):
-        # Initialise node with data
+        log(self.id_data.name, self.name, "init", "Executable="+str(self.node_executable), 3)
         self.use_custom_color = True
         self.set_color()
     
@@ -47,7 +49,7 @@ class ScNode:
                     layout.operator("sorcar.execute_node", text="Set Preview")
     
     def execute(self, forced=False):
-        # Execute node
+        log(self.id_data.name, self.name, "execute", "FirstTime="+str(self.first_time)+", Forced="+str(forced), 2)
         if (self.first_time or forced):
             self.node_error = True
             if (self.init_in(forced)):
@@ -60,33 +62,37 @@ class ScNode:
         return not self.node_error
     
     def init_in(self, forced):
+        log(self.id_data.name, self.name, "init_in", "Forced="+str(forced), 3)
         for i in self.inputs:
             if (not i.execute(forced)):
+                log(self.id_data.name, self.name, "init_in", "Execution failed for input \""+i.name+"\"", 3)
                 return False
         return True
     
     def error_condition(self):
-        # Check for any error in input data
+        log(self.id_data.name, self.name, "error_condition", "Checking for invalid parameters", 3)
         return False
     
     def pre_execute(self):
-        # Set/change focus or environment for execution
-        pass
+        log(self.id_data.name, self.name, "pre_execute", "Setting up environment", 3)
     
     def functionality(self):
-        # Main operation using input values
-        pass
+        log(self.id_data.name, self.name, "functionality", "Performing the actual operation", 3)
     
     def post_execute(self):
-        out = {}
-        # Adjust parameters, reset focus/environment, set output
-        return out
+        log(self.id_data.name, self.name, "post_execute", "Preparing output sockets' data", 3)
+        return {}
     
     def init_out(self, out):
-        # Set all outputs
         if (not out):
+            log(self.id_data.name, self.name, "init_out", "No output", 3)
             return False
+        log(self.id_data.name, self.name, "init_out", "Output="+str(out), 3)
         for i in out:
             if not (self.outputs[i].set(out[i])):
+                log(self.id_data.name, self.name, "init_out", "Cannot set output \""+self.outputs[i].name+"\"", 3)
                 return False
         return True
+    
+    def free(self):
+        log(self.id_data.name, self.name, "free", "Node removed", 3)
