@@ -24,15 +24,15 @@ class ScEditGroup(Operator):
                 if (node.node_tree):
                     log("OPERATOR", node_tree.name, self.bl_idname, "Node=\""+str(node.name)+"\", NodeTree="+"\""+node.node_tree.name+"\"", 1)
                     path.append(node.node_tree, node=node)
-                    return {"FINISHED"}
+                    return {'FINISHED'}
                 else:
                     log("OPERATOR", node_tree.name, self.bl_idname, "Node=\""+str(node.name)+"\", NodeTree not set", 1)
             elif len(path) > 1:
                 path.pop()
                 log("OPERATOR", node_tree.name, self.bl_idname, "Node=\""+str(node.name)+"\", NodeTree="+"\""+path[-1].node_tree.name+"\"", 1)
-                return {"FINISHED"}
+                return {'FINISHED'}
             else:
                 log("OPERATOR", node_tree.name, self.bl_idname, "\""+str(node.name)+"\" not a group node, operation cancelled", 1)
         else:
             log("OPERATOR", node_tree.name, self.bl_idname, "No active node, operation cancelled", 1)
-        return {"CANCELLED"}
+        return {'CANCELLED'}

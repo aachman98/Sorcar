@@ -2,7 +2,8 @@ import bpy
 
 from bpy.props import StringProperty, BoolProperty
 from mathutils import Vector
-from ...helper import print_log, convert_data
+from ...helper import convert_data
+from ...debug import log
 
 class ScNodeSocket:
     default_prop: StringProperty()
@@ -22,12 +23,14 @@ class ScNodeSocket:
             data = val
         if (ret):
             self.default_value = data
+            log(self.node.name, self.name, "set", "Data="+self.get_data("STRING")[1], 3)
             return True
-        print_log(self.node.name, self.name, "set", "Value not set")
+        else:
+            log(self.node.name, self.name, "set", "Cannot convert data, value not set", 2)
         return False
     
     def init(self, default_prop="", visible=False):
-        # Initialise node socket values
+        log(self.node.name, self.name, "set", "DefaultProp="+default_prop+", Visible="+str(visible), 3)
         self.default_prop = default_prop
         if not (self.is_output or default_prop == ""):
             self.hide = not visible
@@ -59,6 +62,7 @@ class ScNodeSocket:
     
     def execute(self, forced):
         # Execute node socket to get/set default_value
+        log(self.node.name, self.name, "execute", "Forced="+str(forced), 2)
         if (self.is_output):
             if (self.node.type == "GROUP_INPUT"):
                 return True
@@ -75,13 +79,18 @@ class ScNodeSocket:
                         break
                     from_socket = from_node.inputs[0].links[0].from_socket
                     from_node = from_node.inputs[0].links[0].from_node
-                if (from_socket and from_socket.execute(forced)):
-                    ret, data = from_socket.get_data(self.default_type)
-                    if(ret):
-                        self.socket_error = False
-                        return self.set(data)
+                if (from_socket):
+                    if (from_socket.execute(forced)):
+                        ret, data = from_socket.get_data(self.default_type)
+                        if(ret):
+                            self.socket_error = False
+                            return self.set(data)
+                        else:
+                            log(self.node.name, self.name, "execute", "No data received from \""+from_socket.name+"\"", 2)
                     else:
-                        print_log(self.node.name, self.name, "execute", msg="No ret")
+                        log(self.node.name, self.name, "execute", "\""+from_socket.name+"\" socket execution failed", 2)
+                else:
+                    log(self.node.name, self.name, "execute", "Invalid socket", 2)
             else:
                 if (self.default_prop == ""):
                     if (self.node.bl_idname == "ScNodeGroup" and [i for i in self.node.node_tree.inputs if i.identifier==self.identifier][0].show_prop):

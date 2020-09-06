@@ -36,5 +36,5 @@ class ScFlushStacktrace(Operator):
                 if (self.prop_save):
                     text.write(log + '\n')
             print("#"*48)
-            return {"FINISHED"}
-        return {"CANCELLED"}
+            return {'FINISHED'}
+        return {'CANCELLED'}

@@ -104,4 +104,4 @@ class ScGroupNodes(Operator):
         for n in selected_nodes:
             node_tree.nodes.remove(n)
 
-        return {"FINISHED"}
+        return {'FINISHED'}

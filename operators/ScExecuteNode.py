@@ -20,7 +20,7 @@ class ScExecuteNode(Operator):
             log("OPERATOR", curr_tree.name, self.bl_idname, "Node=\""+str(node.name)+"\"", 1)
             curr_tree.node = node.name
             curr_tree.execute_node()
-            return {"FINISHED"}
+            return {'FINISHED'}
         else:
             log("OPERATOR", curr_tree.name, self.bl_idname, "No active node, operation cancelled", 1)
-        return {"CANCELLED"}
+        return {'CANCELLED'}
