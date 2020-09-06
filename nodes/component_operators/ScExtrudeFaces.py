@@ -20,6 +20,7 @@ class ScExtrudeFaces(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Mirror Editing").init("in_mirror")
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.extrude_faces_move(
             get_override(self.inputs["Object"].default_value, True),
             MESH_OT_extrude_faces_indiv = {

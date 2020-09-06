@@ -16,6 +16,7 @@ class ScHideComponents(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Unselected").init("in_unselected")
 
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.hide(
             unselected = self.inputs["Unselected"].default_value
         )

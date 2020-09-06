@@ -36,13 +36,14 @@ class ScConvexHull(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Compare Materials").init("in_materials")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (self.inputs["Max Face Angle"].default_value < 0.0 or self.inputs["Max Face Angle"].default_value > 3.14159)
             or (self.inputs["Max Shape Angle"].default_value < 0.0 or self.inputs["Max Shape Angle"].default_value > 3.14159)
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.convex_hull(
             delete_unused = self.inputs["Delete Unused"].default_value,
             use_existing_faces = self.inputs["Use Existing Faces"].default_value,

@@ -23,6 +23,7 @@ class ScExtrudeRegion(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Mirror Editing").init("in_mirror")
     
     def functionality(self):
+        super().functionality()
         if (self.inputs["Shrink/Fatten"].default_value):
             bpy.ops.mesh.extrude_region_shrink_fatten(
                 get_override(self.inputs["Object"].default_value, True),

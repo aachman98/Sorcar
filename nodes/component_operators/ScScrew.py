@@ -23,7 +23,7 @@ class ScScrew(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketVector", "Axis").init("in_axis", True)
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (int(self.inputs["Steps"].default_value) < 1 or int(self.inputs["Steps"].default_value) > 100000)
             or (int(self.inputs["Turns"].default_value) < 1 or int(self.inputs["Turns"].default_value) > 100000)
@@ -31,6 +31,7 @@ class ScScrew(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.screw(
             steps = int(self.inputs["Steps"].default_value),
             turns = int(self.inputs["Turns"].default_value),

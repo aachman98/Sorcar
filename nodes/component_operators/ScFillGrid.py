@@ -27,6 +27,7 @@ class ScFillGrid(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.fill_grid(
             span = int(self.inputs["Span"].default_value),
             offset = int(self.inputs["Offset"].default_value),

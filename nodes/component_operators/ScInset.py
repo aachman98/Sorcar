@@ -34,12 +34,13 @@ class ScInset(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Interpolate").init("in_interpolate")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or self.inputs["Thickness"].default_value < 0.0
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.inset(
             use_boundary = self.inputs["Boundary"].default_value,
             use_even_offset = self.inputs["Even Offset"].default_value,

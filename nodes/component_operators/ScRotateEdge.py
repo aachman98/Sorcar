@@ -16,6 +16,7 @@ class ScRotateEdge(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Counter Clockwise").init("in_use_ccw", True)
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.edge_rotate(
             use_ccw = self.inputs["Counter Clockwise"].default_value
         )

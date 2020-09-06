@@ -18,7 +18,7 @@ class ScVertexGroup(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Assign").init("in_assign")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or self.inputs["Name"].default_value == ""
         )
@@ -34,6 +34,7 @@ class ScVertexGroup(Node, ScEditOperatorNode):
             self.inputs["Object"].default_value.vertex_groups.active_index = slot
     
     def functionality(self):
+        super().functionality()
         if (self.inputs["Assign"].default_value):
             bpy.ops.object.vertex_group_assign()
         else:

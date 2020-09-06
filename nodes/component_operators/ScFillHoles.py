@@ -22,6 +22,7 @@ class ScFillHoles(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.fill_holes(
             sides = int(self.inputs["Sides"].default_value)
         )

@@ -21,6 +21,7 @@ class ScRip(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Fill").init("in_fill")
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.rip_move(
             get_override(self.inputs["Object"].default_value, True),
             MESH_OT_rip = {

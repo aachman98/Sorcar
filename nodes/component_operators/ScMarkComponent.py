@@ -22,12 +22,13 @@ class ScMarkComponent(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Freestyle Faces").init("in_face")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Type"].default_value in ['SHARP', 'SEAM', 'FREESTYLE'])
         )
     
     def functionality(self):
+        super().functionality()
         if (self.inputs["Type"].default_value == 'SHARP'):
             bpy.ops.mesh.mark_sharp(
                 clear = self.inputs["Unmark"].default_value,

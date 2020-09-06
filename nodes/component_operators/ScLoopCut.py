@@ -25,7 +25,7 @@ class ScLoopCut(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketNumber", "Factor").init("in_factor", True)
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or int(self.inputs["Number of Cuts"].default_value) < 1
             or int(self.inputs["Edge Index"].default_value) < 0
@@ -33,6 +33,7 @@ class ScLoopCut(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         index = int(self.inputs["Edge Index"].default_value)
         if (self.inputs["Use selected edge"].default_value):
             bpy.ops.object.mode_set(mode="OBJECT")

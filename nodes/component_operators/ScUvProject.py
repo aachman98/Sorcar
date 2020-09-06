@@ -37,6 +37,7 @@ class ScUvProject(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         if (self.inputs["Type"].default_value == 'CUBE'):
             bpy.ops.uv.cube_project(
                 cube_size = self.inputs["Value"].default_value,

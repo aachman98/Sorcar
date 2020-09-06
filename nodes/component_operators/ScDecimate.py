@@ -26,7 +26,7 @@ class ScDecimate(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketString", "Symmetry Axis").init("in_symmetry_axis", True)
 
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (self.inputs["Ratio"].default_value < 0.0 or self.inputs["Ratio"].default_value > 1.0)
             or (self.inputs["Weight"].default_value < 0.0 or self.inputs["Weight"].default_value > 1000.0)
@@ -34,6 +34,7 @@ class ScDecimate(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.decimate(
             ratio = self.inputs["Ratio"].default_value,
             use_vertex_group = self.inputs["Vertex Group"].default_value,

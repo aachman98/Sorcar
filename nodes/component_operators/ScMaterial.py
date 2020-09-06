@@ -17,7 +17,7 @@ class ScMaterial(Node, ScEditOperatorNode):
         layout.prop(self, "prop_mat")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or self.prop_mat == None
         )
@@ -32,4 +32,5 @@ class ScMaterial(Node, ScEditOperatorNode):
             self.inputs["Object"].default_value.active_material_index = slot
     
     def functionality(self):
+        super().functionality()
         bpy.ops.object.material_slot_assign()

@@ -18,13 +18,14 @@ class ScTriangulate(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketString", "Polygon Method").init("in_ngon", True)
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Quad Method"].default_value in ['BEAUTY', 'FIXED', 'FIXED_ALTERNATE', 'SHORTEST_DIAGONAL'])
             or (not self.inputs["Polygon Method"].default_value in ['BEAUTY', 'CLIP'])
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.quads_convert_to_tris(
             quad_method = self.inputs["Quad Method"].default_value,
             ngon_method = self.inputs["Polygon Method"].default_value

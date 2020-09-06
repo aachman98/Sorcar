@@ -16,6 +16,7 @@ class ScUnhideComponents(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Select").init("in_select")
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.reveal(
             select = self.inputs["Select"].default_value
         )

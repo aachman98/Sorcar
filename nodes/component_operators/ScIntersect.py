@@ -20,7 +20,7 @@ class ScIntersect(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketNumber", "Threshold").init("in_threshold")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Source"].default_value in ['SELECT', 'SELECT_UNSELECT'])
             or (not self.inputs["Separate Mode"].default_value in ['ALL', 'CUT', 'NONE'])
@@ -28,6 +28,7 @@ class ScIntersect(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.intersect(
             mode = self.inputs["Source"].default_value,
             separate_mode = self.inputs["Separate Mode"].default_value,

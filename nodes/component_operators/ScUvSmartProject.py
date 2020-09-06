@@ -24,7 +24,7 @@ class ScUvSmartProject(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Stretch to UV Bounds").init("in_stretch", True)
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (self.inputs["Angle Limit"].default_value < 1.0 or self.inputs["Angle Limit"].default_value > 89.0)
             or (self.inputs["Island Margin"].default_value < 0.0 or self.inputs["Island Margin"].default_value > 1.0)
@@ -32,6 +32,7 @@ class ScUvSmartProject(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.uv.smart_project(
             angle_limit = self.inputs["Angle Limit"].default_value,
             island_margin = self.inputs["Island Margin"].default_value,

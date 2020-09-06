@@ -16,12 +16,13 @@ class ScSolidify(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketNumber", "Thickness").init("in_thickness", True)
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (self.inputs["Thickness"].default_value < -10000.0 or self.inputs["Thickness"].default_value > 10000.0)
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.solidify(
             thickness = self.inputs["Thickness"].default_value
         )

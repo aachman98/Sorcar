@@ -34,7 +34,7 @@ class ScFlatten(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Preserve Volume").init("in_preserve_volume")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Mode"].default_value in ['FACES', 'VERTICES'])
             or (self.inputs["Factor"].default_value < -10.0 or self.inputs["Factor"].default_value > 10.0)
@@ -44,6 +44,7 @@ class ScFlatten(Node, ScEditOperatorNode):
         )
 
     def functionality(self):
+        super().functionality()
         if (self.inputs["Mode"].default_value == "VERTICES"):
             if (self.inputs["Laplacian"].default_value):
                 bpy.ops.mesh.vertices_smooth_laplacian(

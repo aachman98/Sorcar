@@ -16,12 +16,13 @@ class ScUnsubdivide(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketNumber", "Iterations").init("in_iterations", True)
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (int(self.inputs["Iterations"].default_value) < 1 or int(self.inputs["Iterations"].default_value) > 1000)
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.unsubdivide(
             iterations = int(self.inputs["Iterations"].default_value)
         )

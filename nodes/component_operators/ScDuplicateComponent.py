@@ -17,6 +17,7 @@ class ScDuplicateComponent(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketVector", "Move Offset").init("in_move_offset", True)
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.duplicate_move(
             get_override(self.inputs["Object"].default_value, True),
             TRANSFORM_OT_translate = {

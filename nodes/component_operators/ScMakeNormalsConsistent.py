@@ -16,6 +16,7 @@ class ScMakeNormalsConsistent(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketNumber", "Inside").init("in_inside", True)
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.normals_make_consistent(
             inside = self.inputs["Inside"].default_value
         )

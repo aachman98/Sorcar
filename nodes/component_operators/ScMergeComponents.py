@@ -18,12 +18,13 @@ class ScMergeComponents(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "UVs").init("in_uvs")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Type"].default_value in ['FIRST', 'LAST', 'CENTER', 'CURSOR', 'COLLAPSE'])
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.merge(
             type = self.inputs["Type"].default_value,
             uvs = self.inputs["UVs"].default_value

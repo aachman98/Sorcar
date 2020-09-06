@@ -29,13 +29,14 @@ class ScSpin(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketVector", "Axis").init("in_axis", True)
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (int(self.inputs["Steps"].default_value) < 0 or int(self.inputs["Steps"].default_value) > 1000000)
             or Vector(self.inputs["Axis"].default_value).magnitude == 0
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.spin(
             steps = int(self.inputs["Steps"].default_value),
             dupli = self.inputs["Duplicate"].default_value,

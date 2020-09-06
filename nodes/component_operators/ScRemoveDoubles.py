@@ -18,12 +18,13 @@ class ScRemoveDoubles(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Unselected").init("in_unselected")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (self.inputs["Threshold"].default_value < 0.000001 or self.inputs["Threshold"].default_value > 50)
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.remove_doubles(
             threshold = self.inputs["Threshold"].default_value,
             use_unselected = self.inputs["Unselected"].default_value

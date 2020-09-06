@@ -20,13 +20,14 @@ class ScPoke(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketString", "Poke Center").init("in_center_mode")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (self.inputs["Poke Offset"].default_value < -1000 or self.inputs["Poke Offset"].default_value > 1000)
             or (not self.inputs["Poke Center"].default_value in ['MEDIAN_WEIGHTED', 'MEDIAN', 'BOUNDS'])
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.poke(
             offset = self.inputs["Poke Offset"].default_value,
             use_relative_offset = self.inputs["Relative Offset"].default_value,

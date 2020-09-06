@@ -30,7 +30,7 @@ class ScWireframe(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Replace Original").init("in_use_replace", True)
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (self.inputs["Thickness"].default_value < 0.0 or self.inputs["Thickness"].default_value > 10000.0)
             or (self.inputs["Offset"].default_value < 0.0 or self.inputs["Offset"].default_value > 10000.0)
@@ -38,6 +38,7 @@ class ScWireframe(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.wireframe(
             thickness = self.inputs["Thickness"].default_value,
             offset = self.inputs["Offset"].default_value,

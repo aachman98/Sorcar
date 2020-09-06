@@ -35,13 +35,14 @@ class ScBisect(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketNumber", "Y End").init("in_yend")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (self.inputs["Threshold"].default_value < 0.0 or self.inputs["Threshold"].default_value > 10.0)
             or (Vector(self.inputs["Plane Normal"].default_value).magnitude == 0.0)
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.bisect(
             plane_co = self.inputs["Plane Point"].default_value,
             plane_no = self.inputs["Plane Normal"].default_value,

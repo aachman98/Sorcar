@@ -24,12 +24,13 @@ class ScPointNormals(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketNumber", "Spherize Strength").init("in_spherize_strength")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (self.inputs["Spherize Strength"].default_value < 0.0 or self.inputs["Spherize Strength"].default_value > 1.0)
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.point_normals(
             target_location = self.inputs["Target"].default_value,
             invert = self.inputs["Invert"].default_value,

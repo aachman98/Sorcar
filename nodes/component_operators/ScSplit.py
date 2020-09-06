@@ -22,6 +22,7 @@ class ScSplit(Node, ScEditOperatorNode):
         )
 
     def functionality(self):
+        super().functionality()
         if (self.inputs["Type"].default_value == 'REGION'):
             bpy.ops.mesh.split()
         elif (self.inputs["Type"].default_value == 'INDIVIDUAL'):

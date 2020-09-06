@@ -9,4 +9,5 @@ class ScAddEdgeFace(Node, ScEditOperatorNode):
     bl_label = "Add Edge/Face"
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.edge_face_add()

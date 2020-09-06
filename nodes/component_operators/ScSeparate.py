@@ -19,7 +19,7 @@ class ScSeparate(Node, ScEditOperatorNode):
         self.outputs.new("ScNodeSocketArray", "Separated Objects")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Type"].default_value in ['SELECTED', 'MATERIAL', 'LOOSE'])
         )
@@ -29,6 +29,7 @@ class ScSeparate(Node, ScEditOperatorNode):
         self.prop_obj_array = "[]"
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.separate(
             type = self.inputs["Type"].default_value
         )

@@ -22,7 +22,7 @@ class ScSymmetrySnap(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Center").init("in_use_center")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Direction"].default_value in ['NEGATIVE_X', 'POSITIVE_X', 'NEGATIVE_Y', 'POSITIVE_Y', 'NEGATIVE_Z', 'POSITIVE_Z'])
             or (self.inputs["Threshold"].default_value < 0.0 or self.inputs["Threshold"].default_value > 10.0)
@@ -30,6 +30,7 @@ class ScSymmetrySnap(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.symmetry_snap(
             direction = self.inputs["Direction"].default_value,
             threshold = self.inputs["Threshold"].default_value,

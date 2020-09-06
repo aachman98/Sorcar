@@ -28,13 +28,14 @@ class ScQuadrangulate(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Compare Materials").init("in_materials")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (self.inputs["Max Face Angle"].default_value < 0.0 or self.inputs["Max Face Angle"].default_value > 3.14159)
             or (self.inputs["Max Shape Angle"].default_value < 0.0 or self.inputs["Max Shape Angle"].default_value > 3.14159)
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.tris_convert_to_quads(
             face_threshold = self.inputs["Max Face Angle"].default_value,
             shape_threshold = self.inputs["Max Shape Angle"].default_value,

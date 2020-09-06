@@ -19,12 +19,13 @@ class ScOffsetEdgeLoops(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Cap Endpoint").init("in_cap")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (self.inputs["Factor"].default_value < -1.0 or self.inputs["Factor"].default_value > 1.0)
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.offset_edge_loops_slide(
             get_override(self.inputs["Object"].default_value, True),
             MESH_OT_offset_edge_loops = {

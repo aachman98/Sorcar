@@ -24,13 +24,14 @@ class ScUvUnwrap(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketNumber", "Margin").init("in_margin")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Method"].default_value in ['ANGLE_BASED', 'CONFORMAL'])
             or (self.inputs["Margin"].default_value < 0.0 or self.inputs["Margin"].default_value > 1.0)
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.uv.unwrap(
             method = self.inputs["Method"].default_value,
             fill_holes = self.inputs["Fill Holes"].default_value,

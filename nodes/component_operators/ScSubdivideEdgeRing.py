@@ -24,7 +24,7 @@ class ScSubdivideEdgeRing(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketNumber", "Profile Factor").init("in_profile_shape_factor")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (int(self.inputs["Number of Cuts"].default_value) < 0 or int(self.inputs["Number of Cuts"].default_value) > 1000)
             or (not self.inputs["Interpolation"].default_value in ['LINEAR', 'PATH', 'SURFACE'])
@@ -34,6 +34,7 @@ class ScSubdivideEdgeRing(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.subdivide_edgering(
             number_cuts = int(self.inputs["Number of Cuts"].default_value),
             interpolation = self.inputs["Interpolation"].default_value,

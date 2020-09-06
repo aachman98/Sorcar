@@ -16,6 +16,7 @@ class ScFillEdgeLoop(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Beauty").init("in_use_beauty", True)
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.fill(
             use_beauty = self.inputs["Beauty"].default_value
         )

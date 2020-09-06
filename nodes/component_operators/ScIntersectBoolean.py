@@ -20,13 +20,14 @@ class ScIntersectBoolean(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketNumber", "Threshold").init("in_threshold")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Operation"].default_value in ['INTERSECT', 'UNION', 'DIFFERENCE'])
             or (self.inputs["Threshold"].default_value < 0.0 or self.inputs["Threshold"].default_value > 0.01)
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.intersect_boolean(
             operation = self.inputs["Operation"].default_value,
             use_swap = self.inputs["Swap"].default_value,

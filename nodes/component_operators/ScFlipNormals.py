@@ -9,4 +9,5 @@ class ScFlipNormals(Node, ScEditOperatorNode):
     bl_label = "Flip Normals"
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.flip_normals()

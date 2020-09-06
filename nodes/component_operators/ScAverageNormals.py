@@ -20,7 +20,7 @@ class ScAverageNormals(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketNumber", "Threshold").init("in_threshold")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Type"].default_value in ['CUSTOM_NORMAL', 'FACE_AREA', 'CORNER_ANGLE'])
             or (self.inputs["Weight"].default_value < 1.0 or self.inputs["Weight"].default_value > 100.0)
@@ -28,6 +28,7 @@ class ScAverageNormals(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.average_normals(
             average_type = self.inputs["Type"].default_value,
             weight = self.inputs["Weight"].default_value,

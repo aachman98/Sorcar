@@ -28,7 +28,7 @@ class ScSubdivide(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketNumber", "Random Seed").init("in_seed")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (int(self.inputs["Number of Cuts"].default_value) < 1 or int(self.inputs["Number of Cuts"].default_value) > 100)
             or (self.inputs["Smoothness"].default_value < 0.0 or self.inputs["Smoothness"].default_value > 1000.0)
@@ -39,6 +39,7 @@ class ScSubdivide(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.subdivide(
             number_cuts = int(self.inputs["Number of Cuts"].default_value),
             smoothness = self.inputs["Smoothness"].default_value,

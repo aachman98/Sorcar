@@ -21,6 +21,7 @@ class ScExtrude(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Mirror Editing").init("in_mirror")
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.extrude_context_move(
             get_override(self.inputs["Object"].default_value, True),
             MESH_OT_extrude_context = {

@@ -32,7 +32,7 @@ class ScBridgeEdgeLoops(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketString", "Profile Shape").init("in_profile_shape")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Connect Loops"].default_value in ['SINGLE', 'CLOSED', 'PAIRS'])
             or (self.inputs["Merge Factor"].default_value < 0.0 or self.inputs["Merge Factor"].default_value > 1.0)
@@ -45,6 +45,7 @@ class ScBridgeEdgeLoops(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.bridge_edge_loops(
             type = self.inputs["Connect Loops"].default_value,
             use_merge = self.inputs["Merge"].default_value,

@@ -16,12 +16,13 @@ class ScBeautifyFill(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketNumber", "Angle Limit").init("in_angle_limit", True)
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (self.inputs["Angle Limit"].default_value < 0 or self.inputs["Angle Limit"].default_value > 3.14159)
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.beautify_fill(
             angle_limit = self.inputs["Angle Limit"].default_value
         )

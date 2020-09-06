@@ -44,7 +44,7 @@ class ScBevel(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketNumber", "Spread").init("in_spread")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Offset Type"].default_value in ['OFFSET', 'WIDTH', 'DEPTH', 'PERCENT'])
             or (self.inputs["Offset Type"].default_value == 'PERCENT' and (self.inputs["Offset"].default_value < 0.0 or self.inputs["Offset"].default_value > 100.0))
@@ -59,6 +59,7 @@ class ScBevel(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.bevel(
             offset_type = self.inputs["Offset Type"].default_value,
             offset = self.inputs["Offset"].default_value,

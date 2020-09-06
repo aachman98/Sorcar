@@ -9,4 +9,5 @@ class ScMergeNormals(Node, ScEditOperatorNode):
     bl_label = "Merge Normals"
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.merge_normals()
