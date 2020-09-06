@@ -42,6 +42,7 @@ class ScWeightedNormalMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].vertex_group = self.prop_vertex_group
         bpy.context.object.modifiers[self.prop_mod_name].invert_vertex_group = self.prop_invert_vertex_group
         bpy.context.object.modifiers[self.prop_mod_name].mode = self.inputs["Weighting Mode"].default_value

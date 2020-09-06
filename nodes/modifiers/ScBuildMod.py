@@ -30,6 +30,7 @@ class ScBuildMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].frame_start = bpy.context.scene.frame_current_final - self.inputs["Percent"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].frame_duration = 100.0
         bpy.context.object.modifiers[self.prop_mod_name].use_reverse = self.inputs["Reverse"].default_value

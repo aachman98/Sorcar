@@ -55,6 +55,7 @@ class ScScrewMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].axis = self.inputs["Axis"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].object = self.inputs["Axis Object"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].angle = self.inputs["Angle"].default_value

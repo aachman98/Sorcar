@@ -64,6 +64,7 @@ class ScSolidifyMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].thickness = self.inputs["Thickness"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].thickness_clamp = self.inputs["Clamp"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].thickness_vertex_group = self.inputs["Factor"].default_value

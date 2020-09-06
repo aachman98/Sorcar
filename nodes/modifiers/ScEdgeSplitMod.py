@@ -27,6 +27,7 @@ class ScEdgeSplitMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].split_angle = self.inputs["Split Angle"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].use_edge_angle = self.inputs["Edge Angle"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].use_edge_sharp = self.inputs["Sharp Edges"].default_value

@@ -39,6 +39,7 @@ class ScSubsurfMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].subdivision_type = self.inputs["Type"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].render_levels = self.inputs["Render"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].levels = self.inputs["Viewport"].default_value

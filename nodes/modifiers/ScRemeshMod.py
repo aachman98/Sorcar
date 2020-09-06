@@ -38,6 +38,7 @@ class ScRemeshMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].mode = self.inputs["Mode"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].octree_depth = int(self.inputs["Octree Depth"].default_value)
         bpy.context.object.modifiers[self.prop_mod_name].scale = self.inputs["Scale"].default_value

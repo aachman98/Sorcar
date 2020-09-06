@@ -61,6 +61,7 @@ class ScArrayMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].fit_type = self.inputs["Fit Type"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].count = int(self.inputs["Count"].default_value)
         bpy.context.object.modifiers[self.prop_mod_name].fit_length = self.inputs["Length"].default_value

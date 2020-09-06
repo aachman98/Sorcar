@@ -53,6 +53,7 @@ class ScSimpleDeformMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].deform_method = self.inputs["Deform Method"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].deform_axis = self.inputs["Deform Axis"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].origin = self.inputs["Origin"].default_value

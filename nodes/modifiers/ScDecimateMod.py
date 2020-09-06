@@ -55,6 +55,7 @@ class ScDecimateMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].decimate_type = self.inputs["Type"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].vertex_group = self.prop_vertex_group
         bpy.context.object.modifiers[self.prop_mod_name].ratio = self.inputs["Ratio"].default_value

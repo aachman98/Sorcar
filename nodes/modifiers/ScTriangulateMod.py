@@ -31,6 +31,7 @@ class ScTriangulateMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].quad_method = self.inputs["Quad Method"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].ngon_method = self.inputs["Ngon Method"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].keep_custom_normals = self.inputs["Keep Normals"].default_value

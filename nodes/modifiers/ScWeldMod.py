@@ -32,6 +32,7 @@ class ScWeldMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].vertex_group = self.prop_vertex_group
         bpy.context.object.modifiers[self.prop_mod_name].merge_threshold = self.inputs["Distance"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].max_interactions = int(self.inputs["Duplicate Limit"].default_value)

@@ -33,6 +33,7 @@ class ScCurveMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].object = self.inputs["Curve"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].deform_axis = self.inputs["Deformation Axis"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].vertex_group = self.prop_vertex_group

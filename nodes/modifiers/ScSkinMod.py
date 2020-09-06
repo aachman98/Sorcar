@@ -34,6 +34,7 @@ class ScSkinMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].branch_smoothing = self.inputs["Branch Smoothing"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].use_smooth_shade = self.inputs["Smooth Shading"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].use_x_symmetry = self.inputs["X"].default_value

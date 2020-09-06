@@ -47,6 +47,7 @@ class ScWaveMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].time_offset = bpy.context.scene.frame_current - self.inputs["Offset"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].speed = self.inputs["Speed"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].height = self.inputs["Height"].default_value

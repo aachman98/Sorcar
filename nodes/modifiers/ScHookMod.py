@@ -40,6 +40,7 @@ class ScHookMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].object = self.inputs["Hook Object"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].falloff_radius = self.inputs["Radius"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].strength = self.inputs["Strength"].default_value

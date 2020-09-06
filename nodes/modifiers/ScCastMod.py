@@ -49,6 +49,7 @@ class ScCastMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].cast_type = self.inputs["Cast Type"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].use_x = self.inputs["X"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].use_y = self.inputs["Y"].default_value

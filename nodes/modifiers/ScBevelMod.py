@@ -71,6 +71,7 @@ class ScBevelMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].vertex_group = self.prop_vertex_group
         bpy.context.object.modifiers[self.prop_mod_name].width = self.inputs["Width"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].width_pct = self.inputs["Width"].default_value

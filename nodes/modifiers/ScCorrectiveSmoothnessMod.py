@@ -41,6 +41,7 @@ class ScCorrectiveSmoothnessMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].factor = self.inputs["Factor"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].iterations = int(self.inputs["Repeat"].default_value)
         bpy.context.object.modifiers[self.prop_mod_name].smooth_type = self.inputs["Smooth Type"].default_value

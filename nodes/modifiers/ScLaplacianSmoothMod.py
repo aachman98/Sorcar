@@ -43,6 +43,7 @@ class ScLaplacianSmoothMod(Node, ScModifierNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.object.modifiers[self.prop_mod_name].vertex_group = self.prop_vertex_group
         bpy.context.object.modifiers[self.prop_mod_name].iterations = self.inputs["Repeat"].default_value
         bpy.context.object.modifiers[self.prop_mod_name].use_x = self.inputs["X"].default_value
