@@ -42,7 +42,7 @@ class ScNumber(Node, ScNode):
         )
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         if (self.inputs["Random"].default_value):
             rs = numpy.random.RandomState(int(self.inputs["Seed"].default_value))
             if (not self.first_time):

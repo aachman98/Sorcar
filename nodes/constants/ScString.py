@@ -19,4 +19,6 @@ class ScString(Node, ScNode):
         layout.prop(self, "prop_string")
     
     def post_execute(self):
-        return {"Value": self.prop_string}
+        out = super().post_execute()
+        out["Value"] = self.prop_string
+        return out

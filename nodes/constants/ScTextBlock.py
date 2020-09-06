@@ -15,7 +15,10 @@ class ScTextBlock(Node, ScNode):
         self.outputs.new("ScNodeSocketString", "Value")
     
     def error_condition(self):
-        return self.prop_text == None
+        return (
+            super().error_condition
+            or self.prop_text == None
+        )
     
     def draw_buttons(self, context, layout):
         super().draw_buttons(context, layout)
@@ -26,4 +29,6 @@ class ScTextBlock(Node, ScNode):
                 col.label(text=l.body)
     
     def post_execute(self):
-        return {"Value": self.prop_text.as_string()}
+        out = super().post_execute()
+        out["Value"] = self.prop_text.as_string()
+        return out

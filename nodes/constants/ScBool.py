@@ -20,4 +20,6 @@ class ScBool(Node, ScNode):
         layout.prop(self, "prop_bool")
     
     def post_execute(self):
-        return {"Value": self.prop_bool}
+        out = super().post_execute()
+        out["Value"] = self.prop_bool
+        return out

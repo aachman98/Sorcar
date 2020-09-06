@@ -19,4 +19,6 @@ class ScSelectionType(Node, ScNode):
         layout.column().prop(self, "prop_type")
     
     def post_execute(self):
-        return {"Value": self.prop_type}
+        out = super().post_execute()
+        out["Value"] = self.prop_type
+        return out
