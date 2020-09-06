@@ -85,12 +85,12 @@ class ScNodeTree(NodeTree):
             clear_logs()
             self.unregister_all_objects()
             if (hasattr(n, "execute")):
-                log(self.name, n.name, msg="BEGIN EXECUTION", level=2)
+                log(self.name, n.name, msg="BEGIN EXECUTION", level=2, mem='SET')
                 try:
                     if (not n.execute()):
-                        log(self.name, msg="EXECUTION FAILED", level=2)
+                        log(self.name, msg="EXECUTION FAILED", level=2, mem='GET')
                     else:
-                        log(self.name, msg="EXECUTION SUCCESSFUL", level=2)
+                        log(self.name, msg="EXECUTION SUCCESSFUL", level=2, mem='GET')
                 except:
                     print_traceback()
         else:
