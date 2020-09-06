@@ -19,16 +19,20 @@ class ScConvertToMesh(Node, ScNode):
         self.outputs.new("ScNodeSocketObject", "Object")
     
     def pre_execute(self):
+        super().pre_execute()
         focus_on_object(self.inputs["Curve"].default_value)
         self.prop_curve = self.inputs["Curve"].default_value.data
     
     def functionality(self):
+        super().functionality()
         bpy.ops.object.convert(
             target = "MESH",
             keep_original = False
         )
     
     def post_execute(self):
+        out = super().post_execute()
         bpy.context.active_object.data.name = bpy.context.active_object.name
         bpy.data.curves.remove(self.prop_curve)
-        return {"Object": bpy.context.active_object}
+        out["Object"] = bpy.context.active_object
+        return out

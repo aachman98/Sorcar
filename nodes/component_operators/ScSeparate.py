@@ -46,6 +46,7 @@ class ScSeparate(Node, ScEditOperatorNode):
         return ret
     
     def free(self):
+        super().free()
         for object in self.prop_obj_array[1:-1].split(', '):
             try:
                 obj = eval(object)

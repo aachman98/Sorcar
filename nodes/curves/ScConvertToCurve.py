@@ -19,16 +19,20 @@ class ScConvertToCurve(Node, ScNode):
         self.outputs.new("ScNodeSocketCurve", "Curve")
     
     def pre_execute(self):
+        super().pre_execute()
         focus_on_object(self.inputs["Object"].default_value)
         self.prop_mesh = self.inputs["Object"].default_value.data
     
     def functionality(self):
+        super().functionality()
         bpy.ops.object.convert(
             target = "CURVE",
             keep_original = False
         )
     
     def post_execute(self):
+        out = super().post_execute()
         bpy.context.active_object.data.name = bpy.context.active_object.name
         bpy.data.meshes.remove(self.prop_mesh)
-        return {"Curve": bpy.context.active_object}
+        out["Curve"] = bpy.context.active_object
+        return out

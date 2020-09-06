@@ -24,7 +24,7 @@ class ScCurveSpline(Node, ScCurveOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Smooth").init("in_smooth", True)
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Tilt"].default_value in ['LINEAR', 'CARDINAL', 'BSPLINE', 'EASE'])
             or (not self.inputs["Radius"].default_value in ['LINEAR', 'CARDINAL', 'BSPLINE', 'EASE'])
@@ -32,6 +32,7 @@ class ScCurveSpline(Node, ScCurveOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         self.inputs["Curve"].default_value.data.splines[0].tilt_interpolation = self.inputs["Tilt"].default_value
         self.inputs["Curve"].default_value.data.splines[0].radius_interpolation = self.inputs["Radius"].default_value
         self.inputs["Curve"].default_value.data.splines[0].resolution_u = int(self.inputs["Resolution"].default_value)

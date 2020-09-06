@@ -36,7 +36,7 @@ class ScCurveShape(Node, ScCurveOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Bounds Clamp").init("in_clamp")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Dimensions"].default_value in ['2D', '3D'])
             or (int(self.inputs["Resolution Preview"].default_value) < 1 or int(self.inputs["Resolution Preview"].default_value) > 1024)
@@ -47,6 +47,7 @@ class ScCurveShape(Node, ScCurveOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         self.inputs["Curve"].default_value.data.dimensions = self.inputs["Dimensions"].default_value
         if (self.inputs["Dimensions"].default_value == "3D"):
             self.inputs["Curve"].default_value.data.fill_mode = self.inputs["Fill Mode (3D)"].default_value
