@@ -18,6 +18,7 @@ class ScDissolveEdges(Node, ScDeletionNode):
         self.inputs.new("ScNodeSocketBool", "Face Split").init("in_split")
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.dissolve_edges(
             use_verts = self.inputs["Dissolve Vertices"].default_value,
             use_face_split = self.inputs["Face Split"].default_value

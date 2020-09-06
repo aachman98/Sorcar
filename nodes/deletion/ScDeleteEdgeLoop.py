@@ -16,6 +16,7 @@ class ScDeleteEdgeLoop(Node, ScDeletionNode):
         self.inputs.new("ScNodeSocketBool", "Face Split").init("in_split")
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.delete_edgeloop(
             use_face_split = self.inputs["Face Split"].default_value
         )

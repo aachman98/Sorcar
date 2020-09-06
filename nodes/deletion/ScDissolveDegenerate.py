@@ -16,6 +16,7 @@ class ScDissolveDegenerate(Node, ScDeletionNode):
         self.inputs.new("ScNodeSocketNumber", "Threshold").init("in_threshold", True)
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.dissolve_degenerate(
             threshold = self.inputs["Threshold"].default_value
         )

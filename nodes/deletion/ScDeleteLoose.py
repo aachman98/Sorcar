@@ -20,6 +20,7 @@ class ScDeleteLoose(Node, ScDeletionNode):
         self.inputs.new("ScNodeSocketBool", "Faces").init("in_face")
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.delete_loose(
             use_verts = self.inputs["Vertices"].default_value,
             use_edges = self.inputs["Edges"].default_value,

@@ -10,4 +10,5 @@ class ScEdgeCollapse(Node, ScDeletionNode):
     bl_label = "Collapse Edge"
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.edge_collapse()

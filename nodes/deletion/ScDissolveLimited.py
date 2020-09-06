@@ -29,6 +29,7 @@ class ScDissolveLimited(Node, ScDeletionNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.dissolve_limited(
             angle_limit = self.inputs["Max Angle"].default_value,
             use_dissolve_boundaries = self.inputs["All Boundaries"].default_value,

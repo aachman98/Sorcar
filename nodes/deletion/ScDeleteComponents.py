@@ -22,6 +22,7 @@ class ScDeleteComponents(Node, ScDeletionNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.delete(
             type = self.inputs["Type"].default_value
         )

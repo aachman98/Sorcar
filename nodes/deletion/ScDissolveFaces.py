@@ -16,6 +16,7 @@ class ScDissolveFaces(Node, ScDeletionNode):
         self.inputs.new("ScNodeSocketBool", "Dissolve Vertices").init("in_verts", True)
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.dissolve_faces(
             use_verts = self.inputs["Dissolve Vertices"].default_value,
         )
