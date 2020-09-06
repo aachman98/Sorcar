@@ -28,8 +28,9 @@ class ScFlushStacktrace(Operator):
             str = "sc_" + time.strftime('%Y-%m-%d_%H-%M-%S') + ".log"
             if (self.prop_save):
                 text = bpy.data.texts.new(str)
-            ########## sc_2020-09-04_02-02-37.log ##########
+            print("#"*48)
             print("#"*10+" "+str+" "+"#"*10)
+            print("#"*48)
             for log in logs:
                 print(log)
                 if (self.prop_save):

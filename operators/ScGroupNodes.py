@@ -3,6 +3,7 @@ from mathutils import Vector
 
 from bpy.types import Operator
 from ..helper import sc_poll_op, get_override
+from ..debug import log
 
 class ScGroupNodes(Operator):
     """Create node-group from selected nodes"""
@@ -44,6 +45,9 @@ class ScGroupNodes(Operator):
                         if (not l.to_node in selected_nodes):
                             if (not l in links_external_out):
                                 links_external_out.append(l)
+        
+        # Log the current node-tree, newly created group, and the number of nodes & sockets (input/output)
+        log("OPERATOR", node_tree.name, self.bl_idname, "NodeGroup="+"\""+node_group.name+"\", Nodes="+str(nodes_len)+", Inputs="+str(len(links_external_in))+", Outputs="+str(len(links_external_out)), 1)
 
         # Calculate the required locations for placement of grouped node and input/output nodes
         loc_x_in = 0

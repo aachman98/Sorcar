@@ -53,7 +53,7 @@ class SorcarPreferences(AddonPreferences):
     items = [
         ('NONE', '0: None', 'No logs'),
         ('INFO', '1: Info', 'Register/unregister, addon-updater, versions, etc.'),
-        ('DEBUG', '2: Dataflow', 'Node-trees, nodes, node-groups, etc.'),
+        ('DEBUG', '2: Dataflow', 'Node-trees, node-groups, nodes, sockets, etc.'),
         ('TRACE', '3: All', 'Node functions, socket functions, error conditions, etc.')
     ],
     default = 'INFO',
