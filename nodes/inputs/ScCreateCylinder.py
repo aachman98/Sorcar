@@ -33,6 +33,7 @@ class ScCreateCylinder(Node, ScInputNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.primitive_cylinder_add(
             vertices = int(self.inputs["Vertices"].default_value),
             radius = self.inputs["Radius"].default_value,

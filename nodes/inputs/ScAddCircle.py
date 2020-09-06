@@ -30,6 +30,7 @@ class ScAddCircle(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.primitive_circle_add(
             vertices = int(self.inputs["Vertices"].default_value),
             radius = self.inputs["Radius"].default_value,

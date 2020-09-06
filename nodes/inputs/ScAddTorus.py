@@ -42,6 +42,7 @@ class ScAddTorus(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.primitive_torus_add(
             major_segments = int(self.inputs["Major Segments"].default_value),
             minor_segments = int(self.inputs["Minor Segments"].default_value),

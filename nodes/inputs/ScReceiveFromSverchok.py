@@ -799,6 +799,7 @@ class ScReceiveFromSverchok(Node, ScInputNode):
     prop_faces_mask: StringProperty(default=repr([[True]*136]))
     
     def functionality(self):
+        super().functionality()
         verts = eval(self.prop_verts)
         edges = eval(self.prop_edges)
         faces = eval(self.prop_faces)

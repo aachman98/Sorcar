@@ -17,6 +17,7 @@ class ScSingleVertex(Node, ScInputNode):
         self.inputs.new("ScNodeSocketBool", "Show Name").init("in_show_name", True)
 
     def functionality(self):
+        super().functionality()
         m = bpy.data.meshes.new(self.inputs["Name"].default_value)
         obj = bpy.data.objects.new(self.inputs["Name"].default_value, m)
         obj.location = bpy.context.scene.cursor.location

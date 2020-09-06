@@ -30,6 +30,7 @@ class ScAddUvSphere(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.primitive_uv_sphere_add(
             segments = int(self.inputs["Segments"].default_value),
             ring_count = int(self.inputs["Rings"].default_value),

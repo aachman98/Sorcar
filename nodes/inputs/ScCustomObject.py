@@ -25,10 +25,12 @@ class ScCustomObject(Node, ScInputNode):
         )
     
     def pre_execute(self):
+        super().pre_execute()
         self.inputs["Object"].default_value.hide_set(False)
         focus_on_object(self.inputs["Object"].default_value)
     
     def functionality(self):
+        super().functionality()
         bpy.ops.object.duplicate()
     
     def post_execute(self):

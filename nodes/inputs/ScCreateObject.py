@@ -15,6 +15,7 @@ class ScCreateObject(Node, ScInputNode):
         self.inputs.new("ScNodeSocketArray", "Faces")
     
     def functionality(self):
+        super().functionality()
         bpy.ops.object.add(
             type = "MESH",
             align = "CURSOR"

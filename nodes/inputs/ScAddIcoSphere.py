@@ -27,6 +27,7 @@ class ScAddIcoSphere(Node, ScEditOperatorNode):
         )
     
     def functionality(self):        
+        super().functionality()
         bpy.ops.mesh.primitive_ico_sphere_add(
             subdivisions = int(self.inputs["Subdivisions"].default_value),
             radius = self.inputs["Radius"].default_value,

@@ -30,6 +30,7 @@ class ScAddGrid(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.primitive_grid_add(
             x_subdivisions = int(self.inputs["X Subdivisions"].default_value),
             y_subdivisions = int(self.inputs["Y Subdivisions"].default_value),

@@ -36,6 +36,7 @@ class ScCreateCone(Node, ScInputNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.primitive_cone_add(
             vertices = int(self.inputs["Vertices"].default_value),
             radius1 = self.inputs["Radius 1"].default_value,

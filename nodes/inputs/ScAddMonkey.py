@@ -24,6 +24,7 @@ class ScAddMonkey(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.primitive_monkey_add(
             size = self.inputs["Size"].default_value,
             calc_uvs = self.inputs["Generate UVs"].default_value

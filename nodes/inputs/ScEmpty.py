@@ -25,6 +25,7 @@ class ScEmpty(Node, ScInputNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.object.empty_add(
             type = self.inputs["Type"].default_value,
             radius = self.inputs["Radius"].default_value

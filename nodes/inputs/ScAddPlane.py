@@ -24,6 +24,7 @@ class ScAddPlane(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.primitive_plane_add(
             size = self.inputs["Size"].default_value,
             calc_uvs = self.inputs["Generate UVs"].default_value
