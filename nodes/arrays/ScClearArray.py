@@ -14,7 +14,7 @@ class ScClearArray(Node, ScNode):
         self.outputs.new("ScNodeSocketArray", "Empty Array")
 
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         arr = eval(self.inputs["Array"].default_value)
         arr.clear()
         out["Empty Array"] = repr(arr)

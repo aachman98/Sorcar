@@ -14,7 +14,7 @@ class ScReverseArray(Node, ScNode):
         self.outputs.new("ScNodeSocketArray", "New Array")
 
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         arr = eval(self.inputs["Array"].default_value)
         arr.reverse()
         out["New Array"] = repr(arr)

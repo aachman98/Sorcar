@@ -15,6 +15,6 @@ class ScCountElement(Node, ScNode):
         self.outputs.new("ScNodeSocketNumber", "Value")
 
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         out["Value"] = eval(self.inputs["Array"].default_value).count(self.inputs["Element"].default_value)
         return out

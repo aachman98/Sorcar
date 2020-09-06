@@ -3,6 +3,7 @@ import math
 
 from bpy.types import Node
 from .._base.node_base import ScNode
+from ...debug import log
 
 class ScMakeArray(Node, ScNode):
     bl_idname = "ScMakeArray"
@@ -13,7 +14,8 @@ class ScMakeArray(Node, ScNode):
         self.inputs.new("ScNodeSocketArrayPlaceholder", "...")
         self.outputs.new("ScNodeSocketArray", "Array")
     
-    def init_in(self, forced):
+    def init_in(self, forced): # Should be a behaviour of socket
+        log(self.id_data.name, self.name, "init_in", "Forced="+str(forced), 3)
         for i in self.inputs:
             if (not i.bl_rna.name == "ScNodeSocketArrayPlaceholder"):
                 if (i.is_linked):
@@ -24,6 +26,7 @@ class ScMakeArray(Node, ScNode):
         return True
 
     def post_execute(self):
+        out = super().post_execute()
         arr = []
         for i in self.inputs:
             if (not i.bl_rna.name == "ScNodeSocketArrayPlaceholder"):
@@ -31,4 +34,5 @@ class ScMakeArray(Node, ScNode):
                     arr.append(list(i.default_value))
                 else:
                     arr.append(i.default_value)
-        return {"Array": repr(arr)}
+        out["Array"] = repr(arr)
+        return out

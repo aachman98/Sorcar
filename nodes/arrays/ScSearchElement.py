@@ -23,7 +23,7 @@ class ScSearchElement(Node, ScNode):
         self.outputs.new("ScNodeSocketNumber", "Index")
 
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         try:
             if (self.inputs["Use Range"].default_value):
                 index = eval(self.inputs["Array"].default_value).index(self.inputs["Element"].default_value, int(self.inputs["Start Index"].default_value), int(self.inputs["End Index"].default_value))

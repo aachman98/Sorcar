@@ -19,7 +19,7 @@ class ScPopElement(Node, ScNode):
         self.outputs.new("ScNodeSocketUniversal", "Element")
 
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         arr = eval(self.inputs["Array"].default_value)
         try:
             elem = arr.pop(int(self.inputs["Index"].default_value))

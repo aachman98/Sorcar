@@ -16,7 +16,7 @@ class ScRemoveElement(Node, ScNode):
         self.outputs.new("ScNodeSocketArray", "New Array")
 
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         arr = eval(self.inputs["Array"].default_value)
         try:
             arr.remove(self.inputs["Element"].default_value)
