@@ -34,7 +34,7 @@ class ScVoronoi(Node, ScNode):
         )
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         dist, loc = mathutils.noise.voronoi(
             self.inputs["Position"].default_value,
             distance_metric = self.inputs["Distance Metric"].default_value,

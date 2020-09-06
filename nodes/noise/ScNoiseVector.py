@@ -25,7 +25,7 @@ class ScNoiseVector(Node, ScNode):
         )
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         out["Value"] = mathutils.noise.noise_vector(
             self.inputs["Position"].default_value,
             noise_basis = self.inputs["Noise Basis"].default_value

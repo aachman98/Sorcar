@@ -33,7 +33,7 @@ class ScHeteroTerrain(Node, ScNode):
         )
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         out["Value"] = mathutils.noise.hetero_terrain(
             self.inputs["Position"].default_value,
             self.inputs["H"].default_value,

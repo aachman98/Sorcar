@@ -30,7 +30,7 @@ class ScVariableLacunarity(Node, ScNode):
         )
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         out["Value"] = mathutils.noise.variable_lacunarity(
             self.inputs["Position"].default_value,
             self.inputs["Distortion"].default_value,

@@ -33,7 +33,7 @@ class ScTurbulenceVector(Node, ScNode):
         )
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         out["Value"] = mathutils.noise.turbulence_vector(
             self.inputs["Position"].default_value,
             int(self.inputs["Octaves"].default_value),

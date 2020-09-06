@@ -35,7 +35,7 @@ class ScRidgedMultiFractal(Node, ScNode):
         )
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         out["Value"] = mathutils.noise.ridged_multi_fractal(
             self.inputs["Position"].default_value,
             self.inputs["H"].default_value,

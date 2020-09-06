@@ -17,6 +17,6 @@ class ScCell(Node, ScNode):
         self.outputs.new("ScNodeSocketNumber", "Value")
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         out["Value"] = mathutils.noise.cell(self.inputs["Position"].default_value)
         return out

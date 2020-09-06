@@ -17,6 +17,6 @@ class ScCellVector(Node, ScNode):
         self.outputs.new("ScNodeSocketVector", "Value")
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         out["Value"] = mathutils.noise.cell_vector(self.inputs["Position"].default_value)
         return out
