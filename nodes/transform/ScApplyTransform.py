@@ -20,6 +20,7 @@ class ScApplyTransform(Node, ScObjectOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Scale").init("in_scale", True)
     
     def functionality(self):
+        super().functionality()
         bpy.ops.object.transform_apply(
             location = self.inputs["Location"].default_value,
             rotation = self.inputs["Rotation"].default_value,

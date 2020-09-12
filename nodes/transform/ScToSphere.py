@@ -25,14 +25,17 @@ class ScToSphere(Node, ScNode):
     
     def error_condition(self):
         return (
-            self.inputs["Object"].default_value == None
+            super().error_condition()
+            or self.inputs["Object"].default_value == None
             or (self.inputs["Value"].default_value < 0.0 or self.inputs["Value"].default_value > 1.0)
         )
     
     def pre_execute(self):
+        super().pre_execute()
         focus_on_object(self.inputs["Object"].default_value, True)
     
     def functionality(self):
+        super().functionality()
         bpy.ops.transform.tosphere(
             get_override(self.inputs["Object"].default_value, True),
             value = self.inputs["Value"].default_value,

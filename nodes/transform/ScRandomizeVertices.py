@@ -30,6 +30,7 @@ class ScRandomizeVertices(Node, ScEditOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.transform.vertex_random(
             offset = self.inputs["Offset Amount"].default_value,
             uniform = self.inputs["Uniform"].default_value,

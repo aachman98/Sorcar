@@ -28,6 +28,7 @@ class ScCopyTransform(Node, ScObjectOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         if self.inputs["Location"].default_value:
             self.inputs["Object"].default_value.location = self.inputs["Secondary Object"].default_value.location
         if self.inputs["Rotation"].default_value:

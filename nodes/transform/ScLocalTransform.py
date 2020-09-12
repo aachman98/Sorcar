@@ -37,6 +37,7 @@ class ScLocalTransform(Node, ScTransformNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.transform.transform(
             get_override(self.inputs["Object"].default_value, self.inputs["Edit Mode"].default_value),
             mode = self.inputs["Mode"].default_value,

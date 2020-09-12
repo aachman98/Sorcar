@@ -27,6 +27,7 @@ class ScCreateOrientation(Node, ScTransformNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.transform.create_orientation(
             get_override(self.inputs["Object"].default_value, self.inputs["Edit Mode"].default_value),
             name = self.inputs["Name"].default_value,

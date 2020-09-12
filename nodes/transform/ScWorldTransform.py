@@ -24,6 +24,7 @@ class ScWorldTransform(Node, ScObjectOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         if (self.inputs["Type"].default_value == 'LOCATION'):
             self.inputs["Object"].default_value.location = self.inputs["Value"].default_value
         elif (self.inputs["Type"].default_value == 'ROTATION'):

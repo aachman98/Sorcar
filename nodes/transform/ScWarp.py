@@ -24,6 +24,7 @@ class ScWarp(Node, ScEditOperatorNode):
         self.inputs.new("ScNodeSocketVector", "Center").init("in_center")
     
     def functionality(self):
+        super().functionality()
         bpy.ops.transform.vertex_warp(
             warp_angle = self.inputs["Warp Angle"].default_value,
             offset_angle = self.inputs["Offset Angle"].default_value,

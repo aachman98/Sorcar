@@ -42,6 +42,7 @@ class ScRandomizeTransform(Node, ScObjectOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.object.randomize_transform(
             random_seed = int(self.inputs["Random Seed"].default_value),
             use_delta = self.inputs["Transform Delta"].default_value,
