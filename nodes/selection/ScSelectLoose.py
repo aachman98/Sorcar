@@ -16,6 +16,7 @@ class ScSelectLoose(Node, ScSelectionNode):
         self.inputs.new("ScNodeSocketBool", "Extend").init("in_extend", True)
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.select_loose(
             extend = self.inputs["Extend"].default_value
         )

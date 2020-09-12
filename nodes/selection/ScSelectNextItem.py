@@ -9,4 +9,5 @@ class ScSelectNextItem(Node, ScSelectionNode):
     bl_label = "Select Next Item"
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.select_next_item()

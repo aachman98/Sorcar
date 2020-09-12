@@ -9,4 +9,5 @@ class ScSelectInteriorFaces(Node, ScSelectionNode):
     bl_label = "Select Interior Faces"
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.select_interior_faces()

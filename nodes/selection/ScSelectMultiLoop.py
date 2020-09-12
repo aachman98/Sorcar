@@ -16,6 +16,7 @@ class ScSelectMultiLoop(Node, ScSelectionNode):
         self.inputs.new("ScNodeSocketBool", "Select Ring").init("in_ring", True)
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.loop_multi_select(
             ring = self.inputs["Select Ring"].default_value
         )

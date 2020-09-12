@@ -20,7 +20,7 @@ class ScSelectSimilar(Node, ScSelectionNode):
         self.inputs.new("ScNodeSocketNumber", "Threshold").init("in_threshold")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Type"].default_value in ['NORMAL', 'FACE', 'VGROUP', 'EDGE', 'LENGTH', 'DIR', 'FACE', 'FACE_ANGLE', 'CREASE', 'BEVEL', 'SEAM', 'SHARP', 'FREESTYLE_EDGE', 'MATERIAL', 'AREA', 'SIDES', 'PERIMETER', 'COPLANAR', 'SMOOTH', 'FACE_MAP', 'FREESTYLE_FACE'])
             or (not self.inputs["Compare"].default_value in ['EQUAL', 'GREATER', 'LESS'])
@@ -28,6 +28,7 @@ class ScSelectSimilar(Node, ScSelectionNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.select_similar(
             type = self.inputs["Type"].default_value,
             compare = self.inputs["Compare"].default_value,

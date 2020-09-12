@@ -21,12 +21,13 @@ class ScSelectMirror(Node, ScSelectionNode):
         layout.prop(self, "prop_axis", expand=True)
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or len(self.prop_axis) == 0
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.select_mirror(
             axis = self.prop_axis,
             extend = self.inputs["Extend"].default_value

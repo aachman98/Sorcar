@@ -30,6 +30,7 @@ class ScSelectLinkedPick(Node, ScSelectionNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.select_linked_pick(
             deselect = self.inputs["Deselect"].default_value,
             delimit = self.prop_delimit,

@@ -26,6 +26,7 @@ class ScSelectNonManifold(Node, ScSelectionNode):
         self.inputs.new("ScNodeSocketBool", "Vertices").init("in_verts")
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.select_non_manifold(
             extend = self.inputs["Extend"].default_value,
             use_wire = self.inputs["Wire"].default_value,

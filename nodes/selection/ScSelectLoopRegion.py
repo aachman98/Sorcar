@@ -16,6 +16,7 @@ class ScSelectLoopRegion(Node, ScSelectionNode):
         self.inputs.new("ScNodeSocketBool", "Select Bigger").init("in_bigger", True)
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.loop_to_region(
             select_bigger = self.inputs["Select Bigger"].default_value
         )

@@ -22,27 +22,23 @@ class ScSelectByLocation(Node, ScSelectionNode):
         self.inputs.new("ScNodeSocketBool", "Deselect").init("in_deselect")
 
     def functionality(self):
+        super().functionality()
         bpy.ops.object.mode_set(mode="OBJECT")
-
         if (not (self.inputs["Deselect"].default_value or self.inputs["Extend"].default_value)):
             bpy.ops.object.mode_set(mode="EDIT")
             bpy.ops.mesh.select_all(action="DESELECT")
             bpy.ops.object.mode_set(mode="OBJECT")
-
         if (bpy.context.tool_settings.mesh_select_mode[0]):
             for vertex in self.inputs["Object"].default_value.data.vertices:
                 if (((vertex.co[0]>=self.inputs["Minimum"].default_value[0] and vertex.co[1]>=self.inputs["Minimum"].default_value[1] and vertex.co[2]>=self.inputs["Minimum"].default_value[2]) and (vertex.co[0]<=self.inputs["Maximum"].default_value[0] and vertex.co[1]<=self.inputs["Maximum"].default_value[1] and vertex.co[2]<=self.inputs["Maximum"].default_value[2]))):
                     vertex.select = not self.inputs["Deselect"].default_value
-
         if (bpy.context.tool_settings.mesh_select_mode[1]):
             for edge in self.inputs["Object"].default_value.data.edges:
                 co = (self.inputs["Object"].default_value.data.vertices[edge.vertices[0]].co + self.inputs["Object"].default_value.data.vertices[edge.vertices[1]].co)/2
                 if (((co[0]>=self.inputs["Minimum"].default_value[0] and co[1]>=self.inputs["Minimum"].default_value[1] and co[2]>=self.inputs["Minimum"].default_value[2]) and (co[0]<=self.inputs["Maximum"].default_value[0] and co[1]<=self.inputs["Maximum"].default_value[1] and co[2]<=self.inputs["Maximum"].default_value[2]))):
                     edge.select = not self.inputs["Deselect"].default_value
-
         if (bpy.context.tool_settings.mesh_select_mode[2]):
             for face in self.inputs["Object"].default_value.data.polygons:
                 if (((face.center[0]>=self.inputs["Minimum"].default_value[0] and face.center[1]>=self.inputs["Minimum"].default_value[1] and face.center[2]>=self.inputs["Minimum"].default_value[2]) and (face.center[0]<=self.inputs["Maximum"].default_value[0] and face.center[1]<=self.inputs["Maximum"].default_value[1] and face.center[2]<=self.inputs["Maximum"].default_value[2]))):
                     face.select = not self.inputs["Deselect"].default_value
-
         bpy.ops.object.mode_set(mode="EDIT")

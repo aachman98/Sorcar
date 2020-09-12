@@ -9,4 +9,5 @@ class ScSelectRegionBoundary(Node, ScSelectionNode):
     bl_label = "Select Region Boundary"
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.region_to_loop()

@@ -16,6 +16,7 @@ class ScSelectLess(Node, ScSelectionNode):
         self.inputs.new("ScNodeSocketBool", "Face Step").init("in_step", True)
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.select_less(
             use_face_step = self.inputs["Face Step"].default_value
         )

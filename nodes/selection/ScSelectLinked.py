@@ -22,6 +22,7 @@ class ScSelectLinked(Node, ScSelectionNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.select_linked(
             delimit = self.prop_delimit
         )

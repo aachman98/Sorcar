@@ -16,12 +16,13 @@ class ScSelectLinkedFacesFlat(Node, ScSelectionNode):
         self.inputs.new("ScNodeSocketNumber", "Sharpness").init("in_sharpness", True)
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (self.inputs["Sharpness"].default_value < 0.000174533 or self.inputs["Sharpness"].default_value > 3.14159)
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.select_linked_faces_flat(
             sharpness = self.inputs["Sharpness"].default_value
         )

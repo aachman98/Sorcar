@@ -28,7 +28,7 @@ class ScSelectShortestPath(Node, ScSelectionNode):
         self.inputs.new("ScNodeSocketNumber", "Offset").init("in_offset")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Edge Tag"].default_value in ['SELECT', 'SEAM', 'SHARP', 'CREASE', 'BEVEL', 'FREESTYLE'])
             or int(self.inputs["Nth Selection"].default_value) < 1
@@ -36,6 +36,7 @@ class ScSelectShortestPath(Node, ScSelectionNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.shortest_path_select(
             edge_mode = self.inputs["Edge Tag"].default_value,
             use_face_step = self.inputs["Face Stepping"].default_value,

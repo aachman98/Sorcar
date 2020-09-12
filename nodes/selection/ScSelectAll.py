@@ -16,12 +16,13 @@ class ScSelectAll(Node, ScSelectionNode):
         self.inputs.new("ScNodeSocketString", "Action").init("in_action", True)
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Action"].default_value in ["TOGGLE", "SELECT", "DESELECT", "INVERT"])
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.select_all(
             action = self.inputs["Action"].default_value
         )

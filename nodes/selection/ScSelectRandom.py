@@ -20,7 +20,7 @@ class ScSelectRandom(Node, ScSelectionNode):
         self.inputs.new("ScNodeSocketString", "Action").init("in_action", True)
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (self.inputs["Percent"].default_value < 0 or self.inputs["Percent"].default_value > 100)
             or self.inputs["Seed"].default_value < 0
@@ -28,6 +28,7 @@ class ScSelectRandom(Node, ScSelectionNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.select_random(
             percent = self.inputs["Percent"].default_value,
             seed = int(self.inputs["Seed"].default_value),

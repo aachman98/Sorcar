@@ -20,7 +20,7 @@ class ScSelectAxis(Node, ScSelectionNode):
         self.inputs.new("ScNodeSocketNumber", "Threshold").init("in_threshold")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Sign"].default_value in ['POS', 'NEG', 'ALIGN'])
             or (not self.inputs["Axis"].default_value in ['X', 'Y', 'Z'])
@@ -28,6 +28,7 @@ class ScSelectAxis(Node, ScSelectionNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.select_axis(
             orientation = bpy.context.scene.transform_orientation_slots[0].type,
             sign = self.inputs["Sign"].default_value,

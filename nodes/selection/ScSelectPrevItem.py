@@ -9,4 +9,5 @@ class ScSelectPrevItem(Node, ScSelectionNode):
     bl_label = "Select Previous Item"
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.select_next_item()

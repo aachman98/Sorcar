@@ -20,13 +20,14 @@ class ScSelectFaceBySides(Node, ScSelectionNode):
         self.inputs.new("ScNodeSocketBool", "Extend").init("in_extend")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or int(self.inputs["Number"].default_value) < 3
             or (not self.inputs["Type"].default_value in ['LESS', 'EQUAL', 'GREATER', 'NOTEQUAL'])
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.select_face_by_sides(
             number = int(self.inputs["Number"].default_value),
             type = self.inputs["Type"].default_value,

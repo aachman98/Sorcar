@@ -20,13 +20,14 @@ class ScSelectNth(Node, ScSelectionNode):
         self.inputs.new("ScNodeSocketNumber", "Offset").init("in_offset")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or int(self.inputs["Nth Element"].default_value) < 1
             or int(self.inputs["Skip Number"].default_value) < 1
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.select_nth(
             nth = int(self.inputs["Nth Element"].default_value),
             skip = int(self.inputs["Skip Number"].default_value),

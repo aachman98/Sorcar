@@ -38,6 +38,7 @@ class ScSelectAlternateFaces(Node, ScSelectionNode):
                 bpy.ops.mesh.select_all(action="DESELECT")
     
     def functionality(self):
+        super().functionality()
         bpy.ops.object.mode_set(mode="OBJECT")
         for i in range(int(self.inputs["Offset"].default_value), len(self.inputs["Object"].default_value.data.polygons), int(self.inputs["Every Nth"].default_value)):
             self.inputs["Object"].default_value.data.polygons[i].select = not self.inputs["Deselect"].default_value

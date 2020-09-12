@@ -9,4 +9,5 @@ class ScSelectSimilarRegion(Node, ScSelectionNode):
     bl_label = "Select Similar Region"
     
     def functionality(self):
+        super().functionality()
         bpy.ops.mesh.select_similar_region()

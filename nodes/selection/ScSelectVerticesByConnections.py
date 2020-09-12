@@ -29,14 +29,13 @@ class ScSelectVerticesByConnections(Node, ScEditOperatorNode):
         bpy.context.tool_settings.mesh_select_mode = [True, False, False]
 
     def functionality(self):
+        super().functionality()
         bm = bmesh.from_edit_mesh(self.inputs["Object"].default_value.data)
         index = -1
-
         if hasattr(bm.verts, "ensure_lookup_table"):
             bm.verts.ensure_lookup_table()
         if (self.inputs["Extend"].default_value):
             original_selection = [v.index for v in bm.verts if v.select]
-        
         bpy.ops.mesh.select_all(action='DESELECT')
         for i in bm.verts:
             if (len(i.link_edges) == int(self.inputs["Connections"].default_value)):
@@ -45,7 +44,6 @@ class ScSelectVerticesByConnections(Node, ScEditOperatorNode):
         if (not index == -1):
             bm.verts[index].select_set(True)
             bpy.ops.mesh.select_similar(type='EDGE', threshold=0.01)
-        
         bm.free()
         if (self.inputs["Extend"].default_value):
             bpy.ops.object.mode_set(mode='OBJECT')

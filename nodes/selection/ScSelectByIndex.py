@@ -20,15 +20,15 @@ class ScSelectByIndex(Node, ScSelectionNode):
         self.inputs.new("ScNodeSocketBool", "Deselect").init("in_deselect")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or int(self.inputs["Index"].default_value) < 0
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.object.mode_set(mode="OBJECT")
         data = []
-
         if (bpy.context.tool_settings.mesh_select_mode[0]):
             data.append(self.inputs["Object"].default_value.data.vertices)
         if (bpy.context.tool_settings.mesh_select_mode[1]):
