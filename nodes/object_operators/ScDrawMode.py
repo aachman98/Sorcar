@@ -36,13 +36,14 @@ class ScDrawMode(Node, ScObjectOperatorNode):
         self.inputs.new("ScNodeSocketBool", "Render").init("in_visibility_render")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Display As"].default_value in ['SOLID', 'WIRE', 'BOUNDS'])
             or (not self.inputs["Bounds Shape"].default_value in ['BOX', 'SPHERE', 'CYLINDER', 'CONE', 'CAPSULE'])
         )
     
     def functionality(self):
+        super().functionality()
         self.inputs["Object"].default_value.show_name = self.inputs["Name"].default_value
         self.inputs["Object"].default_value.show_axis = self.inputs["Axis"].default_value
         self.inputs["Object"].default_value.show_wire = self.inputs["Wireframe"].default_value

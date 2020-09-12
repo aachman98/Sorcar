@@ -26,6 +26,7 @@ class ScExportFbx(Node, ScObjectOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.ops.export_scene.fbx(
             filepath = os.path.join(
                 bpy.path.abspath(self.inputs["Directory"].default_value),

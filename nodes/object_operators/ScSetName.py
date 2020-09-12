@@ -16,12 +16,13 @@ class ScSetName(Node, ScObjectOperatorNode):
         self.inputs.new("ScNodeSocketString", "Name").init("in_name", True)
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or self.inputs["Name"].default_value == ""
         )
     
     def functionality(self):
+        super().functionality()
         self.inputs["Object"].default_value.name = self.inputs["Name"].default_value
         if (self.inputs["Object"].default_value.data):
             self.inputs["Object"].default_value.data.name = self.inputs["Name"].default_value

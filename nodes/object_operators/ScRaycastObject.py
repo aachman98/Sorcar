@@ -25,7 +25,7 @@ class ScRaycastObject(Node, ScObjectOperatorNode):
         self.outputs.new("ScNodeSocketNumber", "Distance")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or self.inputs["Distance"].default_value < 0.0
         )

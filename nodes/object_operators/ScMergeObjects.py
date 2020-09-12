@@ -15,7 +15,7 @@ class ScMergeObjects(Node, ScObjectOperatorNode):
         self.inputs.new("ScNodeSocketArray", "Mesh Array")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or len(eval(self.inputs["Mesh Array"].default_value)) == 0
         )
@@ -26,4 +26,5 @@ class ScMergeObjects(Node, ScObjectOperatorNode):
             obj.select_set(True, view_layer=bpy.context.view_layer)
     
     def functionality(self):
+        super().functionality()
         bpy.ops.object.join()

@@ -17,7 +17,7 @@ class ScMakeLinks(Node, ScObjectOperatorNode):
         self.inputs.new("ScNodeSocketArray", "Objects")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Type"].default_value in ['OBDATA', 'MATERIAL', 'ANIMATION', 'GROUPS', 'DUPLICOLLECTION', 'MODIFIERS', 'FONTS'])
         )
@@ -28,6 +28,7 @@ class ScMakeLinks(Node, ScObjectOperatorNode):
             obj.select_set(True, view_layer=bpy.context.view_layer)
     
     def functionality(self):
+        super().functionality()
         bpy.ops.object.make_links_data(
             type = self.inputs["Type"].default_value
         )

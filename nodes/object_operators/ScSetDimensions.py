@@ -16,4 +16,5 @@ class ScSetDimensions(Node, ScObjectOperatorNode):
         self.inputs.new("ScNodeSocketVector", "Dimensions").init("in_dimensions", True)
     
     def functionality(self):
+        super().functionality()
         self.inputs["Object"].default_value.dimensions = self.inputs["Dimensions"].default_value

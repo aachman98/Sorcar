@@ -19,7 +19,7 @@ class ScOverlap(Node, ScObjectOperatorNode):
         self.outputs.new("ScNodeSocketArray", "Secondary Indices")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or self.inputs["Secondary Object"].default_value == None
         )

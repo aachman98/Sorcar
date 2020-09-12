@@ -36,7 +36,7 @@ class ScScatter(Node, ScObjectOperatorNode):
             layout.prop(self, "prop_rot", expand=True)
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or self.inputs["Scatter Object"].default_value == None
             or (not self.inputs["Component"].default_value in ['FACES', 'VERTS', 'EDGES'])
@@ -50,6 +50,7 @@ class ScScatter(Node, ScObjectOperatorNode):
         self.inputs["Scatter Object"].default_value.hide_set(False)
     
     def functionality(self):
+        super().functionality()
         if (self.inputs["Type"].default_value == 'INST'):
             o = self.inputs["Object"].default_value
             so = self.inputs["Scatter Object"].default_value
@@ -106,6 +107,7 @@ class ScScatter(Node, ScObjectOperatorNode):
         return out
     
     def free(self):
+        super().free()
         for object in self.prop_obj_array[1:-1].split(', '):
             try:
                 obj = eval(object)

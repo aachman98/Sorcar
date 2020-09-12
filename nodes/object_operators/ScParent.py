@@ -28,6 +28,7 @@ class ScParent(Node, ScObjectOperatorNode):
         )
 
     def functionality(self):
+        super().functionality()
         parent = self.inputs["Parent"].default_value
         parent.select_set(state=True)
         bpy.context.view_layer.objects.active = parent

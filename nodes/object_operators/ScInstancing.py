@@ -42,6 +42,7 @@ class ScInstancing(Node, ScObjectOperatorNode):
         )
     
     def functionality(self):
+        super().functionality()
         self.inputs["Object"].default_value.instance_type = self.inputs["Type"].default_value
         self.inputs["Object"].default_value.show_instancer_for_viewport = self.inputs["Display Instancer"].default_value
         self.inputs["Object"].default_value.show_instancer_for_render = self.inputs["Render Instancer"].default_value

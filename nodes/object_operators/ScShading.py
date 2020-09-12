@@ -20,13 +20,14 @@ class ScShading(Node, ScObjectOperatorNode):
         self.inputs.new("ScNodeSocketNumber", "Angle").init("in_angle")
     
     def error_condition(self):
-        return(
+        return (
             super().error_condition()
             or (not self.inputs["Shading"].default_value in ['SMOOTH', 'FLAT'])
             or (self.inputs["Angle"].default_value < 0.0 or self.inputs["Angle"].default_value > 3.14159)
         )
     
     def functionality(self):
+        super().functionality()
         if (self.inputs["Shading"].default_value == "FLAT"):
             bpy.ops.object.shade_flat()
         else:

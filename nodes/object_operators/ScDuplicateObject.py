@@ -19,6 +19,7 @@ class ScDuplicateObject(Node, ScObjectOperatorNode):
         self.outputs.new("ScNodeSocketObject", "Duplicate Object")
     
     def functionality(self):
+        super().functionality()
         bpy.ops.object.duplicate(
             linked = self.inputs["Linked"].default_value
         )
@@ -31,4 +32,5 @@ class ScDuplicateObject(Node, ScObjectOperatorNode):
         return out
     
     def free(self):
+        super().free()
         self.id_data.unregister_object(self.out_mesh)

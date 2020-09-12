@@ -22,6 +22,7 @@ class ScClearParent(Node, ScObjectOperatorNode):
         )
 
     def functionality(self):
+        super().functionality()
         bpy.ops.object.parent_clear(
             type = self.inputs["Type"].default_value
         )

@@ -15,10 +15,11 @@ class ScGetChildren(Node, ScNode):
 
     def error_condition(self):
         return (
-            self.inputs["Object"].default_value == None
+            super().error_condition()
+            or self.inputs["Object"].default_value == None
         )
     
     def post_execute(self):
-        return {
-            "Children": repr(list(self.inputs["Object"].default_value.children))
-        }
+        out = super().post_execute()
+        out["Children"] = repr(list(self.inputs["Object"].default_value.children))
+        return out
