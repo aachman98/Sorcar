@@ -31,6 +31,7 @@ class ScProportionalEditing(Node, ScSettingNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.scene.tool_settings.proportional_edit_falloff = self.inputs["Falloff"].default_value
         bpy.context.scene.tool_settings.proportional_size = self.inputs["Size"].default_value
         bpy.context.scene.tool_settings.use_proportional_connected = self.inputs["Connected Only"].default_value

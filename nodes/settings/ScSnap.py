@@ -44,6 +44,7 @@ class ScSnap(Node, ScSettingNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.scene.tool_settings.use_snap = self.inputs["Snap"].default_value
         bpy.context.scene.tool_settings.snap_elements = self.prop_elements
         bpy.context.scene.tool_settings.snap_target = self.inputs["Snap With"].default_value

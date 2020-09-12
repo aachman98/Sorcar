@@ -18,5 +18,6 @@ class ScCursorTransform(Node, ScSettingNode):
         self.inputs.new("ScNodeSocketVector", "Rotation").init("in_rotation")
     
     def functionality(self):
+        super().functionality()
         bpy.context.scene.cursor.location = self.inputs["Location"].default_value
         bpy.context.scene.cursor.rotation_euler = self.inputs["Rotation"].default_value

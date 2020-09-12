@@ -24,5 +24,6 @@ class ScPivotPoint(Node, ScSettingNode):
         )
     
     def functionality(self):
+        super().functionality()
         bpy.context.scene.tool_settings.transform_pivot_point = self.inputs["Pivot Point"].default_value
         bpy.context.scene.tool_settings.use_transform_pivot_point_align = self.inputs["Only Origins"].default_value
