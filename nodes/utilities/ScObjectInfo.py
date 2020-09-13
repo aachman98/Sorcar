@@ -29,14 +29,18 @@ class ScObjectInfo(Node, ScNode):
         self.outputs.new("ScNodeSocketArray", "Total Faces")
     
     def pre_execute(self):
+        super().pre_execute()
         focus_on_object(self.inputs["Object"].default_value, True)
         bpy.ops.object.mode_set(mode='OBJECT')
     
     def error_condition(self):
-        return self.inputs["Object"].default_value == None
+        return (
+            super().error_condition()
+            or self.inputs["Object"].default_value == None
+        )
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         out["Name"] = self.inputs["Object"].default_value.name
         out["Location"] = self.inputs["Object"].default_value.location
         out["Rotation"] = self.inputs["Object"].default_value.rotation_euler

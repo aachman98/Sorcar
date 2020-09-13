@@ -22,13 +22,16 @@ class ScCustomPythonScript(Node, ScNode):
     
     def error_condition(self):
         return (
-            int(self.inputs["Repeat"].default_value) < 1
+            super().error_condition()
+            or int(self.inputs["Repeat"].default_value) < 1
         )
     
     def pre_execute(self):
+        super().pre_execute()
         print_log(self.name, None, None, self.inputs["Script"].default_value)
     
     def functionality(self):
+        super().functionality()
         _C = bpy.context
         _D = bpy.data
         _O = bpy.ops
@@ -43,4 +46,6 @@ class ScCustomPythonScript(Node, ScNode):
             exec(self.inputs["Script"].default_value)
 
     def post_execute(self):
-        return {"Out": self.inputs["In"].default_value}
+        out = super().post_execute()
+        out["Out"] = self.inputs["In"].default_value
+        return out

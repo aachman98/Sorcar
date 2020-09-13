@@ -22,12 +22,13 @@ class ScTrigoOp(Node, ScNode):
     
     def error_condition(self):
         return (
-            (not self.inputs["Operation 1"].default_value in ["SIN", "COS", "TAN"])
+            super().error_condition()
+            or (not self.inputs["Operation 1"].default_value in ["SIN", "COS", "TAN"])
             or (not self.inputs["Operation 2"].default_value in ["NONE", "HB", "INV"])
         )
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         if (self.inputs["Operation 1"].default_value == "SIN"):
             if (self.inputs["Operation 2"].default_value == "NONE"):
                 out["Value"] = math.sin(self.inputs["X"].default_value)

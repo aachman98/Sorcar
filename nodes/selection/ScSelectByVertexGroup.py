@@ -4,7 +4,6 @@ from bpy.props import StringProperty, BoolProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_selection import ScSelectionNode
-from ...helper import print_log
 
 class ScSelectByVertexGroup(Node, ScSelectionNode):
     bl_idname = "ScSelectByVertexGroup"

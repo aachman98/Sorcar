@@ -23,6 +23,7 @@ class ScComponentInfo(Node, ScNode):
         self.outputs.new("ScNodeSocketNumber", "Area (Only Faces)")
     
     def pre_execute(self):
+        super().pre_execute()
         focus_on_object(self.inputs["Object"].default_value)
     
     def error_condition(self):
@@ -33,7 +34,7 @@ class ScComponentInfo(Node, ScNode):
         )
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         if (self.inputs["Component"].default_value == 'FACE'):
             loc = [i.center for i in self.inputs["Object"].default_value.data.polygons if i.select]
             rot = [i.normal for i in self.inputs["Object"].default_value.data.polygons if i.select]

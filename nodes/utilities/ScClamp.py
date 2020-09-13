@@ -21,10 +21,11 @@ class ScClamp(Node, ScNode):
     
     def error_condition(self):
         return (
-            self.inputs["Max"].default_value < self.inputs["Min"].default_value
+            super().error_condition()
+            or self.inputs["Max"].default_value < self.inputs["Min"].default_value
         )
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         out["Value"] = max(min(self.inputs["Max"].default_value, self.inputs["X"].default_value), self.inputs["Min"].default_value)
         return out

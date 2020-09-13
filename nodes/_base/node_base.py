@@ -1,7 +1,6 @@
 import bpy
 
 from bpy.props import BoolProperty
-from ...helper import print_log
 from ...debug import log
 
 class ScNode:
@@ -87,7 +86,7 @@ class ScNode:
         if (not out):
             log(self.id_data.name, self.name, "init_out", "No output", 3)
             return False
-        log(self.id_data.name, self.name, "init_out", "Output="+str(out), 3)
+        log(self.id_data.name, self.name, "init_out", "Output="+repr(out), 3)
         for i in out:
             if not (self.outputs[i].set(out[i])):
                 log(self.id_data.name, self.name, "init_out", "Cannot set output \""+self.outputs[i].name+"\"", 3)

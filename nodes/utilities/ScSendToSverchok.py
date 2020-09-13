@@ -39,6 +39,7 @@ class ScSendToSverchok(Node, ScObjectOperatorNode):
         super().pre_execute()
     
     def functionality(self):
+        super().functionality()
         obj = self.inputs["Object"].default_value
         self.prop_tree.nodes[self.prop_node].set_mesh(
             repr([[list(i.co) for i in obj.data.vertices]]),

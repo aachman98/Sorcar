@@ -27,11 +27,12 @@ class ScMapRange(Node, ScNode):
     
     def error_condition(self):
         return (
-            self.inputs["Out Min"].default_value == self.inputs["Out Max"].default_value
+            super().error_condition()
+            or self.inputs["Out Min"].default_value == self.inputs["Out Max"].default_value
         )
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         x = self.inputs["X"].default_value
         x_min = self.inputs["In Min"].default_value
         x_max = self.inputs["In Max"].default_value

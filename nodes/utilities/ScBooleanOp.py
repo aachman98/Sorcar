@@ -21,11 +21,12 @@ class ScBooleanOp(Node, ScNode):
     
     def error_condition(self):
         return (
-            (not self.inputs["Operation"].default_value in ['AND', 'OR', 'EQUAL', 'NOTEQUAL', 'NOTX', 'NOTY'])
+            super().error_condition()
+            or (not self.inputs["Operation"].default_value in ['AND', 'OR', 'EQUAL', 'NOTEQUAL', 'NOTX', 'NOTY'])
         )
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         if (self.inputs["Operation"].default_value == "AND"):
             out["Value"] = self.inputs["X"].default_value and self.inputs["Y"].default_value
         elif (self.inputs["Operation"].default_value == "OR"):

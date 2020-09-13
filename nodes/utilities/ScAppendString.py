@@ -18,6 +18,6 @@ class ScAppendString(Node, ScNode):
         self.outputs.new("ScNodeSocketString", "Value")
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         out["Value"] = self.inputs["A"].default_value + self.inputs["B"].default_value
         return out

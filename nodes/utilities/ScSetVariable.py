@@ -25,19 +25,22 @@ class ScSetVariable(Node, ScNode):
     
     def error_condition(self):
         return (
-            self.prop_nodetree == None
+            super().error_condition()
+            or self.prop_nodetree == None
             or self.inputs["Name"].default_value == ""
         )
     
     def pre_execute(self):
+        super().pre_execute()
         if not hasattr(self.prop_nodetree, "variables"):
             self.prop_nodetree.variables = {}
     
     def functionality(self):
+        super().functionality()
         self.prop_nodetree.variables[self.inputs["Name"].default_value] = self.inputs["Value"].default_value
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         out["Out"] = self.inputs["In"].default_value
         out["Value"] = self.inputs["Value"].default_value
         return out

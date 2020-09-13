@@ -18,7 +18,7 @@ class ScBreakVector(Node, ScNode):
         self.outputs.new("ScNodeSocketNumber", "Z")
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         out["X"] = self.inputs["Vector"].default_value[0]
         out["Y"] = self.inputs["Vector"].default_value[1]
         out["Z"] = self.inputs["Vector"].default_value[2]

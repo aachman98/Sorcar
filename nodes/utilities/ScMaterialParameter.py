@@ -33,19 +33,21 @@ class ScMaterialParameter(Node, ScNode):
     
     def error_condition(self):
         return (
-            self.prop_mat == None
+            super().error_condition()
+            or self.prop_mat == None
             or self.prop_node == ""
             or (not self.prop_type in ['INPUT', 'OUTPUT'])
             or self.prop_socket == ""
         )
     
     def functionality(self):
+        super().functionality()
         if (self.prop_type == "INPUT"):
             self.prop_mat.node_tree.nodes[self.prop_node].inputs[self.prop_socket].default_value = eval(self.inputs["Value"].default_value)
         else:
             self.prop_mat.node_tree.nodes[self.prop_node].outputs[self.prop_socket].default_value = eval(self.inputs["Value"].default_value)
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         out["Out"] = self.inputs["In"].default_value
         return out
