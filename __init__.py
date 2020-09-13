@@ -140,7 +140,7 @@ all_classes = []
 addon_keymaps = []
 
 def register():
-    log(msg="REGISTERING...", level=2)
+    log(msg="REGISTERING...")
     path = repr([i for i in addon_utils.modules() if i.bl_info['name'] == "Sorcar"][0]).split("from '")[1].split("__init__.py'>")[0]
     classes_ops = import_ops(path)
     classes_sockets = import_sockets(path)
@@ -175,10 +175,10 @@ def register():
     
     addon_updater_ops.register(bl_info)
     
-    log("REGISTERED", msg="{} operators, {} sockets, {} UI, {} keymaps & {} nodes ({} categories)".format(len(classes_ops), len(classes_sockets), len(classes_ui), len(addon_keymaps), total_nodes, len(classes_nodes)))
+    log("REGISTERED", msg="{} operators, {} sockets, {} UI panels, {} keymaps & {} nodes ({} categories)".format(len(classes_ops), len(classes_sockets), len(classes_ui), len(addon_keymaps), total_nodes, len(classes_nodes)))
 
 def unregister():
-    log(msg="UNREGISTERING...", level=2)
+    log(msg="UNREGISTERING...")
     global all_classes, addon_keymaps
     all_classes.reverse()
 
