@@ -27,7 +27,7 @@ class ScPrint(Node, ScNode):
         return super().execute(forced or self.prop_force)
     
     def functionality(self):
-        log(self.id_data.name, self.name, "functionality", self.inputs["String"].default_value)
+        log(self.id_data.name, self.name, "functionality", "Text:\n"+self.inputs["String"].default_value)
     
     def post_execute(self):
         out = super().post_execute()

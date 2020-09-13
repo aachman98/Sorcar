@@ -4,7 +4,7 @@ import math
 from bpy.props import IntProperty, StringProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
-from ...helper import print_log
+from ...debug import log
 
 class ScCustomPythonScript(Node, ScNode):
     bl_idname = "ScCustomPythonScript"
@@ -27,8 +27,7 @@ class ScCustomPythonScript(Node, ScNode):
         )
     
     def pre_execute(self):
-        super().pre_execute()
-        print_log(self.name, None, None, self.inputs["Script"].default_value)
+        log(self.id_data.name, self.name, "pre_execute", "Script:\n"+self.inputs["Script"].default_value, 2)
     
     def functionality(self):
         super().functionality()

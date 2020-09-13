@@ -4,7 +4,7 @@ from bpy.props import EnumProperty, StringProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_operator import ScEditOperatorNode
-from ...helper import print_log
+from ...debug import log
 
 class ScSeparate(Node, ScEditOperatorNode):
     bl_idname = "ScSeparate"
@@ -51,6 +51,6 @@ class ScSeparate(Node, ScEditOperatorNode):
             try:
                 obj = eval(object)
             except:
-                print_log(self.id_data.name, self.name, "free", "Invalid object: " + object)
+                log(self.id_data.name, self.name, "free", "Invalid object: " + object, 2)
                 continue
             self.id_data.unregister_object(obj)

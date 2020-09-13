@@ -5,7 +5,8 @@ from bpy.props import PointerProperty, StringProperty, EnumProperty, BoolPropert
 from bpy.types import Node
 from .._base.node_base import ScNode
 from .._base.node_operator import ScObjectOperatorNode
-from ...helper import focus_on_object, remove_object, print_log
+from ...helper import focus_on_object, remove_object
+from ...debug import log
 
 class ScScatter(Node, ScObjectOperatorNode):
     bl_idname = "ScScatter"
@@ -112,6 +113,6 @@ class ScScatter(Node, ScObjectOperatorNode):
             try:
                 obj = eval(object)
             except:
-                print_log(self.id_data.name, self.name, "free", "Invalid object: " + object)
+                log(self.id_data.name, self.name, "free", "Invalid object: " + object, 2)
                 continue
             self.id_data.unregister_object(obj)
