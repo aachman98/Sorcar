@@ -3,6 +3,7 @@ import bpy
 from bpy.props import IntProperty
 from bpy.types import Node
 from .._base.node_base import ScNode
+from ...debug import log
 
 class ScEndForEachComponentLoop(Node, ScNode):
     bl_idname = "ScEndForEachComponentLoop"
@@ -18,13 +19,20 @@ class ScEndForEachComponentLoop(Node, ScNode):
         self.outputs.new("ScNodeSocketObject", "Out")
     
     def init_in(self, forced):
-        return (
-            self.inputs["Begin For-Each Component Loop"].is_linked
-            and self.inputs["Begin For-Each Component Loop"].links[0].from_node.execute(forced)
-        )
+        log(self.id_data.name, self.name, "init_in", "Forced="+str(forced), 3)
+        if (self.inputs["Begin For-Each Component Loop"].is_linked):
+            if (self.inputs["Begin For-Each Component Loop"].links[0].from_node.execute(forced)):
+                return True
+            else:
+                log(self.id_data.name, self.name, "init_in", "Execution failed for node \"Begin For-Each Component Loop\"", 3)
+        else:
+            log(self.id_data.name, self.name, "init_in", "Info input \"Begin For-Each Component Loop\" not linked", 3)
+        return False
     
     def functionality(self):
+        super().functionality()
         for i in eval(self.inputs["Begin For-Each Component Loop"].links[0].from_node.prop_components):
+            log(self.id_data.name, self.name, "functionality", "Index="+str(i), 3)
             self.inputs["Begin For-Each Component Loop"].links[0].from_node.out_index = i
             bpy.ops.object.mode_set(mode="EDIT")
             bpy.ops.mesh.select_all(action="DESELECT")
@@ -40,6 +48,6 @@ class ScEndForEachComponentLoop(Node, ScNode):
         self.inputs["Begin For-Each Component Loop"].links[0].from_node.prop_locked = False
     
     def post_execute(self):
-        out = {}
+        out = super().post_execute()
         out["Out"] = self.inputs["In"].default_value
         return out
