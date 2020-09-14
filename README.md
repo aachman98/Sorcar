@@ -108,6 +108,7 @@ and more...!
 - Fixed "Select Vertices by Connection": switch to vertex mode before selection
 - Renamed "Merge" & "Delete" nodes: added "Component" suffix
 - Renamed "Cursor" node to "Cursor Transform"
+- Renamed "File" input socket to "Directory" in "Export FBX" node
 
 #### v3.2.0
 
