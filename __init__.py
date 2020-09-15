@@ -34,10 +34,11 @@ import os
 
 from bpy.types import NodeTree, Operator, PropertyGroup, AddonPreferences
 from bpy.props import BoolProperty, StringProperty, IntProperty, EnumProperty
-from nodeitems_utils import NodeItem
 
 from .tree.ScNodeCategory import ScNodeCategory
 from .tree.ScNodeTree import ScNodeTree
+from .tree.ScNodeItem import ScNodeItem
+
 from .helper import update_each_frame
 from .debug import log
 
@@ -136,6 +137,45 @@ def init_keymaps():
     ]
     return km, kmi
 
+def sc_register_node_categories(identifier, cat_list):
+    if identifier in nodeitems_utils._node_categories:
+        raise KeyError("Node categories list '%s' already registered" % identifier)
+        return
+    
+    menu_types = []
+
+    # works as draw function for menus
+    def draw_node_item(self, context):
+        layout = self.layout
+        col = layout.column()
+        for item in self.category.items(context):
+            item.draw(item, col, context)
+
+    for cat in cat_list:
+        if (cat):
+            menu_type = type("NODE_MT_category_" + cat.identifier, (bpy.types.Menu,), {
+                "bl_space_type": 'NODE_EDITOR',
+                "bl_label": cat.name,
+                "category": cat,
+                "poll": cat.poll,
+                "draw": draw_node_item,
+            })
+            menu_types.append(menu_type)
+            bpy.utils.register_class(menu_type)
+
+    def draw_add_menu(self, context):
+        layout = self.layout
+        col = layout.column()
+        for cat in cat_list:
+            if (cat):
+                if cat.poll(context):
+                    cat.draw(context, col)
+            else:
+                col.separator()
+
+    # stores: (categories list, menu draw function, submenu types)
+    nodeitems_utils._node_categories[identifier] = (cat_list, draw_add_menu, menu_types)
+
 all_classes = []
 addon_keymaps = []
 
@@ -155,15 +195,23 @@ def register():
     all_classes.append(SorcarPreferences)
 
     total_nodes = 0
+    cat_ordered = ScNodeCategory.add_node_menu()
+    cat_unordered = [i for i in classes_nodes if (not i in cat_ordered)]
+    if (len(cat_unordered) > 0):
+        cat_ordered.append(None)
+        cat_ordered.extend(cat_unordered)
     node_categories = []
-    for cat in classes_nodes:
-        total_nodes += len(classes_nodes[cat])
-        node_categories.append(ScNodeCategory(identifier="sc_"+cat, name=bpy.path.display_name(cat), items=[NodeItem(i.bl_idname) for i in classes_nodes[cat]]))
-        all_classes.extend(classes_nodes[cat])
+    for cat in cat_ordered:
+        if (cat):
+            total_nodes += len(classes_nodes[cat])
+            node_categories.append(ScNodeCategory(identifier="sc_"+cat, name=bpy.path.display_name(cat), items=[ScNodeItem(i.bl_idname) for i in classes_nodes[cat]]))
+            all_classes.extend(classes_nodes[cat])
+        else:
+            node_categories.append(None)
     
     for i in all_classes:
         bpy.utils.register_class(i)
-    nodeitems_utils.register_node_categories("sc_node_categories", node_categories)
+    sc_register_node_categories("sc_node_categories", node_categories)
     if not (update_each_frame in bpy.app.handlers.frame_change_post):
         bpy.app.handlers.frame_change_post.append(update_each_frame)
     
