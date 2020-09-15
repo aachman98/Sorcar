@@ -272,9 +272,9 @@ def unregister():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
 
-    bpy.utils.preview.remove(icons[0])
-    icons.clear()
+    bpy.utils.previews.remove(icons[0])
     
     addon_updater_ops.unregister()
 
     log("UNREGISTERED", msg=str(len(all_classes)) + " classes")
+    all_classes.clear()
