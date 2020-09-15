@@ -181,7 +181,7 @@ def sc_register_node_categories(identifier, cat_list):
             item.draw(item, col, context)
 
     for cat in cat_list:
-        if (cat):
+        if (not cat.identifier == "__separator__"):
             menu_type = type("NODE_MT_category_" + cat.identifier, (bpy.types.Menu,), {
                 "bl_space_type": 'NODE_EDITOR',
                 "bl_label": cat.name,
@@ -196,7 +196,7 @@ def sc_register_node_categories(identifier, cat_list):
         layout = self.layout
         col = layout.column()
         for cat in cat_list:
-            if (cat):
+            if (not cat.identifier == "__separator__"):
                 if cat.poll(context):
                     cat.draw(context, col)
             else:
@@ -238,7 +238,7 @@ def register():
             node_categories.append(ScNodeCategory(identifier="sc_"+cat, name=bpy.path.display_name(cat), items=[ScNodeItem(i.bl_idname) for i in classes_nodes[cat]], icon_value=icons[1].get(cat, 0)))
             all_classes.extend(classes_nodes[cat])
         else:
-            node_categories.append(None)
+            node_categories.append(ScNodeCategory(identifier="__separator__", name="__separator__"))
     
     for i in all_classes:
         bpy.utils.register_class(i)
