@@ -27,6 +27,7 @@ bl_info = {
 }
 
 import bpy
+import bpy.utils.previews
 import nodeitems_utils
 import addon_utils
 import importlib
@@ -137,6 +138,34 @@ def init_keymaps():
     ]
     return km, kmi
 
+def import_icons(path="./", style_value=0):
+    if (style_value == 0):
+        style = "red_white"
+    elif (style_value == 1):
+        style = "red_black"
+    if (style_value == 2):
+        style = "black"
+    if (style_value == 3):
+        style = "white"
+    prev = bpy.utils.previews.new()
+    icons = {
+        "inputs": prev.load("sc_inputs", os.path.join(path, "icons", str(style_value)+"01_"+style+"_inputs.png"), 'IMAGE').icon_id,
+        "curves": prev.load("sc_curves", os.path.join(path, "icons", str(style_value)+"08_"+style+"_curve operators.png"), 'IMAGE').icon_id,
+        "transform": prev.load("sc_transform", os.path.join(path, "icons", str(style_value)+"02_"+style+"_transform.png"), 'IMAGE').icon_id,
+        "selection": prev.load("sc_selection", os.path.join(path, "icons", str(style_value)+"04_"+style+"_selection.png"), 'IMAGE').icon_id,
+        "deletion": prev.load("sc_deletion", os.path.join(path, "icons", str(style_value)+"05_"+style+"_deletion.png"), 'IMAGE').icon_id,
+        "component_operators": prev.load("sc_component_operators", os.path.join(path, "icons", str(style_value)+"06_"+style+"_component operators.png"), 'IMAGE').icon_id,
+        "object_operators": prev.load("sc_object_operators", os.path.join(path, "icons", str(style_value)+"07_"+style+"_mesh operators.png"), 'IMAGE').icon_id,
+        "modifiers": prev.load("sc_modifiers", os.path.join(path, "icons", str(style_value)+"09_"+style+"_modifiers.png"), 'IMAGE').icon_id,
+        "constants": prev.load("sc_constants", os.path.join(path, "icons", str(style_value)+"10_"+style+"_constants.png"), 'IMAGE').icon_id,
+        "arrays": prev.load("sc_arrays", os.path.join(path, "icons", str(style_value)+"14_"+style+"_outputs.png"), 'IMAGE').icon_id,
+        "noise": prev.load("sc_noise", os.path.join(path, "icons", str(style_value)+"03_"+style+"_conversion.png"), 'IMAGE').icon_id,
+        "utilities": prev.load("sc_utilities", os.path.join(path, "icons", str(style_value)+"11_"+style+"_utilities.png"), 'IMAGE').icon_id,
+        "settings": prev.load("sc_settings", os.path.join(path, "icons", str(style_value)+"13_"+style+"_settings.png"), 'IMAGE').icon_id,
+        "flow_control": prev.load("sc_flow_control", os.path.join(path, "icons", str(style_value)+"12_"+style+"_flow control.png"), 'IMAGE').icon_id,
+    }
+    return (prev, icons)
+
 def sc_register_node_categories(identifier, cat_list):
     if identifier in nodeitems_utils._node_categories:
         raise KeyError("Node categories list '%s' already registered" % identifier)
@@ -178,6 +207,7 @@ def sc_register_node_categories(identifier, cat_list):
 
 all_classes = []
 addon_keymaps = []
+icons = ()
 
 def register():
     log(msg="REGISTERING...")
@@ -187,12 +217,13 @@ def register():
     classes_ui = import_ui(path)
     classes_nodes = import_nodes(path)
 
-    global all_classes, addon_keymaps
+    global all_classes, addon_keymaps, icons
     all_classes = [ScNodeTree]
     all_classes.extend(classes_ops)
     all_classes.extend(classes_sockets)
     all_classes.extend(classes_ui)
     all_classes.append(SorcarPreferences)
+    icons = import_icons(path, 0)
 
     total_nodes = 0
     cat_ordered = ScNodeCategory.add_node_menu()
@@ -204,7 +235,7 @@ def register():
     for cat in cat_ordered:
         if (cat):
             total_nodes += len(classes_nodes[cat])
-            node_categories.append(ScNodeCategory(identifier="sc_"+cat, name=bpy.path.display_name(cat), items=[ScNodeItem(i.bl_idname) for i in classes_nodes[cat]]))
+            node_categories.append(ScNodeCategory(identifier="sc_"+cat, name=bpy.path.display_name(cat), items=[ScNodeItem(i.bl_idname) for i in classes_nodes[cat]], icon_value=icons[1].get(cat, 0)))
             all_classes.extend(classes_nodes[cat])
         else:
             node_categories.append(None)
@@ -227,7 +258,7 @@ def register():
 
 def unregister():
     log(msg="UNREGISTERING...")
-    global all_classes, addon_keymaps
+    global all_classes, addon_keymaps, icons
     all_classes.reverse()
 
     for i in all_classes:
@@ -240,6 +271,9 @@ def unregister():
     for km, kmi in addon_keymaps:
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
+
+    bpy.utils.preview.remove(icons[0])
+    icons.clear()
     
     addon_updater_ops.unregister()
 
