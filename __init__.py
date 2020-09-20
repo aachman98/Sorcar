@@ -39,6 +39,7 @@ from bpy.props import BoolProperty, StringProperty, IntProperty, EnumProperty
 from .tree.ScNodeCategory import ScNodeCategory
 from .tree.ScNodeTree import ScNodeTree
 from .tree.ScNodeItem import ScNodeItem
+from .tree.add_node_menu import menu
 
 from .helper import update_each_frame
 from .debug import log
@@ -229,17 +230,26 @@ def register():
     icons = import_icons(path, 4)
 
     total_nodes = 0
-    cat_ordered = ScNodeCategory.add_node_menu()
-    cat_unordered = [i for i in classes_nodes if (not i in cat_ordered)]
+    cat_unordered = [i for i in classes_nodes if (not i in [j[0] for j in menu if(j)])]
     if (len(cat_unordered) > 0):
-        cat_ordered.append(None)
-        cat_ordered.extend(cat_unordered)
+        menu.append(None)
+        menu.extend([(str(i), []) for i in cat_unordered])
     node_categories = []
-    for cat in cat_ordered:
+    for cat in menu:
         if (cat):
-            total_nodes += len(classes_nodes[cat])
-            node_categories.append(ScNodeCategory(identifier="sc_"+cat, name=bpy.path.display_name(cat), items=[ScNodeItem(i.bl_idname) for i in classes_nodes[cat]], icon_value=icons[1].get(cat, 0)))
-            all_classes.extend(classes_nodes[cat])
+            nodes_unordered = [i.bl_idname for i in classes_nodes[cat[0]] if (not i.bl_idname in cat[1])]
+            if (len(nodes_unordered) > 0):
+                cat[1].append(None)
+                cat[1].extend(nodes_unordered)
+            node_items = []
+            for i in cat[1]:
+                if (i):
+                    node_items.append(ScNodeItem(i))
+                else:
+                    node_items.append(None)
+            total_nodes += len(classes_nodes[cat[0]])
+            node_categories.append(ScNodeCategory(identifier="sc_"+cat[0], name=bpy.path.display_name(cat[0]), items=node_items, icon_value=icons[1].get(cat[0], 0)))
+            all_classes.extend(classes_nodes[cat[0]])
         else:
             node_categories.append(ScNodeCategory(identifier="__separator__", name="__separator__"))
     

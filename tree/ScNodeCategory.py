@@ -30,26 +30,3 @@ class ScNodeCategory(NodeCategory):
     
     def draw(self, context, layout):
         layout.menu("NODE_MT_category_%s" % self.identifier, icon_value=self.icon_value)
-    
-    def add_node_menu(): # Separate class to handle menu
-        return [
-            "inputs",
-            "curves",
-            None,
-            "transform",
-            "selection",
-            "deletion",
-            None,
-            "component_operators",
-            "object_operators",
-            "modifiers",
-            None,
-            "constants",
-            "arrays",
-            "noise",
-            None,
-            "utilities",
-            "settings",
-            None,
-            "flow_control"
-        ]
