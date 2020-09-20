@@ -6,7 +6,7 @@ from .._base.node_base import ScNode
 from .._base.node_modifier import ScModifierNode
 
 class ScCorrectiveSmoothnessMod(Node, ScModifierNode):
-    bl_idname = "CorrectiveSmoothnessScMod"
+    bl_idname = "ScCorrectiveSmoothnessMod"
     bl_label = "Corrective Smoothness Modifier"
     
     prop_vertex_group: StringProperty(update=ScNode.update_value)
