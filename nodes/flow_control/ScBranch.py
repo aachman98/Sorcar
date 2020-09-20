@@ -8,6 +8,7 @@ from ...debug import log
 class ScBranch(Node, ScNode):
     bl_idname = "ScBranch"
     bl_label = "Branch (If-Else)"
+    bl_icon = 'QUESTION'
 
     in_condition: BoolProperty(update=ScNode.update_value)
 

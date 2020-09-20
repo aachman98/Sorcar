@@ -8,6 +8,7 @@ from ...debug import log
 class ScBeginForEachComponentLoop(Node, ScNode):
     bl_idname = "ScBeginForEachComponentLoop"
     bl_label = "Begin For-Each Component Loop"
+    bl_icon = 'TRACKING_FORWARDS_SINGLE'
 
     prop_locked: BoolProperty()
     prop_components: StringProperty()

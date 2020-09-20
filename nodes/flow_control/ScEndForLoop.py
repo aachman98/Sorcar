@@ -8,6 +8,7 @@ from ...debug import log
 class ScEndForLoop(Node, ScNode):
     bl_idname = "ScEndForLoop"
     bl_label = "End For Loop"
+    bl_icon = 'TRACKING_REFINE_BACKWARDS'
 
     in_iterations: IntProperty(default=5, min=1, update=ScNode.update_value)
 

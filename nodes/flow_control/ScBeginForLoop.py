@@ -8,6 +8,7 @@ from ...debug import log
 class ScBeginForLoop(Node, ScNode):
     bl_idname = "ScBeginForLoop"
     bl_label = "Begin For Loop"
+    bl_icon = 'TRACKING_REFINE_FORWARDS'
 
     prop_locked: BoolProperty()
     out_counter: IntProperty()

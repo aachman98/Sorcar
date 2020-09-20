@@ -8,6 +8,7 @@ from ...debug import log
 class ScEndForEachComponentLoop(Node, ScNode):
     bl_idname = "ScEndForEachComponentLoop"
     bl_label = "End For-Each Component Loop"
+    bl_icon = 'TRACKING_BACKWARDS_SINGLE'
 
     in_iterations: IntProperty(default=5, min=1, update=ScNode.update_value)
 
