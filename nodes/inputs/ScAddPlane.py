@@ -8,6 +8,7 @@ from .._base.node_operator import ScEditOperatorNode
 class ScAddPlane(Node, ScEditOperatorNode):
     bl_idname = "ScAddPlane"
     bl_label = "Add Plane"
+    bl_icon = 'MESH_PLANE'
 
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_size: FloatProperty(default=2.0, min=0.0, update=ScNode.update_value)

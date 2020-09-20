@@ -8,6 +8,7 @@ from .._base.node_operator import ScEditOperatorNode
 class ScAddCone(Node, ScEditOperatorNode):
     bl_idname = "ScAddCone"
     bl_label = "Add Cone"
+    bl_icon = 'CONE'
 
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_type: EnumProperty(items=[("NOTHING", "Nothing", ""), ("NGON", "Ngon", ""), ("TRIFAN", "Triangle Fan", "")], default="NGON", update=ScNode.update_value)

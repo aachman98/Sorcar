@@ -8,6 +8,7 @@ from .._base.node_operator import ScEditOperatorNode
 class ScAddMonkey(Node, ScEditOperatorNode):
     bl_idname = "ScAddMonkey"
     bl_label = "Add Monkey (Suzanne)"
+    bl_icon = 'MONKEY'
 
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_size: FloatProperty(default=2.0, min=0.0, update=ScNode.update_value)

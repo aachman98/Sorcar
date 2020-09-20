@@ -8,6 +8,7 @@ from .._base.node_operator import ScEditOperatorNode
 class ScAddGrid(Node, ScEditOperatorNode):
     bl_idname = "ScAddGrid"
     bl_label = "Add Grid"
+    bl_icon = 'GRID'
 
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_x: IntProperty(default=10, min=2, max=10000000, update=ScNode.update_value)

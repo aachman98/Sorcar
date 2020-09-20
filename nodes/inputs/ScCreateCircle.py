@@ -8,6 +8,7 @@ from .._base.node_input import ScInputNode
 class ScCreateCircle(Node, ScInputNode):
     bl_idname = "ScCreateCircle"
     bl_label = "Create Circle"
+    bl_icon = 'MESH_CIRCLE'
 
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_type: EnumProperty(items=[("NOTHING", "Nothing", ""), ("NGON", "Ngon", ""), ("TRIFAN", "Triangle Fan", "")], default="NOTHING", update=ScNode.update_value)

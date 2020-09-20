@@ -9,6 +9,7 @@ from .._base.node_input import ScInputNode
 class ScImportFbx(Node, ScInputNode):
     bl_idname = "ScImportFbx"
     bl_label = "Import FBX"
+    bl_icon = 'IMPORT'
 
     in_file: StringProperty(subtype='FILE_PATH', update=ScNode.update_value)
     in_uv: BoolProperty(default=True, update=ScNode.update_value)

@@ -9,6 +9,7 @@ from ...helper import focus_on_object
 class ScReceiveFromSverchok(Node, ScInputNode):
     bl_idname = "ScReceiveFromSverchok"
     bl_label = "Receive from Sverchok"
+    bl_icon = 'RNA'
 
     prop_verts: StringProperty(default='''[[
         [0.0, 1.0, -0.05000000074505806],

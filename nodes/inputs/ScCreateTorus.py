@@ -8,6 +8,7 @@ from .._base.node_input import ScInputNode
 class ScCreateTorus(Node, ScInputNode):
     bl_idname = "ScCreateTorus"
     bl_label = "Create Torus"
+    bl_icon = 'MESH_TORUS'
 
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_mode: EnumProperty(items=[("MAJOR_MINOR", "Major/Minor", ""), ("EXT_INT", "Exterior/Interior", "")], default="MAJOR_MINOR", update=ScNode.update_value)

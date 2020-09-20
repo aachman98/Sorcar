@@ -8,6 +8,7 @@ from .._base.node_operator import ScEditOperatorNode
 class ScAddIcoSphere(Node, ScEditOperatorNode):
     bl_idname = "ScAddIcoSphere"
     bl_label = "Add Ico Sphere"
+    bl_icon = 'MESH_ICOSPHERE'
 
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_subdivision: IntProperty(default=2, min=1, max=10, update=ScNode.update_value)

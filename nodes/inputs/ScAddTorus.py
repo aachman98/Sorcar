@@ -8,6 +8,7 @@ from .._base.node_operator import ScEditOperatorNode
 class ScAddTorus(Node, ScEditOperatorNode):
     bl_idname = "ScAddTorus"
     bl_label = "Add Torus"
+    bl_icon = 'SURFACE_NTORUS'
 
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_mode: EnumProperty(items=[("MAJOR_MINOR", "Major/Minor", ""), ("EXT_INT", "Exterior/Interior", "")], default="MAJOR_MINOR", update=ScNode.update_value)

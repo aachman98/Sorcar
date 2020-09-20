@@ -8,6 +8,7 @@ from .._base.node_input import ScInputNode
 class ScCreateCone(Node, ScInputNode):
     bl_idname = "ScCreateCone"
     bl_label = "Create Cone"
+    bl_icon = 'MESH_CONE'
 
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_type: EnumProperty(items=[("NOTHING", "Nothing", ""), ("NGON", "Ngon", ""), ("TRIFAN", "Triangle Fan", "")], default="NGON", update=ScNode.update_value)

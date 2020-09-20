@@ -8,6 +8,7 @@ from .._base.node_operator import ScEditOperatorNode
 class ScAddCylinder(Node, ScEditOperatorNode):
     bl_idname = "ScAddCylinder"
     bl_label = "Add Cylinder"
+    bl_icon = 'SURFACE_NCYLINDER'
 
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_type: EnumProperty(items=[("NOTHING", "Nothing", ""), ("NGON", "Ngon", ""), ("TRIFAN", "Triangle Fan", "")], default="NGON", update=ScNode.update_value)

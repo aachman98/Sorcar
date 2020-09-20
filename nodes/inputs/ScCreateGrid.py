@@ -8,6 +8,7 @@ from .._base.node_input import ScInputNode
 class ScCreateGrid(Node, ScInputNode):
     bl_idname = "ScCreateGrid"
     bl_label = "Create Grid"
+    bl_icon = 'MESH_GRID'
 
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_x: IntProperty(default=10, min=2, max=10000000, update=ScNode.update_value)

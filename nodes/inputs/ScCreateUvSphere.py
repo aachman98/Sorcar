@@ -8,6 +8,7 @@ from .._base.node_input import ScInputNode
 class ScCreateUvSphere(Node, ScInputNode):
     bl_idname = "ScCreateUvSphere"
     bl_label = "Create UV Sphere"
+    bl_icon = 'MESH_UVSPHERE'
 
     in_uv: BoolProperty(default=True, update=ScNode.update_value)
     in_segment: IntProperty(default=32, min=3, max=10000000, update=ScNode.update_value)
