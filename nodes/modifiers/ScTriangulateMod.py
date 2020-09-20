@@ -8,6 +8,7 @@ from .._base.node_modifier import ScModifierNode
 class ScTriangulateMod(Node, ScModifierNode):
     bl_idname = "ScTriangulateMod"
     bl_label = "Triangulate Modifier"
+    bl_icon = 'MOD_TRIANGULATE'
     
     in_quad_method: EnumProperty(items=[("BEAUTY", "Beauty", ""), ("FIXED", "Fixed", ""), ("FIXED_ALTERNATE", "Fixed Alternate", ""), ("SHORTEST_DIAGONAL", "Shortest Diagonal", "")], default="SHORTEST_DIAGONAL", update=ScNode.update_value)
     in_ngon_method: EnumProperty(items=[("BEAUTY", "Beauty", ""), ("CLIP", "Clip", "")], default="BEAUTY", update=ScNode.update_value)

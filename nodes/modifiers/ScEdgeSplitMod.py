@@ -8,6 +8,7 @@ from .._base.node_modifier import ScModifierNode
 class ScEdgeSplitMod(Node, ScModifierNode):
     bl_idname = "ScEdgeSplitMod"
     bl_label = "Edge Split Modifier"
+    bl_icon = 'MOD_EDGESPLIT'
     
     in_split_angle: FloatProperty(default=0.523599, min=0.0, max=3.14159, unit="ROTATION", update=ScNode.update_value)
     in_use_edge_angle: BoolProperty(default=True, update=ScNode.update_value)

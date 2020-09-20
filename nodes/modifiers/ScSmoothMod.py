@@ -8,6 +8,7 @@ from .._base.node_modifier import ScModifierNode
 class ScSmoothMod(Node, ScModifierNode):
     bl_idname = "ScSmoothMod"
     bl_label = "Smooth Modifier"
+    bl_icon = 'MOD_SMOOTH'
     
     prop_vertex_group: StringProperty(update=ScNode.update_value)
     in_factor: FloatProperty(default=0.5, update=ScNode.update_value)

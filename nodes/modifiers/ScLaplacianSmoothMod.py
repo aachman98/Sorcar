@@ -8,6 +8,7 @@ from .._base.node_modifier import ScModifierNode
 class ScLaplacianSmoothMod(Node, ScModifierNode):
     bl_idname = "ScLaplacianSmoothMod"
     bl_label = "Laplacian Smooth Modifier"
+    bl_icon = 'MOD_SMOOTH'
     
     prop_vertex_group: StringProperty(update=ScNode.update_value)
     in_iterations: IntProperty(name="Repeat", default=1, min=-32768, max=32767, soft_min=0, soft_max=200, update=ScNode.update_value)

@@ -8,6 +8,7 @@ from .._base.node_modifier import ScModifierNode
 class ScCastMod(Node, ScModifierNode):
     bl_idname = "ScCastMod"
     bl_label = "Cast Modifier"
+    bl_icon = 'MOD_CAST'
     
     prop_vertex_group: StringProperty(update=ScNode.update_value)
     in_cast_type: EnumProperty(items=[("SPHERE", "Sphere", ""), ("CYLINDER", "Cylinder", ""), ("CUBOID", "Cuboid", "")], update=ScNode.update_value)

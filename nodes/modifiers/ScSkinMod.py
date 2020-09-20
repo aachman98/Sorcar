@@ -9,6 +9,7 @@ from ...helper import get_override
 class ScSkinMod(Node, ScModifierNode):
     bl_idname = "ScSkinMod"
     bl_label = "Skin Modifier"
+    bl_icon = 'MOD_SKIN'
     
     in_branch_smoothing: FloatProperty(default=0.0, min=0.0, max=1.0, update=ScNode.update_value)
     in_resize: FloatVectorProperty(default=(1.0, 1.0, 1.0), update=ScNode.update_value)

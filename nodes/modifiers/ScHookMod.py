@@ -8,6 +8,7 @@ from .._base.node_modifier import ScModifierNode
 class ScHookMod(Node, ScModifierNode):
     bl_idname = "ScHookMod"
     bl_label = "Hook Modifier"
+    bl_icon = 'HOOK'
     
     prop_vertex_group: StringProperty(update=ScNode.update_value)
     in_object: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)

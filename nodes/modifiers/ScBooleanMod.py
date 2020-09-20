@@ -10,6 +10,7 @@ from ...helper import sc_poll_mesh
 class ScBooleanMod(Node, ScModifierNode):
     bl_idname = "ScBooleanMod"
     bl_label = "Boolean Modifier"
+    bl_icon = 'MOD_BOOLEAN'
     
     in_op: EnumProperty(items=[("DIFFERENCE", "Difference", ""), ("UNION", "Union", ""), ("INTERSECT", "Intersect", "")], default="INTERSECT", update=ScNode.update_value)
     in_obj: PointerProperty(type=bpy.types.Object, poll=sc_poll_mesh, update=ScNode.update_value)

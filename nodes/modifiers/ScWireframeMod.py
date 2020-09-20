@@ -8,6 +8,7 @@ from .._base.node_modifier import ScModifierNode
 class ScWireframeMod(Node, ScModifierNode):
     bl_idname = "ScWireframeMod"
     bl_label = "Wireframe Modifier"
+    bl_icon = 'MOD_WIREFRAME'
 
     prop_vertex_group: StringProperty(update=ScNode.update_value)
     prop_invert_vertex_group: BoolProperty(update=ScNode.update_value)

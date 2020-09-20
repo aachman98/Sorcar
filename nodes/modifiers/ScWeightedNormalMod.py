@@ -8,6 +8,7 @@ from .._base.node_modifier import ScModifierNode
 class ScWeightedNormalMod(Node, ScModifierNode):
     bl_idname = "ScWeightedNormalMod"
     bl_label = "Weighted Normal Modifier"
+    bl_icon = 'MOD_NORMALEDIT'
     
     prop_vertex_group: StringProperty(update=ScNode.update_value)
     prop_invert_vertex_group: BoolProperty(update=ScNode.update_value)

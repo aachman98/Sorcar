@@ -8,6 +8,7 @@ from .._base.node_modifier import ScModifierNode
 class ScSubsurfMod(Node, ScModifierNode):
     bl_idname = "ScSubsurfMod"
     bl_label = "Subdivision Surface Modifier"
+    bl_icon = 'MOD_SUBSURF'
     
     in_subdivision_type: EnumProperty(items=[("CATMULL_CLARK", "Catmull-Clark", ""), ("SIMPLE", "Simple", "")], default="CATMULL_CLARK", update=ScNode.update_value)
     in_render_levels: IntProperty(default=2, min=0, max=11, soft_max=6, update=ScNode.update_value)

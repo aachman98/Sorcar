@@ -8,6 +8,7 @@ from .._base.node_modifier import ScModifierNode
 class ScRemeshMod(Node, ScModifierNode):
     bl_idname = "ScRemeshMod"
     bl_label = "Remesh Modifier"
+    bl_icon = 'MOD_REMESH'
 
     in_mode: EnumProperty(items=[("BLOCKS", "Blocks", ""), ("SMOOTH", "Smooth", ""), ("SHARP", "Sharp", "")], default="SHARP", update=ScNode.update_value)
     in_octree_depth: IntProperty(default=4, min=1, max=12, update=ScNode.update_value)

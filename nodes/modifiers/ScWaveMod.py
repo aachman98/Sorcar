@@ -8,6 +8,7 @@ from .._base.node_modifier import ScModifierNode
 class ScWaveMod(Node, ScModifierNode):
     bl_idname = "ScWaveMod"
     bl_label = "Wave Modifier"
+    bl_icon = 'MOD_WAVE'
     
     in_offset: FloatProperty(min=0.0, max=1048570.0, update=ScNode.update_value)
     in_speed: FloatProperty(default=0.25, soft_min=0.0, soft_max=1.0, update=ScNode.update_value)

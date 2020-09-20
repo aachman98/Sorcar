@@ -8,6 +8,7 @@ from .._base.node_modifier import ScModifierNode
 class ScBuildMod(Node, ScModifierNode):
     bl_idname = "ScBuildMod"
     bl_label = "Build Modifier"
+    bl_icon = 'MOD_BUILD'
     
     in_percent: FloatProperty(default=50.0, min=0.0, max=100.0, update=ScNode.update_value)
     in_reverse: BoolProperty(update=ScNode.update_value)

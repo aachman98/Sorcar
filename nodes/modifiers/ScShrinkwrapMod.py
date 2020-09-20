@@ -9,6 +9,7 @@ from ...helper import sc_poll_mesh
 class ScShrinkwrapMod(Node, ScModifierNode):
     bl_idname = "ScShrinkwrapMod"
     bl_label = "Shrinkwrap Modifier"
+    bl_icon = 'MOD_SHRINKWRAP'
     
     prop_vertex_group: StringProperty(update=ScNode.update_value)
     prop_invert_vertex_group: BoolProperty(update=ScNode.update_value)

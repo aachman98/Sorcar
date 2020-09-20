@@ -8,6 +8,7 @@ from .._base.node_modifier import ScModifierNode
 class ScSolidifyMod(Node, ScModifierNode):
     bl_idname = "ScSolidifyMod"
     bl_label = "Solidify Modifier"
+    bl_icon = 'MOD_SOLIDIFY'
     
     prop_vertex_group: StringProperty(update=ScNode.update_value)
     prop_invert_vertex_group: BoolProperty(update=ScNode.update_value)

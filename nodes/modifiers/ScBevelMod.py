@@ -8,6 +8,7 @@ from .._base.node_modifier import ScModifierNode
 class ScBevelMod(Node, ScModifierNode):
     bl_idname = "ScBevelMod"
     bl_label = "Bevel Modifier"
+    bl_icon = 'MOD_BEVEL'
     
     prop_vertex_group: StringProperty(update=ScNode.update_value)
     in_width: FloatProperty(name="Width", default=0.1, min=0.0, update=ScNode.update_value)

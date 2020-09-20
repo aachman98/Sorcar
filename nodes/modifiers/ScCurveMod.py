@@ -9,6 +9,7 @@ from ...helper import sc_poll_curve
 class ScCurveMod(Node, ScModifierNode):
     bl_idname = "ScCurveMod"
     bl_label = "Curve Modifier"
+    bl_icon = 'MOD_CURVE'
     
     prop_vertex_group: StringProperty(update=ScNode.update_value)
     in_object: PointerProperty(type=bpy.types.Object, poll=sc_poll_curve, update=ScNode.update_value)

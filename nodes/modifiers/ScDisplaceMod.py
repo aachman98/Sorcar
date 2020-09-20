@@ -8,6 +8,7 @@ from .._base.node_modifier import ScModifierNode
 class ScDisplaceMod(Node, ScModifierNode):
     bl_idname = "ScDisplaceMod"
     bl_label = "Displace Modifier"
+    bl_icon = 'MOD_DISPLACE'
     
     prop_texture: PointerProperty(type=bpy.types.Texture)
     prop_vertex_group: StringProperty(update=ScNode.update_value)

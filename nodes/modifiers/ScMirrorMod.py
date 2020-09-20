@@ -8,6 +8,7 @@ from .._base.node_modifier import ScModifierNode
 class ScMirrorMod(Node, ScModifierNode):
     bl_idname = "ScMirrorMod"
     bl_label = "Mirror Modifier"
+    bl_icon = 'MOD_MIRROR'
     
     in_use_x: BoolProperty(default=True, update=ScNode.update_value)
     in_use_y: BoolProperty(update=ScNode.update_value)

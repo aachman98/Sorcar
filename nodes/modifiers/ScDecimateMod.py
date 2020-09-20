@@ -8,6 +8,7 @@ from .._base.node_modifier import ScModifierNode
 class ScDecimateMod(Node, ScModifierNode):
     bl_idname = "ScDecimateMod"
     bl_label = "Decimate Modifier"
+    bl_icon = 'MOD_DECIM'
     
     prop_vertex_group: StringProperty(update=ScNode.update_value)
     prop_invert_vertex_group: BoolProperty(update=ScNode.update_value)

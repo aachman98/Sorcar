@@ -8,6 +8,7 @@ from .._base.node_modifier import ScModifierNode
 class ScWeldMod(Node, ScModifierNode):
     bl_idname = "ScWeldMod"
     bl_label = "Weld Modifier"
+    bl_icon = 'AUTOMERGE_OFF'
     
     prop_vertex_group: StringProperty(update=ScNode.update_value)
     in_distance: FloatProperty(default=0.001, min=0.0, soft_max=1.0, update=ScNode.update_value)
