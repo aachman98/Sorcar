@@ -9,6 +9,7 @@ from .._base.node_base import ScNode
 class ScVector(Node, ScNode):
     bl_idname = "ScVector"
     bl_label = "Vector"
+    bl_icon = 'EMPTY_ARROWS'
 
     in_uniform: EnumProperty(items=[("NONE", "None", "-"), ("XY", "XY", "-"), ("YZ", "YZ", "-"), ("XZ", "XZ", "-"), ("XYZ", "XYZ", "-")], default="NONE", update=ScNode.update_value)
     in_x: FloatProperty(update=ScNode.update_value)

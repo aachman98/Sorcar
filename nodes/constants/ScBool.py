@@ -8,6 +8,7 @@ from .._base.node_base import ScNode
 class ScBool(Node, ScNode):
     bl_idname = "ScBool"
     bl_label = "Bool"
+    bl_icon = 'CON_ACTION'
 
     prop_bool: BoolProperty(name="Bool", update=ScNode.update_value)
 

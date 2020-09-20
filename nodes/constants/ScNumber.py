@@ -9,6 +9,7 @@ from numpy import array, uint32
 class ScNumber(Node, ScNode):
     bl_idname = "ScNumber"
     bl_label = "Number"
+    bl_icon = 'LINENUMBERS_ON'
 
     prop_type: EnumProperty(name="Type", items=[("FLOAT", "Float", ""), ("INT", "Integer", ""), ("ANGLE", "Angle", "")], default="FLOAT", update=ScNode.update_value)
     prop_float: FloatProperty(name="Float", update=ScNode.update_value)

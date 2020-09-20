@@ -7,6 +7,7 @@ from .._base.node_base import ScNode
 class ScTextBlock(Node, ScNode):
     bl_idname = "ScTextBlock"
     bl_label = "Text Block"
+    bl_icon = 'FILE_TEXT'
 
     prop_text: PointerProperty(name="Text", type=bpy.types.Text, update=ScNode.update_value)
 
