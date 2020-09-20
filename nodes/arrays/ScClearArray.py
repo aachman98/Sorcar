@@ -7,6 +7,7 @@ from .._base.node_base import ScNode
 class ScClearArray(Node, ScNode):
     bl_idname = "ScClearArray"
     bl_label = "Clear Array"
+    bl_icon = 'CANCEL'
 
     def init(self, context):
         super().init(context)

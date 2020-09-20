@@ -7,6 +7,7 @@ from .._base.node_base import ScNode
 class ScCountElement(Node, ScNode):
     bl_idname = "ScCountElement"
     bl_label = "Count Element"
+    bl_icon = "THREE_DOTS"
 
     def init(self, context):
         super().init(context)

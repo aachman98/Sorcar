@@ -8,6 +8,7 @@ from .._base.node_base import ScNode
 class ScSearchElement(Node, ScNode):
     bl_idname = "ScSearchElement"
     bl_label = "Search Element"
+    bl_icon = 'ZOOM_ALL'
 
     in_range: BoolProperty(update=ScNode.update_value)
     in_start: IntProperty(update=ScNode.update_value)

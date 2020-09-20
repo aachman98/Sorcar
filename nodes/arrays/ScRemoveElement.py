@@ -8,6 +8,7 @@ from .._base.node_base import ScNode
 class ScRemoveElement(Node, ScNode):
     bl_idname = "ScRemoveElement"
     bl_label = "Remove Element"
+    bl_icon = 'X'
 
     def init(self, context):
         super().init(context)

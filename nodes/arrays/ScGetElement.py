@@ -7,6 +7,7 @@ from .._base.node_base import ScNode
 class ScGetElement(Node, ScNode):
     bl_idname = "ScGetElement"
     bl_label = "Get Element"
+    bl_icon = 'SHORTDISPLAY'
     
     in_index: IntProperty(update=ScNode.update_value)
 

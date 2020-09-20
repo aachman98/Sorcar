@@ -8,6 +8,7 @@ from .._base.node_base import ScNode
 class ScPopElement(Node, ScNode):
     bl_idname = "ScPopElement"
     bl_label = "Pop Element"
+    bl_icon = 'MOD_ARRAY'
 
     in_index: IntProperty(default=-1, update=ScNode.update_value)
 

@@ -8,6 +8,7 @@ from ...debug import log
 class ScMakeArray(Node, ScNode):
     bl_idname = "ScMakeArray"
     bl_label = "Make Array"
+    bl_icon = 'LONGDISPLAY'
 
     def init(self, context):
         super().init(context)

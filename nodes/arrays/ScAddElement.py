@@ -8,6 +8,7 @@ from .._base.node_base import ScNode
 class ScAddElement(Node, ScNode):
     bl_idname = "ScAddElement"
     bl_label = "Add Element"
+    bl_icon = 'PLUS'
 
     in_use_index: BoolProperty(update=ScNode.update_value)
     in_index: IntProperty(update=ScNode.update_value)
