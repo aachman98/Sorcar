@@ -143,9 +143,9 @@ def import_icons(path="./", style_value=0):
         style = "red_white"
     elif (style_value == 1):
         style = "red_black"
-    if (style_value == 2):
-        style = "black"
     if (style_value == 3):
+        style = "black"
+    if (style_value == 4):
         style = "white"
     prev = bpy.utils.previews.new()
     icons = {
@@ -178,7 +178,10 @@ def sc_register_node_categories(identifier, cat_list):
         layout = self.layout
         col = layout.column()
         for item in self.category.items(context):
-            item.draw(item, col, context)
+            if (item):
+                item.draw(item, col, context)
+            else:
+                col.separator()
 
     for cat in cat_list:
         if (not cat.identifier == "__separator__"):
@@ -223,7 +226,7 @@ def register():
     all_classes.extend(classes_sockets)
     all_classes.extend(classes_ui)
     all_classes.append(SorcarPreferences)
-    icons = import_icons(path, 0)
+    icons = import_icons(path, 4)
 
     total_nodes = 0
     cat_ordered = ScNodeCategory.add_node_menu()
