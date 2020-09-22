@@ -7,7 +7,7 @@ from .._base.node_base import ScNode
 class ScAddArray(Node, ScNode):
     bl_idname = "ScAddArray"
     bl_label = "Add Array"
-    bl_icon = 'ADD'
+    bl_icon = 'PLUS'
 
     def init(self, context):
         super().init(context)

@@ -8,6 +8,7 @@ from .._base.node_operator import ScCurveOperatorNode
 class ScCurveSpline(Node, ScCurveOperatorNode):
     bl_idname = "ScCurveSpline"
     bl_label = "Curve Spline Properties"
+    bl_icon = 'CURVE_DATA'
     
     in_tilt: EnumProperty(name="Tilt", items=[("LINEAR", "Linear", ""), ("CARDINAL", "Cardinal", ""), ("BSPLINE", "Bspline", ""), ("EASE", "Ease", "")], default="LINEAR", update=ScNode.update_value)
     in_radius: EnumProperty(name="Radius", items=[("LINEAR", "Linear", ""), ("CARDINAL", "Cardinal", ""), ("BSPLINE", "Bspline", ""), ("EASE", "Ease", "")], default="LINEAR", update=ScNode.update_value)

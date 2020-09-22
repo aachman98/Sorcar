@@ -9,6 +9,7 @@ from ...helper import remove_object
 class ScImportSvg(Node, ScNode):
     bl_idname = "ScImportSvg"
     bl_label = "Import SVG"
+    bl_icon = 'IMPORT'
 
     prop_collections: StringProperty(default="[]")
     in_name: StringProperty(default="Object", update=ScNode.update_value)

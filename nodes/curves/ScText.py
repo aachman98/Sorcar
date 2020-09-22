@@ -8,6 +8,7 @@ from ...helper import focus_on_object, remove_object
 class ScText(Node, ScNode):
     bl_idname = "ScText"
     bl_label = "Text"
+    bl_icon = 'FONT_DATA'
     
     in_name: StringProperty(default="Curve", update=ScNode.update_value)
     in_text: StringProperty(default="Text", update=ScNode.update_value)

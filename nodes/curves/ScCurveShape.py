@@ -8,6 +8,7 @@ from .._base.node_operator import ScCurveOperatorNode
 class ScCurveShape(Node, ScCurveOperatorNode):
     bl_idname = "ScCurveShape"
     bl_label = "Curve Shape Properties"
+    bl_icon = 'CURVE_BEZCURVE'
     
     in_dimensions: EnumProperty(name="Dimensions", items=[("2D", "2D", ""), ("3D", "3D", "")], default="3D", update=ScNode.update_value)
     in_resolution: IntProperty(default=12, min=1, max=1024, soft_max=64, update=ScNode.update_value)

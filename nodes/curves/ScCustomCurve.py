@@ -9,6 +9,7 @@ from ...helper import sc_poll_curve_font
 class ScCustomCurve(Node, ScNode):
     bl_idname = "ScCustomCurve"
     bl_label = "Custom Curve"
+    bl_icon = 'EYEDROPPER'
 
     in_obj: PointerProperty(type=bpy.types.Object, poll=sc_poll_curve_font, update=ScNode.update_value)
     in_hide: BoolProperty(default=True, update=ScNode.update_value)

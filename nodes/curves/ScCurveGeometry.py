@@ -9,6 +9,7 @@ from ...helper import sc_poll_curve
 class ScCurveGeometry(Node, ScCurveOperatorNode):
     bl_idname = "ScCurveGeometry"
     bl_label = "Curve Geometry Properties"
+    bl_icon = 'SURFACE_NCURVE'
     
     in_depth: FloatProperty(soft_min=0.0, update=ScNode.update_value)
     in_offset: FloatProperty(update=ScNode.update_value)
