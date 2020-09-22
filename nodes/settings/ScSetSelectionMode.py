@@ -8,6 +8,7 @@ from ...helper import focus_on_object
 class ScSetSelectionMode(Node, ScNode):
     bl_idname = "ScSetSelectionMode"
     bl_label = "Set Selection Mode"
+    bl_icon = 'EDITMODE_HLT'
 
     in_selection_type: EnumProperty(name="Mode", items=[("VERT", "Vertices", "", "VERTEXSEL", 1), ("EDGE", "Edges", "", "EDGESEL", 2), ("FACE", "Faces", "", "FACESEL", 4)], default={'VERT'}, options={"ENUM_FLAG"}, update=ScNode.update_value)
 

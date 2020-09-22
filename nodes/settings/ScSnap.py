@@ -8,6 +8,7 @@ from .._base.node_setting import ScSettingNode
 class ScSnap(Node, ScSettingNode):
     bl_idname = "ScSnap"
     bl_label = "Snap"
+    bl_icon = 'SNAP_ON'
 
     prop_elements: EnumProperty(name="Snap To", items=[('INCREMENT', 'Increment', '', 1), ('VERTEX', 'Vertex', '', 2), ('EDGE', 'Edge', '', 4), ('FACE', 'Face', '', 8), ('VOLUME', 'Volume', '', 16), ('EDGE_MIDPOINT', 'Edge Center', '', 32), ('EDGE_PERPENDICULAR', 'Edge Perpendicular', '', 64)], default={'INCREMENT'}, options={'ENUM_FLAG'}, update=ScNode.update_value)
     prop_affect: EnumProperty(name="Affect", items=[('MOVE', 'Move', '', 1), ('ROTATE', 'Rotate', '', 2), ('SCALE', 'Scale', '', 4)], default={'MOVE'}, options={'ENUM_FLAG'}, update=ScNode.update_value)

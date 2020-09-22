@@ -8,6 +8,7 @@ from .._base.node_setting import ScSettingNode
 class ScCursorTransform(Node, ScSettingNode):
     bl_idname = "ScCursorTransform"
     bl_label = "Cursor Transform"
+    bl_icon = 'CURSOR'
 
     in_location: FloatVectorProperty(update=ScNode.update_value)
     in_rotation: FloatVectorProperty(unit="ROTATION", update=ScNode.update_value)

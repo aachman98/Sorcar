@@ -8,6 +8,7 @@ from .._base.node_setting import ScSettingNode
 class ScTransformOrientation(Node, ScSettingNode):
     bl_idname = "ScTransformOrientation"
     bl_label = "Transform Orientation"
+    bl_icon = 'ORIENTATION_GLOBAL'
 
     in_orientation: EnumProperty(items=[("GLOBAL", "Global", ""), ("LOCAL", "Local", ""), ("NORMAL", "Normal", ""), ("GIMBAL", "Gimbal", ""), ("CURSOR", "Cursor", "")], default="GLOBAL", update=ScNode.update_value)
 
