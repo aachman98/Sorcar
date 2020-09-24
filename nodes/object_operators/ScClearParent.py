@@ -8,6 +8,7 @@ from .._base.node_operator import ScObjectOperatorNode
 class ScClearParent(Node, ScObjectOperatorNode):
     bl_idname = "ScClearParent"
     bl_label = "Clear Parent"
+    bl_icon = 'MARKER'
 
     ops_type: EnumProperty(items=[('CLEAR', 'Normal', ''), ('CLEAR_KEEP_TRANSFORM', 'Keep Transform', ''), ('CLEAR_INVERSE', 'Clear Inverse', '')], default='CLEAR', update=ScNode.update_value)
 

@@ -8,6 +8,7 @@ from .._base.node_operator import ScObjectOperatorNode
 class ScSetDimensions(Node, ScObjectOperatorNode):
     bl_idname = "ScSetDimensions"
     bl_label = "Set Dimensions"
+    bl_icon = 'SHADING_BBOX'
     
     in_dimensions: FloatVectorProperty(update=ScNode.update_value)
 

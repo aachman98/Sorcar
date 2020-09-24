@@ -8,6 +8,7 @@ from .._base.node_operator import ScObjectOperatorNode
 class ScMakeLinks(Node, ScObjectOperatorNode):
     bl_idname = "ScMakeLinks"
     bl_label = "Make Links"
+    bl_icon = 'LINKED'
     
     in_type: EnumProperty(items=[("OBDATA", "Object Data", ""), ("MATERIAL", "Material", ""), ("ANIMATION", "Animation", ""), ("GROUPS", "Groups", ""), ("DUPLIGROUP", "Dupligroup", ""), ("MODIFIERS", "Modifiers", ""), ("FONTS", "Fonts", "")], default="OBDATA", update=ScNode.update_value)
 

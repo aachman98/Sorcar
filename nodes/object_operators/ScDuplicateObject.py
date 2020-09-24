@@ -9,6 +9,7 @@ from ...helper import remove_object
 class ScDuplicateObject(Node, ScObjectOperatorNode):
     bl_idname = "ScDuplicateObject"
     bl_label = "Duplicate Object"
+    bl_icon = 'DUPLICATE'
 
     in_linked: BoolProperty(update=ScNode.update_value)
     out_mesh: PointerProperty(type=bpy.types.Object)

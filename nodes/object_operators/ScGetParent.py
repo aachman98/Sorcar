@@ -7,6 +7,7 @@ from ...helper import focus_on_object
 class ScGetParent(Node, ScNode):
     bl_idname = "ScGetParent"
     bl_label = "Get Parent"
+    bl_icon = 'CON_CHILDOF'
     
     def init(self, context):
         super().init(context)

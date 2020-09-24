@@ -8,7 +8,8 @@ from .._base.node_operator import ScObjectOperatorNode
 class ScShading(Node, ScObjectOperatorNode):
     bl_idname = "ScShading"
     bl_label = "Shading"
-    
+    bl_icon = 'SHADING_RENDERED'
+        
     in_shading: EnumProperty(items=[("SMOOTH", "Smooth", ""), ("FLAT", "Flat", "")], default="FLAT", update=ScNode.update_value)
     in_auto: BoolProperty(update=ScNode.update_value)
     in_angle: FloatProperty(default=0.523599, min=0.0, max=3.14159, unit="ROTATION", update=ScNode.update_value)

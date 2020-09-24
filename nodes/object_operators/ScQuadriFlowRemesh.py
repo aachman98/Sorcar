@@ -8,6 +8,7 @@ from .._base.node_operator import ScObjectOperatorNode
 class ScQuadriFlowRemesh(Node, ScObjectOperatorNode):
     bl_idname = "ScQuadriFlowRemesh"
     bl_label = "QuadriFlow Remesh"
+    bl_icon = 'MOD_REMESH'
 
     in_paint_symmetry: BoolProperty(default=True, update=ScNode.update_value)
     in_preserve_sharp: BoolProperty(update=ScNode.update_value)

@@ -11,6 +11,7 @@ from ...debug import log
 class ScScatter(Node, ScObjectOperatorNode):
     bl_idname = "ScScatter"
     bl_label = "Scatter"
+    bl_icon = 'OUTLINER_OB_POINTCLOUD'
 
     prop_loc: EnumProperty(items=[('X', 'X', '', 2), ('Y', 'Y', '', 4), ('Z', 'Z', '', 8)], default={'X', 'Y', 'Z'}, options={'ENUM_FLAG'}, update=ScNode.update_value)
     prop_rot: EnumProperty(items=[('X', 'X', '', 2), ('Y', 'Y', '', 4), ('Z', 'Z', '', 8)], default={'X', 'Y', 'Z'}, options={'ENUM_FLAG'}, update=ScNode.update_value)

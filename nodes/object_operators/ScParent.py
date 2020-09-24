@@ -8,6 +8,7 @@ from .._base.node_operator import ScObjectOperatorNode
 class ScParent(Node, ScObjectOperatorNode):
     bl_idname = "ScParent"
     bl_label = "Parent"
+    bl_icon = 'MARKER_HLT'
 
     prop_obj: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
     in_ops_type: EnumProperty(items=[('OBJECT', 'Object', ''), ('WITHOUT_INVERSE', 'Object(Without Inverse)', '')], default='OBJECT', update=ScNode.update_value)

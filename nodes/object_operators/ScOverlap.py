@@ -9,6 +9,7 @@ from .._base.node_operator import ScObjectOperatorNode
 class ScOverlap(Node, ScObjectOperatorNode):
     bl_idname = "ScOverlap"
     bl_label = "Overlap"
+    bl_icon = 'SELECT_INTERSECT'
 
     in_object: PointerProperty(type=bpy.types.Object, update=ScNode.update_value)
 

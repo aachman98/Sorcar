@@ -8,6 +8,7 @@ from .._base.node_operator import ScObjectOperatorNode
 class ScInstancing(Node, ScObjectOperatorNode):
     bl_idname = "ScInstancing"
     bl_label = "Instancing"
+    bl_icon = 'OUTLINER_DATA_POINTCLOUD'
 
     # prop_collection: PointerProperty(type=bpy.types.Collection, update=ScNode.update_value)
     # in_type: EnumProperty(items=[('NONE', 'None', ''), ('VERTS', 'Vertices', ''), ('FACES', 'Faces', ''), ('COLLECTION', 'Collection', '')], default='NONE', update=ScNode.update_value)

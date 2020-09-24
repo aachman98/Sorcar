@@ -8,6 +8,7 @@ from .._base.node_operator import ScObjectOperatorNode
 class ScSetName(Node, ScObjectOperatorNode):
     bl_idname = "ScSetName"
     bl_label = "Set Name"
+    bl_icon = 'SORTALPHA'
     
     in_name: StringProperty(default="Object", update=ScNode.update_value)
 

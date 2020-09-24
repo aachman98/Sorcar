@@ -8,6 +8,7 @@ from .._base.node_operator import ScObjectOperatorNode
 class ScVoxelRemesh(Node, ScObjectOperatorNode):
     bl_idname = "ScVoxelRemesh"
     bl_label = "Voxel Remesh"
+    bl_icon = 'FILE_VOLUME'
 
     in_remesh_voxel_size: FloatProperty(default=0.1, min=0.0001, update=ScNode.update_value)
     in_remesh_voxel_adaptivity: FloatProperty(default=0.0, min=0.0, max=1.0, update=ScNode.update_value)

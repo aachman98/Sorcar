@@ -8,6 +8,7 @@ from .._base.node_operator import ScObjectOperatorNode
 class ScOrigin(Node, ScObjectOperatorNode):
     bl_idname = "ScOrigin"
     bl_label = "Origin"
+    bl_icon = 'OBJECT_ORIGIN'
     
     in_type: EnumProperty(items=[("GEOMETRY_ORIGIN", "Geometry to Origin", ""), ("ORIGIN_GEOMETRY", "Origin to Geometry", ""), ("ORIGIN_CURSOR", "Origin to 3D Cursor", ""), ("ORIGIN_CENTER_OF_MASS", "Origin to Center of Mass (Surface)", ""), ("ORIGIN_CENTER_OF_VOLUME", "Origin to Center of Mass (Volume)", "")], default="GEOMETRY_ORIGIN", update=ScNode.update_value)
     in_center: EnumProperty(items=[("MEDIAN", "Median", ""), ("BOUNDS", "Bounds", "")], default="MEDIAN", update=ScNode.update_value)

@@ -9,6 +9,7 @@ from ...helper import focus_on_object
 class ScMergeObjects(Node, ScObjectOperatorNode):
     bl_idname = "ScMergeObjects"
     bl_label = "Merge Objects"
+    bl_icon = 'SELECT_EXTEND'
 
     def init(self, context):
         super().init(context)

@@ -9,6 +9,7 @@ from .._base.node_operator import ScObjectOperatorNode
 class ScExportFbx(Node, ScObjectOperatorNode):
     bl_idname = "ScExportFbx"
     bl_label = "Export FBX"
+    bl_icon = 'EXPORT'
 
     in_dir: StringProperty(subtype='DIR_PATH', update=ScNode.update_value)
     in_filename: StringProperty(default="untitled")

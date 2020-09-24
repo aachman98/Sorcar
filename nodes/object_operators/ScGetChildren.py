@@ -7,6 +7,7 @@ from ...helper import focus_on_object
 class ScGetChildren(Node, ScNode):
     bl_idname = "ScGetChildren"
     bl_label = "Get Children"
+    bl_icon = 'OUTLINER'
     
     def init(self, context):
         super().init(context)

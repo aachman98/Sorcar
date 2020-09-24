@@ -8,6 +8,7 @@ from .._base.node_operator import ScObjectOperatorNode
 class ScDrawMode(Node, ScObjectOperatorNode):
     bl_idname = "ScDrawMode"
     bl_label = "Draw Mode"
+    bl_icon = 'MATSHADERBALL'
     
     in_name: BoolProperty(update=ScNode.update_value)
     in_axis: BoolProperty(update=ScNode.update_value)
