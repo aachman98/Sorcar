@@ -9,7 +9,7 @@ from .._base.node_input import ScInputNode
 class ScSingleVertex(Node, ScInputNode):
     bl_idname = "ScSingleVertex"
     bl_label = "Single Vertex"
-    bl_icon = 'LAYER_ACTIVE'
+    bl_icon = 'DOT'
 
     in_show_name: BoolProperty(update=ScNode.update_value)
 

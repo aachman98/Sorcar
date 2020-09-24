@@ -7,6 +7,7 @@ from .._base.node_base import ScNode
 class ScComparisonOp(Node, ScNode):
     bl_idname = "ScComparisonOp"
     bl_label = "Comparison Operation"
+    bl_icon = 'CON_SAMEVOL'
 
     in_x: FloatProperty(name="X", update=ScNode.update_value)
     in_y: FloatProperty(name="Y", update=ScNode.update_value)

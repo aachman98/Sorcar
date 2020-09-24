@@ -8,6 +8,7 @@ from .._base.node_base import ScNode
 class ScRaycastScene(Node, ScNode):
     bl_idname = "ScRaycastScene"
     bl_label = "Raycast (Scene)"
+    bl_icon = 'OUTLINER_OB_LIGHTPROBE'
     
     in_origin: FloatVectorProperty(update=ScNode.update_value)
     in_direction: FloatVectorProperty(update=ScNode.update_value)

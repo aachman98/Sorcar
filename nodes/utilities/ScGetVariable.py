@@ -7,6 +7,7 @@ from .._base.node_base import ScNode
 class ScGetVariable(Node, ScNode):
     bl_idname = "ScGetVariable"
     bl_label = "Get Variable"
+    bl_icon = 'PMARKER_SEL'
 
     prop_nodetree: PointerProperty(name="NodeTree", type=bpy.types.NodeTree, update=ScNode.update_value)
     in_name: StringProperty(default="Var", update=ScNode.update_value)

@@ -8,6 +8,7 @@ from ...debug import log
 class ScEvaluateAs(Node, ScNode):
     bl_idname = "ScEvaluateAs"
     bl_label = "Evaluate As"
+    bl_icon = 'CON_TRANSFORM_CACHE'
 
     def init(self, context):
         super().init(context)

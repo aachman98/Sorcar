@@ -7,6 +7,7 @@ from .._base.node_base import ScNode
 class ScSceneInfo(Node, ScNode):
     bl_idname = "ScSceneInfo"
     bl_label = "Scene Info"
+    bl_icon = 'SCENE_DATA'
 
     def init(self, context):
         super().init(context)

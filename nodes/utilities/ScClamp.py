@@ -7,6 +7,7 @@ from .._base.node_base import ScNode
 class ScClamp(Node, ScNode):
     bl_idname = "ScClamp"
     bl_label = "Clamp"
+    bl_icon = 'SNAP_PEEL_OBJECT'
 
     in_x: FloatProperty(update=ScNode.update_value)
     in_min: FloatProperty(update=ScNode.update_value)

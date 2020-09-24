@@ -7,6 +7,7 @@ from .._base.node_base import ScNode
 class ScBreakVector(Node, ScNode):
     bl_idname = "ScBreakVector"
     bl_label = "Break Vector"
+    bl_icon = 'CENTER_ONLY'
 
     in_vector: FloatVectorProperty(update=ScNode.update_value)
 

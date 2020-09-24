@@ -31,6 +31,7 @@ op_items = [
 class ScMathsOp(Node, ScNode):
     bl_idname = "ScMathsOp"
     bl_label = "Maths Operation"
+    bl_icon = 'CON_TRANSLIKE'
 
     in_x: FloatProperty(update=ScNode.update_value)
     in_y: FloatProperty(update=ScNode.update_value)

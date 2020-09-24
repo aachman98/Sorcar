@@ -8,6 +8,7 @@ from .._base.node_base import ScNode
 class ScTrigoOp(Node, ScNode):
     bl_idname = "ScTrigoOp"
     bl_label = "Trigonometric Operation"
+    bl_icon = 'FORCE_HARMONIC'
 
     in_x: FloatProperty(update=ScNode.update_value)
     in_op1: EnumProperty(name="Opertion", items=[("SIN","Sin",""), ("COS","Cos",""), ("TAN","Tan","")], default="SIN", update=ScNode.update_value)

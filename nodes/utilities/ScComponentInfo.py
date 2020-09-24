@@ -9,6 +9,7 @@ from ...helper import focus_on_object
 class ScComponentInfo(Node, ScNode):
     bl_idname = "ScComponentInfo"
     bl_label = "Component Info"
+    bl_icon = 'MOD_EXPLODE'
 
     in_component: EnumProperty(name="Component", items=[("FACE", "Face", ""), ("VERT", "Vertex", ""), ("EDGE", "Edge", "")], default="FACE", update=ScNode.update_value)
     in_average: BoolProperty(update=ScNode.update_value)

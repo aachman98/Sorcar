@@ -9,6 +9,7 @@ from ...debug import log
 class ScCustomPythonScript(Node, ScNode):
     bl_idname = "ScCustomPythonScript"
     bl_label = "Custom Python Script"
+    bl_icon = 'FILE_SCRIPT'
 
     in_script: StringProperty(default="print('Hello World')", update=ScNode.update_value)
     in_iteration: IntProperty(default=1, min=1, soft_max=50, update=ScNode.update_value)

@@ -7,6 +7,7 @@ from .._base.node_base import ScNode
 class ScMaterialParameter(Node, ScNode):
     bl_idname = "ScMaterialParameter"
     bl_label = "Material Parameter"
+    bl_icon = 'MATERIAL'
 
     prop_mat: PointerProperty(name="Material", type=bpy.types.Material, update=ScNode.update_value)
     prop_node: StringProperty(name="Node", update=ScNode.update_value)

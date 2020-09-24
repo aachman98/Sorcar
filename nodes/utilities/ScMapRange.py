@@ -7,6 +7,7 @@ from .._base.node_base import ScNode
 class ScMapRange(Node, ScNode):
     bl_idname = "ScMapRange"
     bl_label = "Map Range"
+    bl_icon = 'MOD_HUE_SATURATION'
 
     in_x: FloatProperty(update=ScNode.update_value)
     in_min_in: FloatProperty(update=ScNode.update_value)

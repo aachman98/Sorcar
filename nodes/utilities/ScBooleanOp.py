@@ -7,6 +7,7 @@ from .._base.node_base import ScNode
 class ScBooleanOp(Node, ScNode):
     bl_idname = "ScBooleanOp"
     bl_label = "Boolean Operation"
+    bl_icon = 'SELECT_SUBTRACT'
 
     in_x: BoolProperty(name="X", update=ScNode.update_value)
     in_y: BoolProperty(name="Y", update=ScNode.update_value)

@@ -7,6 +7,7 @@ from .._base.node_base import ScNode
 class ScAppendString(Node, ScNode):
     bl_idname = "ScAppendString"
     bl_label = "Append String"
+    bl_icon = 'LINENUMBERS_OFF'
 
     in_a: StringProperty(update=ScNode.update_value)
     in_b: StringProperty(update=ScNode.update_value)

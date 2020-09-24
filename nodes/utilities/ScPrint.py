@@ -8,6 +8,7 @@ from ...debug import log
 class ScPrint(Node, ScNode):
     bl_idname = "ScPrint"
     bl_label = "Print"
+    bl_icon = 'CONSOLE'
 
     prop_force: BoolProperty(name="Force Re-evaluate", update=ScNode.update_value)
     in_str: StringProperty(update=ScNode.update_value)

@@ -7,6 +7,7 @@ from ...debug import log
 class ScNodeGroup(ScNode, NodeCustomGroup):
     bl_idname = "ScNodeGroup"
     bl_label = "Node Group"
+    bl_icon = 'NODETREE'
 
     def init(self, context):
         self.node_executable = True

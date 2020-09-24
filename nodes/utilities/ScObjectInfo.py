@@ -8,6 +8,7 @@ from ...helper import focus_on_object
 class ScObjectInfo(Node, ScNode):
     bl_idname = "ScObjectInfo"
     bl_label = "Object Info"
+    bl_icon = 'FILE_3D'
 
     def init(self, context):
         super().init(context)

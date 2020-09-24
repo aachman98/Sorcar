@@ -8,6 +8,7 @@ from .._base.node_base import ScNode
 class ScVectorOp(Node, ScNode):
     bl_idname = "ScVectorOp"
     bl_label = "Vector Operation"
+    bl_icon = 'CON_LOCLIMIT'
 
     in_x: FloatVectorProperty(update=ScNode.update_value)
     in_y: FloatVectorProperty(update=ScNode.update_value)
