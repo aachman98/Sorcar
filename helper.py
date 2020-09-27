@@ -43,7 +43,7 @@ def remove_object(obj):
             data = obj.data
             type = obj.type
         except:
-            log("HELPER", None, "remove_object", "Data/type not found for object \""+obj.name+"\"", 3)
+            log("HELPER", None, "remove_object", "Data/type not found for object \""+str(obj)+"\"", 3)
             return
         log("HELPER", obj.name, "remove_object", "Removing from scene", 2)
         bpy.data.objects.remove(obj, do_unlink=True, do_id_user=True)

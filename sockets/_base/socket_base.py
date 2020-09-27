@@ -23,7 +23,7 @@ class ScNodeSocket:
             data = val
         if (ret):
             self.default_value = data
-            log(self.node.name, self.name, "set", "Data="+self.get_data("STRING")[1], 3)
+            log(self.node.name, self.name, "set", "Data="+str(self.get_data("STRING")[1]), 3)
             return True
         else:
             log(self.node.name, self.name, "set", "Cannot convert data, value not set", 2)

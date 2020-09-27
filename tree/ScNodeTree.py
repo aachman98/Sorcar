@@ -25,19 +25,19 @@ class ScNodeTree(NodeTree):
 
     def register_object(self, obj):
         if (obj not in self.objects):
-            log(self.name, None, "register_object", "Register object \""+obj.name+"\"", 2)
+            log(self.name, None, "register_object", "Register object \""+str(obj)+"\"", 2)
             self.objects.append(obj)
     
     def unregister_object(self, obj):
         if obj in self.objects:
-            log(self.name, None, "unregister_object", "Unregister object \""+obj.name+"\"", 2)
+            log(self.name, None, "unregister_object", "Unregister object \""+str(obj)+"\"", 2)
             remove_object(obj)
             self.objects.remove(obj)
     
     def unregister_all_objects(self):
         log(self.name, None, "unregister_all_objects", "Objects="+str(len(self.objects)), 2)
         for obj in self.objects:
-            log(self.name, None, "unregister_all_objects", "Object="+obj.name, 3)
+            log(self.name, None, "unregister_all_objects", "Object="+str(obj), 3)
             remove_object(obj)
         self.objects = []
 
