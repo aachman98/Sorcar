@@ -88,6 +88,8 @@ and more...!
 
 ## Changelog
 
+#### [Unreleased]
+
 #### v3.2.1
 
 - Added support for object registration & unregistration on each evaluation (handled by nodetree instead of individual nodes)
