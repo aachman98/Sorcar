@@ -50,6 +50,7 @@ class SorcarPreferences(AddonPreferences):
     bl_idname = __package__
     bl_label = "Sorcar Preferences"
 
+    # Max log level to print to console
     log_level: EnumProperty(
     name = "Log Level",
     description = "Maximum level of logs to print to console",
@@ -61,6 +62,16 @@ class SorcarPreferences(AddonPreferences):
     ],
     default = 'INFO',
     )
+
+    # Get icon styles from subdir
+    def get_icon_items(self, context):
+        return [(i.name.upper(), bpy.path.display_name(i.name), '') for i in os.scandir(path + "icons") if i.is_dir()]
+    icon_style: EnumProperty(
+    name = "Icon Style (Requires restart)",
+    description = "Icon style to use",
+    items = get_icon_items
+    )
+    
     # Addon updater properties
     auto_check_update: BoolProperty(
     name = "Auto-check for Update",
@@ -96,6 +107,7 @@ class SorcarPreferences(AddonPreferences):
 
     def draw(self, context):
         self.layout.prop(self, "log_level")
+        self.layout.prop(self, "icon_style")
         addon_updater_ops.update_settings_ui(self, context)
 
 def import_ops(path="./"):
@@ -195,25 +207,31 @@ def sc_register_node_categories(identifier, cat_list):
     # stores: (categories list, menu draw function, submenu types)
     nodeitems_utils._node_categories[identifier] = (cat_list, draw_add_menu, menu_types)
 
+path = repr([i for i in addon_utils.modules() if i.bl_info['name'] == "Sorcar"][0]).split("from '")[1].split("__init__.py'>")[0]
 all_classes = []
 addon_keymaps = []
 icons = ()
 
 def register():
     log(msg="REGISTERING...")
-    path = repr([i for i in addon_utils.modules() if i.bl_info['name'] == "Sorcar"][0]).split("from '")[1].split("__init__.py'>")[0]
+    bpy.utils.register_class(SorcarPreferences)
+    global all_classes, addon_keymaps, icons, path
+
     classes_ops = import_ops(path)
     classes_sockets = import_sockets(path)
     classes_ui = import_ui(path)
     classes_nodes = import_nodes(path)
 
-    global all_classes, addon_keymaps, icons
     all_classes = [ScNodeTree]
     all_classes.extend(classes_ops)
     all_classes.extend(classes_sockets)
     all_classes.extend(classes_ui)
-    all_classes.append(SorcarPreferences)
-    icons = import_icons(path, classes_nodes.keys(), 'WHITE')
+    # Try to get icon style from user prefs (default to 'WHITE')
+    try:
+        icon_style = bpy.context.preferences.addons.get(__package__).preferences.icon_style
+    except:
+        icon_style = 'WHITE'
+    icons = import_icons(path, classes_nodes.keys(), icon_style)
 
     total_nodes = 0
     cat_unordered = [i for i in classes_nodes if (not i in [j[0] for j in menu if(j)])]
@@ -254,6 +272,7 @@ def register():
     addon_updater_ops.register(bl_info)
     
     log("REGISTERED", msg="{} operators, {} sockets, {} UI panels, {} keymaps & {} nodes ({} categories)".format(len(classes_ops), len(classes_sockets), len(classes_ui), len(addon_keymaps), total_nodes, len(classes_nodes)))
+    all_classes.append(SorcarPreferences)
 
 def unregister():
     log(msg="UNREGISTERING...")
