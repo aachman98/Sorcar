@@ -96,13 +96,14 @@ and more...!
 - Added "Flush Stacktrace" operator in "Debug" panel to force output logs for last execution
 - Added Enum property to set default log level in Preferences
 - Added support for custom menu & sub-menu layout for categories and nodes
-- Added icons import method for node categories
-- Added support for icons on nodes of categories: Arrays, Constants, Curves, Flow Control, Inputs, Modifiers, Object Operators, Settings, Utilities
+- Added import method for custom node category icons from ".../sorcar/icons" subdir
+- Added Enum property to set default icon style in Preferences
+- Added support for Blender icons on nodes of categories: Arrays, Constants, Curves, Flow Control, Inputs, Modifiers, Object Operators, Settings, Utilities
 - Added custom base class for node items
 - Improved logs for addon updater, node & socket base classes, node-tree, helper methods and operators
 - Improved all node classes (from all categories) to call parent (super) class' methods first
 - Improved categories layout and nodes sub-layout order of display in "Add Node" menu
-- Fixed operator return values
+- Fixed operators return values
 - Renamed icons to match node category names
 - Depricated "print_log" helper method
 
