@@ -90,6 +90,16 @@ and more...!
 
 #### [Unreleased]
 
+- Added "Debug" section under "Sorcar" tab in N-panel
+- Added "debug.py" to provide support for text-block/console log outputs of different levels
+- Added support for timestamp and duration for log outputs
+- Added "Flush Stacktrace" operator in "Debug" panel to force output logs for last execution
+- Added Enum property to set default log level in Preferences
+- Improved logs for addon updater, node & socket base classes, node-tree, helper methods and operators
+- Improved all node classes (from all categories) to call parent (super) class' methods first
+- Fixed operator return values
+- Depricated "print_log" helper method
+
 #### v3.2.1
 
 - Added support for object registration & unregistration on each evaluation (handled by nodetree instead of individual nodes)
