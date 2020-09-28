@@ -103,8 +103,9 @@ and more...!
 - Improved logs for addon updater, node & socket base classes, node-tree, helper methods and operators
 - Improved all node classes (from all categories) to call parent (super) class' methods first
 - Improved categories layout and nodes sub-layout order of display in "Add Node" menu
-- Fixed operators return values
 - Fixed "Begin For-Each" & "Begin For-Each Component" loop nodes: unlock on reset
+- Fixed "Scatter" node to duplicate object only when the type is "Manual"
+- Fixed operators return values
 - Renamed icons to match node category names
 - Depricated "print_log" helper method
 

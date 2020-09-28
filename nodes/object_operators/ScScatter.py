@@ -80,7 +80,8 @@ class ScScatter(Node, ScObjectOperatorNode):
                 rot = [(Vector(self.inputs["Object"].default_value.data.vertices[i.vertices[0]].normal) + Vector(self.inputs["Object"].default_value.data.vertices[i.vertices[1]].normal))/2 for i in self.inputs["Object"].default_value.data.edges if i.select]
             for i in range(0, len(loc)):
                 focus_on_object(self.inputs["Scatter Object"].default_value)
-                bpy.ops.object.duplicate()
+                if (self.inputs["Type"].default_value == 'MAN'):
+                    bpy.ops.object.duplicate()
                 if ('X' in self.prop_loc):
                     bpy.context.active_object.location[0] = loc[i][0]
                 if ('Y' in self.prop_loc):
